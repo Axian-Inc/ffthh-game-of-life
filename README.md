@@ -23,7 +23,7 @@ DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion 
 1. Copy your Codex `auth.json` from your host machine to this exact directory in your container: `~/.codex/auth.json`
 1. Create a new branch with your name in it
 1. Navigate to `terraform` directory and run `terraform init`
-1. Run terraform workspace new {your initials} . Ensure that you are on this workspace when you run terraform commands. 
+1. Run `terraform workspace new {your initials}`. Ensure that you are on this workspace when you run terraform commands. 
 
     - There are instructions in the AGENT.MD file for Codex to try and enforce this, as well as for codex to ensure the workspace name is in all deployed resources. This should ensure everyone can deploy their own stack without conflicts with each other
 
