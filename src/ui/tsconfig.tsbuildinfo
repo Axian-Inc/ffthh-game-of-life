@@ -1,0 +1,1 @@
+{"root":["./App.tsx","./HomeScreen.tsx","./NewGameModal.tsx","./main.tsx","./theme.ts","./vite-env.d.ts","./vite.config.ts","./__tests__/HomeScreen.test.tsx","./__tests__/NewGameModal.test.tsx","./store/hooks.ts","./store/index.ts","./store/lifeSlice.ts","./test/setup.ts"],"version":"5.9.3"}

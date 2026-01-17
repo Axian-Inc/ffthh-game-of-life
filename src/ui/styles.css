@@ -1,0 +1,395 @@
+/* =========================================================
+   Theme Stylesheet — Colors + Layout (from mockups)
+   Use as-is or map tokens into your design system.
+   ========================================================= */
+
+/* ---------- Design Tokens ---------- */
+:root {
+  /* Brand gradient */
+  --grad-start: #35c6b3; /* teal */
+  --grad-mid:   #4aa3ff; /* sky blue */
+  --grad-end:   #a76bff; /* purple */
+  --gradient-primary: linear-gradient(90deg, var(--grad-start), var(--grad-mid), var(--grad-end));
+
+  /* Background */
+  --bg-0: #fbfaf7;        /* warm off-white */
+  --bg-1: #f2fbf8;        /* mint tint */
+  --bg-2: #fff3ee;        /* peach tint */
+  --page-bg: radial-gradient(900px 500px at 15% 10%, rgba(53, 198, 179, 0.12), transparent 60%),
+             radial-gradient(900px 500px at 85% 15%, rgba(167, 107, 255, 0.12), transparent 60%),
+             radial-gradient(900px 500px at 70% 85%, rgba(74, 163, 255, 0.10), transparent 60%),
+             linear-gradient(180deg, var(--bg-0), var(--bg-0));
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-2: #fcfcfd;
+
+  /* Text */
+  --text-strong: #1f2937;  /* charcoal/navy */
+  --text:        #334155;  /* slate */
+  --text-muted:  #64748b;  /* muted slate */
+  --text-invert: #ffffff;
+
+  /* Borders */
+  --border: #e7e9ee;
+  --border-soft: #eef0f4;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 10px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 12px 30px rgba(16, 24, 40, 0.10);
+
+  /* Radii */
+  --r-lg: 20px;
+  --r-md: 16px;
+  --r-sm: 14px;
+  --r-pill: 999px;
+
+  /* Spacing (8px grid) */
+  --s-1: 8px;
+  --s-2: 16px;
+  --s-3: 24px;
+  --s-4: 32px;
+  --s-5: 40px;
+
+  /* Focus ring */
+  --focus: 0 0 0 4px rgba(53, 198, 179, 0.22);
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--page-bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+}
+
+/* ---------- Layout Utilities ---------- */
+.container {
+  width: min(1100px, calc(100% - 2 * var(--s-4)));
+  margin: 0 auto;
+  padding: var(--s-4) 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.center {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+/* ---------- Headings ---------- */
+.h1 {
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 54ch;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: 0;
+  cursor: pointer;
+  border-radius: var(--r-pill);
+  padding: 14px 22px;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  min-height: 48px;
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--text-invert);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0px);
+  filter: brightness(0.98);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-strong);
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.icon-btn:hover {
+  background: rgba(100, 116, 139, 0.08);
+  border-color: rgba(100, 116, 139, 0.12);
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+/* Focus */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: inherit;
+}
+
+/* ---------- Cards (Game Hub) ---------- */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-count {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: rgba(53, 198, 179, 0.12);
+  color: #0f766e;
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+@media (max-width: 900px) {
+  .cards-grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s-3);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-strong);
+}
+
+.card-meta {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.status-pill {
+  background: rgba(53, 198, 179, 0.14);
+  color: #0f766e;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+}
+
+.avatar-row {
+  display: flex;
+  gap: 10px;
+  margin: var(--s-2) 0 var(--s-3);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: rgba(31, 41, 55, 0.05);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.card-actions .btn-primary {
+  flex: 1;
+}
+
+/* ---------- Modal (New Game) ---------- */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.28);
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+}
+
+.modal {
+  width: min(620px, 92vw);
+  background: var(--surface);
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(231, 233, 238, 0.7);
+}
+
+.modal-header {
+  background: var(--gradient-primary);
+  color: var(--text-invert);
+  padding: var(--s-3);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.modal-subtitle {
+  margin: 6px 0 0;
+  opacity: 0.95;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: var(--s-3);
+  background: var(--surface-2);
+}
+
+.field-label {
+  display: block;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin-bottom: 8px;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  font-size: 1rem;
+  color: var(--text-strong);
+  outline: none;
+}
+
+.input:focus-visible {
+  box-shadow: var(--focus);
+  border-color: rgba(53, 198, 179, 0.6);
+}
+
+.panel-dashed {
+  border: 2px dashed rgba(100, 116, 139, 0.25);
+  border-radius: 22px;
+  padding: var(--s-3);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.avatar-shuffle {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+
+.avatar-shuffle .avatar {
+  width: 54px;
+  height: 54px;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.helper {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.modal-footer {
+  padding: var(--s-3);
+  background: var(--surface-2);
+}
+
+.footer-help {
+  margin-top: 10px;
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* ---------- Responsive safety ---------- */
+@media (max-width: 480px) {
+  .container { width: calc(100% - 2 * var(--s-3)); }
+  .card { padding: var(--s-2); }
+  .modal-body, .modal-header, .modal-footer { padding: var(--s-2); }
+}
