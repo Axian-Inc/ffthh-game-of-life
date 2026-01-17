@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-neutral-gray-800);
+  background: linear-gradient(180deg, #f6fbfa 0%, #f0f3ff 100%);
+  min-height: 100vh;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+main {
+  padding: var(--space-7) var(--space-5);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  margin: 0 0 var(--space-3);
+  line-height: 1.1;
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.25rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.5rem);
+}

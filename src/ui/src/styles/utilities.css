@@ -1,0 +1,25 @@
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary-teal), var(--color-primary-purple));
+  color: var(--color-neutral-white);
+}
+
+.gradient-soft {
+  background: linear-gradient(180deg, rgba(77, 184, 172, 0.15), rgba(139, 127, 219, 0.15));
+}
+
+.text-muted {
+  color: var(--color-neutral-gray-400);
+}
+
+.card {
+  background: var(--color-neutral-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: 0 12px 24px rgba(31, 41, 55, 0.08);
+}
+
+@media (min-width: 768px) {
+  main {
+    padding: var(--space-9) var(--space-8);
+  }
+}
