@@ -1,12 +1,17 @@
 {
   "name": "Python + Terraform + AWS + Codex",
 
-  // Base image: Python, git, zsh, common build tools, non-root `vscode` user
-  // https://mcr.microsoft.com/devcontainers/python
-  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  // Base image: Playwright (Node + browsers preinstalled)
+  // https://mcr.microsoft.com/playwright
+  "image": "mcr.microsoft.com/playwright:v1.57.0-jammy",
 
   // Add tools via Dev Container Features
   "features": {
+    // Python runtime
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+
     // Terraform CLI
     "ghcr.io/devcontainers/features/terraform:1": {},
 
@@ -66,5 +71,5 @@
   },
 
   // Use the non-root user the base image defines
-  "remoteUser": "vscode"
+  "remoteUser": "pwuser"
 }
