@@ -54,7 +54,7 @@ function GameHub() {
   };
 
   return (
-    <main className={styles.page}>
+    <main className={styles.page} id="main-content">
       <Header />
       <div className={styles.actions}>
         <Button onClick={() => setShowNewGame(true)}>+ New Game</Button>
