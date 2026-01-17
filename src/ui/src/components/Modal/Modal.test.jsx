@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Modal from './Modal.jsx';
 
@@ -67,4 +67,35 @@ test('locks body scroll when modal open', () => {
     </Modal>
   );
   expect(document.body.style.overflow).toBe('hidden');
+});
+
+test('keeps focus on modal when tabbing with no focusables', () => {
+  render(
+    <Modal isOpen onClose={() => {}} showCloseButton={false}>
+      <p>Content</p>
+    </Modal>
+  );
+  const dialog = screen.getByRole('dialog');
+  expect(dialog).toHaveFocus();
+
+  fireEvent.keyDown(document, { key: 'Tab' });
+  expect(dialog).toHaveFocus();
+});
+
+test('wraps focus between first and last focusable elements', () => {
+  render(
+    <Modal isOpen onClose={() => {}} showCloseButton={false}>
+      <button type="button">First</button>
+      <button type="button">Last</button>
+    </Modal>
+  );
+
+  const [first, last] = screen.getAllByRole('button');
+  first.focus();
+  fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+  expect(last).toHaveFocus();
+
+  last.focus();
+  fireEvent.keyDown(document, { key: 'Tab' });
+  expect(first).toHaveFocus();
 });

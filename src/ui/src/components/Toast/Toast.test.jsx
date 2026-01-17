@@ -11,3 +11,8 @@ test('toast displays message and dismisses', async () => {
   await user.click(screen.getByRole('button', { name: /dismiss/i }));
   expect(handleDismiss).toHaveBeenCalledTimes(1);
 });
+
+test('error toast uses alert role', () => {
+  render(<Toast message="Oops" type="error" onDismiss={() => {}} />);
+  expect(screen.getByRole('alert')).toBeInTheDocument();
+});

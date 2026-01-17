@@ -55,3 +55,22 @@ test('status badge shows correct text', () => {
   render(<GameCard game={baseGame} onResume={() => {}} onDelete={() => {}} />);
   expect(screen.getByText(/active/i)).toBeInTheDocument();
 });
+
+test('shows extra player count when more than max avatars', () => {
+  const extendedGame = {
+    ...baseGame,
+    players: [
+      { id: 'p1', avatar: '🦁' },
+      { id: 'p2', avatar: '🐶' },
+      { id: 'p3', avatar: '🐱' },
+      { id: 'p4', avatar: '🐸' },
+      { id: 'p5', avatar: '🦊' },
+      { id: 'p6', avatar: '🐻' },
+      { id: 'p7', avatar: '🐼' },
+    ],
+  };
+
+  render(<GameCard game={extendedGame} onResume={() => {}} onDelete={() => {}} />);
+  expect(screen.getByText('+2')).toBeInTheDocument();
+  expect(screen.getAllByLabelText(/avatar/i)).toHaveLength(5);
+});
