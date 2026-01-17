@@ -46,6 +46,8 @@
   background: transparent;
   cursor: pointer;
   color: var(--color-neutral-gray-400);
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .empty {

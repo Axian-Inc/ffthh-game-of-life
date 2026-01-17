@@ -17,6 +17,7 @@ body {
   color: var(--color-neutral-gray-800);
   background: linear-gradient(180deg, #f6fbfa 0%, #f0f3ff 100%);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 img,

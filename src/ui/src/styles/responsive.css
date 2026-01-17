@@ -1,0 +1,11 @@
+@media (max-width: 767px) {
+  main {
+    padding: var(--space-5) var(--space-4);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  main {
+    padding: var(--space-7) var(--space-6);
+  }
+}

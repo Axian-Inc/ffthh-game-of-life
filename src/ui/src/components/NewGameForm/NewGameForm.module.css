@@ -26,3 +26,9 @@
   font-size: 0.85rem;
   color: #ef4444;
 }
+
+@media (max-width: 767px) {
+  .footer {
+    align-items: stretch;
+  }
+}
