@@ -29,3 +29,7 @@ body {
 #root {
   min-height: 100vh;
 }
+
+button {
+  font-family: inherit;
+}
