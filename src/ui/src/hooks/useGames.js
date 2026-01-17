@@ -1,14 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { readStorage, writeStorage } from '../utils/storage.js';
+import { generateId } from '../utils/idGenerator.js';
 
 const STORAGE_KEY = 'gameHubGames';
-
-const createId = () => {
-  if (globalThis.crypto && globalThis.crypto.randomUUID) {
-    return globalThis.crypto.randomUUID();
-  }
-  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
 
 const normalizeGames = (data) => {
   if (!Array.isArray(data)) {
@@ -61,7 +55,7 @@ const useGames = () => {
     (game) => {
       const now = new Date().toISOString();
       const nextGame = {
-        id: createId(),
+        id: generateId(),
         name: game.name,
         players: game.players || [],
         status: game.status || 'active',

@@ -5,14 +5,8 @@ import PlayerForm from '../PlayerForm/PlayerForm.jsx';
 import PlayerList from '../PlayerList/PlayerList.jsx';
 import Button from '../Button/Button.jsx';
 import { validateGameName } from '../../utils/validation.js';
+import { generateId } from '../../utils/idGenerator.js';
 import styles from './NewGameForm.module.css';
-
-const createId = () => {
-  if (globalThis.crypto && globalThis.crypto.randomUUID) {
-    return globalThis.crypto.randomUUID();
-  }
-  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
 
 function NewGameForm({ onCreateGame, onCancel }) {
   const [gameName, setGameName] = useState('');
@@ -23,7 +17,7 @@ function NewGameForm({ onCreateGame, onCancel }) {
   const canStart = players.length > 0 && !gameNameError;
 
   const handleAddPlayer = (player) => {
-    setPlayers((prev) => [...prev, { ...player, id: createId() }]);
+    setPlayers((prev) => [...prev, { ...player, id: generateId() }]);
   };
 
   const handleRemovePlayer = (id) => {
