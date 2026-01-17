@@ -1,0 +1,151 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 48px 20px 80px;
+}
+
+.hub {
+  width: min(960px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.icon-wrap {
+  width: 88px;
+  height: 88px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffe4b0, #ffd1c4);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 18px 40px rgba(210, 135, 100, 0.25);
+}
+
+.icon {
+  width: 46px;
+  height: 46px;
+  fill: #fff;
+  stroke: #203357;
+  stroke-width: 2;
+}
+
+.title {
+  font-family: 'Fraunces', 'Times New Roman', serif;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  margin: 0;
+  color: #1b2f4a;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 640px;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  color: #445673;
+}
+
+.cta {
+  margin-top: 6px;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #15263f;
+  background: linear-gradient(135deg, #9fe2c5, #7dc9f5);
+  box-shadow: 0 12px 30px rgba(71, 137, 170, 0.35);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta:active {
+  transform: scale(0.98);
+  box-shadow: 0 6px 18px rgba(71, 137, 170, 0.35);
+}
+
+.cta-icon {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 1.1rem;
+}
+
+.games {
+  width: 100%;
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 6px;
+  width: 100%;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1b2f4a;
+}
+
+.trophy {
+  font-size: 1.3rem;
+}
+
+.badge {
+  min-width: 32px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1b2f4a;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.game-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 16px 35px rgba(24, 48, 79, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #1b2f4a;
+}
+
+.game-meta {
+  font-size: 0.95rem;
+  color: #65748b;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app {
+    padding: 36px 16px 60px;
+  }
+}
