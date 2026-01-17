@@ -32,3 +32,15 @@ DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion 
 Simply run `codex --yolo` to get started using Codex for development
 
 NOTE: (the `--yolo` command allows Codex to run without any restrctions, hence the container)
+## Game Hub UI
+
+The React client lives in `src/ui`.
+
+Common commands (run from `src/ui`):
+
+```bash
+npm install
+npm run dev
+npm run build
+npm test
+```
