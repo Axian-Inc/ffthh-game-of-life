@@ -17,8 +17,7 @@ function PlayerForm({ onAddPlayer }) {
   const emailError = useMemo(() => validateEmail(email), [email]);
   const isValid = !nicknameError && !emailError;
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = () => {
     if (!isValid) {
       return;
     }
@@ -38,7 +37,7 @@ function PlayerForm({ onAddPlayer }) {
   const showEmailError = touched.email ? emailError : '';
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <div className={styles.form}>
       <AvatarPicker selectedAvatar={avatar} onAvatarChange={setAvatar} />
       <div className={styles.row}>
         <Input
@@ -48,7 +47,6 @@ function PlayerForm({ onAddPlayer }) {
           onChange={(event) => setNickname(event.target.value)}
           onBlur={() => setTouched((prev) => ({ ...prev, nickname: true }))}
           error={showNicknameError}
-          required
         />
         <Input
           type="email"
@@ -58,15 +56,14 @@ function PlayerForm({ onAddPlayer }) {
           onChange={(event) => setEmail(event.target.value)}
           onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
           error={showEmailError}
-          required
         />
       </div>
       <div className={styles.actions}>
-        <Button type="submit" disabled={!isValid}>
+        <Button type="button" disabled={!isValid} onClick={handleSubmit}>
           Add Player
         </Button>
       </div>
-    </form>
+    </div>
   );
 }
 

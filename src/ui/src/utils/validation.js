@@ -26,4 +26,15 @@ const validateEmail = (value) => {
   return '';
 };
 
-export { validateNickname, validateEmail };
+const validateGameName = (value) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return 'Game name is required';
+  }
+  if (trimmed.length < 3 || trimmed.length > 50) {
+    return 'Game name must be 3-50 characters';
+  }
+  return '';
+};
+
+export { validateNickname, validateEmail, validateGameName };

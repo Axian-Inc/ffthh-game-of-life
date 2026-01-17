@@ -17,6 +17,7 @@ function Button({
   variant = 'primary',
   size = 'medium',
   disabled = false,
+  type = 'button',
   icon,
   children,
   className = '',
@@ -35,7 +36,7 @@ function Button({
 
   return (
     <button
-      type="button"
+      type={type}
       className={combinedClassName}
       disabled={disabled}
       {...props}
@@ -50,6 +51,7 @@ Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'danger']),
   size: PropTypes.oneOf(['small', 'medium', 'large']),
   disabled: PropTypes.bool,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
   icon: PropTypes.node,
   children: PropTypes.node,
   className: PropTypes.string,

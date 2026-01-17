@@ -8,6 +8,13 @@ import styles from './GameHub.module.css';
 
 const STORAGE_KEY = 'gameHubGames';
 
+const createId = () => {
+  if (globalThis.crypto && globalThis.crypto.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 function GameHub() {
   const [games, setGames] = useState([]);
   const [showNewGame, setShowNewGame] = useState(false);
@@ -26,6 +33,26 @@ function GameHub() {
     }
   }, []);
 
+  const handleCreateGame = (game) => {
+    const now = new Date().toISOString();
+    const nextGame = {
+      id: createId(),
+      name: game.name,
+      players: game.players,
+      status: 'active',
+      createdAt: now,
+      lastActive: now,
+    };
+    const nextGames = [nextGame, ...games];
+    setGames(nextGames);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextGames));
+    } catch (error) {
+      // Ignore storage errors for now.
+    }
+    setShowNewGame(false);
+  };
+
   return (
     <main className={styles.page}>
       <Header />
@@ -34,7 +61,7 @@ function GameHub() {
       </div>
       <GameList games={games} onResumeGame={() => {}} onDeleteGame={() => {}} />
       <Modal isOpen={showNewGame} onClose={() => setShowNewGame(false)} title="New Game">
-        <NewGameForm onCancel={() => setShowNewGame(false)} />
+        <NewGameForm onCreateGame={handleCreateGame} onCancel={() => setShowNewGame(false)} />
       </Modal>
     </main>
   );
