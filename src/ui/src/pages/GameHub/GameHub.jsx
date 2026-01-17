@@ -4,53 +4,45 @@ import Button from '../../components/Button/Button.jsx';
 import GameList from '../../components/GameList/GameList.jsx';
 import Modal from '../../components/Modal/Modal.jsx';
 import NewGameForm from '../../components/NewGameForm/NewGameForm.jsx';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
+import Toast from '../../components/Toast/Toast.jsx';
+import useGames from '../../hooks/useGames.js';
+import useToast from '../../hooks/useToast.js';
 import styles from './GameHub.module.css';
 
-const STORAGE_KEY = 'gameHubGames';
-
-const createId = () => {
-  if (globalThis.crypto && globalThis.crypto.randomUUID) {
-    return globalThis.crypto.randomUUID();
-  }
-  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
-
 function GameHub() {
-  const [games, setGames] = useState([]);
+  const { games, createGame, deleteGame, updateGame, loading, error } = useGames();
+  const { toasts, addToast, removeToast } = useToast();
   const [showNewGame, setShowNewGame] = useState(false);
+  const [gameToDelete, setGameToDelete] = useState(null);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setGames(parsed);
-        }
-      }
-    } catch (error) {
-      setGames([]);
+    if (error) {
+      addToast(error, 'error');
     }
-  }, []);
+  }, [error, addToast]);
 
   const handleCreateGame = (game) => {
-    const now = new Date().toISOString();
-    const nextGame = {
-      id: createId(),
-      name: game.name,
-      players: game.players,
-      status: 'active',
-      createdAt: now,
-      lastActive: now,
-    };
-    const nextGames = [nextGame, ...games];
-    setGames(nextGames);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextGames));
-    } catch (error) {
-      // Ignore storage errors for now.
-    }
+    createGame(game);
+    addToast('Game created successfully!', 'success');
     setShowNewGame(false);
+  };
+
+  const handleResumeGame = (game) => {
+    updateGame(game.id, { status: 'active' });
+  };
+
+  const handleDeleteRequest = (game) => {
+    setGameToDelete(game);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!gameToDelete) {
+      return;
+    }
+    deleteGame(gameToDelete.id);
+    addToast('Game deleted', 'info');
+    setGameToDelete(null);
   };
 
   return (
@@ -59,10 +51,33 @@ function GameHub() {
       <div className={styles.actions}>
         <Button onClick={() => setShowNewGame(true)}>+ New Game</Button>
       </div>
-      <GameList games={games} onResumeGame={() => {}} onDeleteGame={() => {}} />
+      {loading ? (
+        <p>Loading games...</p>
+      ) : (
+        <GameList games={games} onResumeGame={handleResumeGame} onDeleteGame={handleDeleteRequest} />
+      )}
       <Modal isOpen={showNewGame} onClose={() => setShowNewGame(false)} title="New Game">
         <NewGameForm onCreateGame={handleCreateGame} onCancel={() => setShowNewGame(false)} />
       </Modal>
+      <ConfirmDialog
+        isOpen={Boolean(gameToDelete)}
+        title="Delete game"
+        message="Are you sure you want to delete this game? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setGameToDelete(null)}
+      />
+      <div className={styles.toastRegion} aria-live="polite" aria-relevant="additions">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onDismiss={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
     </main>
   );
 }

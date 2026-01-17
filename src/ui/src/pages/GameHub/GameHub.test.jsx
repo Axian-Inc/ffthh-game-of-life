@@ -17,11 +17,11 @@ beforeEach(() => {
   window.localStorage.clear();
 });
 
-test('renders header, new game button, and game list', () => {
+test('renders header, new game button, and game list', async () => {
   render(<GameHub />);
   expect(screen.getByRole('heading', { name: /game hub/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /new game/i })).toBeInTheDocument();
-  expect(screen.getByText(/your games/i)).toBeInTheDocument();
+  expect(await screen.findByText(/your games/i)).toBeInTheDocument();
 });
 
 test('new game button opens modal', async () => {
@@ -33,8 +33,8 @@ test('new game button opens modal', async () => {
   expect(screen.getByRole('dialog')).toBeInTheDocument();
 });
 
-test('loads games from localStorage', () => {
+test('loads games from localStorage', async () => {
   window.localStorage.setItem('gameHubGames', JSON.stringify(games));
   render(<GameHub />);
-  expect(screen.getByText(/stored game/i)).toBeInTheDocument();
+  expect(await screen.findByText(/stored game/i)).toBeInTheDocument();
 });

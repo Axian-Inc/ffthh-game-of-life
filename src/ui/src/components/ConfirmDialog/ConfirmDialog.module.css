@@ -1,0 +1,21 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.message {
+  color: var(--color-neutral-gray-400);
+}
+
+@media (max-width: 767px) {
+  .actions {
+    flex-direction: column;
+  }
+}
