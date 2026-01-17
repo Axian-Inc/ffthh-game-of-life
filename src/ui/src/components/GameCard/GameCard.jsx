@@ -1,21 +1,10 @@
 import PropTypes from 'prop-types';
 import Avatar from '../Avatar/Avatar.jsx';
 import Button from '../Button/Button.jsx';
+import formatTimeAgo from '../../utils/timeFormat.js';
 import styles from './GameCard.module.css';
 
 const MAX_AVATARS = 5;
-
-const formatTimestamp = (value) => {
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return 'Unknown';
-  }
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
 
 function GameCard({ game, onResume, onDelete }) {
   const { name, players, lastActive, status } = game;
@@ -29,7 +18,7 @@ function GameCard({ game, onResume, onDelete }) {
           <h3 className={styles.title}>{name}</h3>
           <div className={styles.meta}>
             <span className={styles.metaItem}>👥 {players.length} players</span>
-            <span className={styles.metaItem}>⏱ {formatTimestamp(lastActive)}</span>
+            <span className={styles.metaItem}>⏱ {formatTimeAgo(lastActive)}</span>
           </div>
         </div>
         <span className={styles.badge}>{status}</span>

@@ -9,7 +9,7 @@ const baseGame = {
     { id: 'p1', avatar: '🦁' },
     { id: 'p2', avatar: '🐶' },
   ],
-  lastActive: new Date('2025-01-10T10:00:00Z'),
+  lastActive: new Date('2025-01-10T09:50:00Z'),
   status: 'active',
 };
 
@@ -24,8 +24,10 @@ test('displays correct player count', () => {
 });
 
 test('shows formatted timestamp', () => {
+  jest.spyOn(Date, 'now').mockReturnValue(new Date('2025-01-10T10:00:00Z').getTime());
   render(<GameCard game={baseGame} onResume={() => {}} onDelete={() => {}} />);
-  expect(screen.getByText(/jan 10, 2025/i)).toBeInTheDocument();
+  expect(screen.getByText(/10 minutes ago/i)).toBeInTheDocument();
+  Date.now.mockRestore();
 });
 
 test('renders player avatars', () => {
