@@ -1,7 +1,14 @@
-import { useState } from 'react'
-import { buildNameCounts, createDefaultPlayers, getPlayerError } from '../utils/gameValidation'
+import { useMemo, useState } from 'react'
+import { buildNameCounts, createDefaultPlayers, getPlayerErrors } from '../utils/gameValidation'
 
-const DEFAULT_PLAYER_ID = 3
+const DEFAULT_PLAYER_ID = 1
+
+const avatarOptions = ['🧩', '⚡', '🌿', '🔥', '💫', '🪐', '🧠', '🎯', '🛰️', '🌊']
+
+const getRandomAvatar = (currentAvatar) => {
+  const available = avatarOptions.filter((avatar) => avatar !== currentAvatar)
+  return available[Math.floor(Math.random() * available.length)] || avatarOptions[0]
+}
 
 const useCreateGameForm = () => {
   const [gameName, setGameName] = useState('')
@@ -10,28 +17,56 @@ const useCreateGameForm = () => {
   const [scoringMode, setScoringMode] = useState('standard')
   const [players, setPlayers] = useState(createDefaultPlayers)
   const [nextPlayerId, setNextPlayerId] = useState(DEFAULT_PLAYER_ID)
-  const [playerTouched, setPlayerTouched] = useState({})
+  const [draftPlayer, setDraftPlayer] = useState({
+    name: '',
+    avatar: avatarOptions[0],
+  })
+  const [draftTouched, setDraftTouched] = useState({ name: false })
 
   const maxGameNameLength = 60
   const maxPlayerNameLength = 24
-  const minPlayers = 2
+  const minPlayers = 1
 
   const trimmedGameName = gameName.trim()
   const isGameNameTooLong = trimmedGameName.length > maxGameNameLength
   const isGameNameValid = trimmedGameName.length > 0 && !isGameNameTooLong
 
-  const nameCounts = buildNameCounts(players)
-  const getPlayerValidationError = (player) =>
-    getPlayerError({ player, nameCounts, maxPlayerNameLength })
+  const playerCounts = useMemo(() => {
+    const nameCounts = buildNameCounts(players)
+    return { nameCounts }
+  }, [players])
+
   const arePlayersValid =
     players.length >= minPlayers &&
-    players.every((player) => !getPlayerValidationError(player))
-  const hasPlayerValidation = Object.values(playerTouched).some(Boolean)
+    players.every((player) => {
+      const errors = getPlayerErrors({
+        player,
+        nameCounts: playerCounts.nameCounts,
+        maxPlayerNameLength,
+      })
+      return !errors.name
+    })
 
-  const avatarOptions = ['🧩', '⚡', '🌿', '🔥', '💫', '🪐', '🧠', '🎯', '🛰️', '🌊']
-  const getRandomAvatar = (currentAvatar) => {
-    const available = avatarOptions.filter((avatar) => avatar !== currentAvatar)
-    return available[Math.floor(Math.random() * available.length)] || avatarOptions[0]
+  const draftCounts = useMemo(() => {
+    const draftPool = [...players, draftPlayer]
+    return {
+      nameCounts: buildNameCounts(draftPool),
+    }
+  }, [players, draftPlayer])
+
+  const draftErrors = getPlayerErrors({
+    player: draftPlayer,
+    nameCounts: draftCounts.nameCounts,
+    maxPlayerNameLength,
+  })
+  const isDraftValid = !draftErrors.name
+
+  const resetDraft = (keepAvatar = true) => {
+    setDraftPlayer((current) => ({
+      name: '',
+      avatar: keepAvatar ? current.avatar : getRandomAvatar(current.avatar),
+    }))
+    setDraftTouched({ name: false })
   }
 
   const resetForm = () => {
@@ -41,59 +76,47 @@ const useCreateGameForm = () => {
     setScoringMode('standard')
     setPlayers(createDefaultPlayers())
     setNextPlayerId(DEFAULT_PLAYER_ID)
-    setPlayerTouched({})
+    resetDraft(false)
   }
 
   const markAllTouched = () => {
     setGameNameTouched(true)
-    setPlayerTouched((current) => {
-      const updated = { ...current }
-      players.forEach((player) => {
-        updated[player.id] = true
-      })
-      return updated
-    })
+  }
+
+  const markDraftTouched = (field) => {
+    setDraftTouched((current) => ({ ...current, [field]: true }))
   }
 
   const addPlayer = () => {
+    if (!isDraftValid) {
+      setDraftTouched({ name: true })
+      return false
+    }
+
+    const trimmedName = draftPlayer.name.trim()
     setPlayers((current) => [
       ...current,
-      { id: nextPlayerId, name: '', avatar: getRandomAvatar() },
+      {
+        id: nextPlayerId,
+        name: trimmedName,
+        avatar: draftPlayer.avatar,
+      },
     ])
     setNextPlayerId((current) => current + 1)
+    resetDraft(true)
+    return true
   }
 
   const removePlayer = (playerId) => {
     setPlayers((current) => current.filter((player) => player.id !== playerId))
-    setPlayerTouched((current) => {
-      if (!current[playerId]) {
-        return current
-      }
-      const { [playerId]: _, ...rest } = current
-      return rest
-    })
   }
 
-  const updatePlayerName = (playerId, value) => {
-    setPlayers((current) =>
-      current.map((player) =>
-        player.id === playerId ? { ...player, name: value } : player,
-      ),
-    )
+  const updateDraftName = (value) => {
+    setDraftPlayer((current) => ({ ...current, name: value }))
   }
 
-  const markPlayerTouched = (playerId) => {
-    setPlayerTouched((current) => ({ ...current, [playerId]: true }))
-  }
-
-  const randomizeAvatar = (playerId) => {
-    setPlayers((current) =>
-      current.map((player) =>
-        player.id === playerId
-          ? { ...player, avatar: getRandomAvatar(player.avatar) }
-          : player,
-      ),
-    )
+  const randomizeDraftAvatar = () => {
+    setDraftPlayer((current) => ({ ...current, avatar: getRandomAvatar(current.avatar) }))
   }
 
   return {
@@ -106,23 +129,23 @@ const useCreateGameForm = () => {
     scoringMode,
     setScoringMode,
     players,
-    playerTouched,
+    draftPlayer,
+    draftTouched,
+    draftErrors,
     maxGameNameLength,
     maxPlayerNameLength,
     minPlayers,
     trimmedGameName,
     isGameNameTooLong,
     isGameNameValid,
-    getPlayerValidationError,
     arePlayersValid,
-    hasPlayerValidation,
     resetForm,
     markAllTouched,
     addPlayer,
     removePlayer,
-    updatePlayerName,
-    markPlayerTouched,
-    randomizeAvatar,
+    updateDraftName,
+    markDraftTouched,
+    randomizeDraftAvatar,
   }
 }
 

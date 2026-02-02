@@ -9,15 +9,19 @@ const DeleteGameModal = ({ isOpen, game, onCancel, onConfirm, onBackdropClick })
 
   return (
     <ModalBackdrop onBackdropClick={onBackdropClick}>
-      <div className="modal-card">
-        <div className="modal-header">
+      <div className="modal">
+        <div className="modal-body">
           <p className="eyebrow">Delete Game</p>
-          <h2>Remove “{game.name}”?</h2>
+          <h2 className="modal-title-dark">Remove “{game.name}”?</h2>
+          <p className="tagline">
+            This will permanently remove the game session and its history.
+          </p>
         </div>
-        <p className="tagline">This will permanently remove the game session and its history.</p>
-        <div className="modal-actions">
-          <SecondaryButton onClick={onCancel}>Cancel</SecondaryButton>
-          <PrimaryButton onClick={onConfirm}>Delete game</PrimaryButton>
+        <div className="modal-footer">
+          <div className="modal-actions">
+            <SecondaryButton onClick={onCancel}>Cancel</SecondaryButton>
+            <PrimaryButton onClick={onConfirm}>Delete game</PrimaryButton>
+          </div>
         </div>
       </div>
     </ModalBackdrop>

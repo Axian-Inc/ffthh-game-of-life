@@ -9,23 +9,25 @@ const ResumeGameModal = ({ isOpen, game, mode, onBackdropClick, onClose }) => {
 
   return (
     <ModalBackdrop onBackdropClick={onBackdropClick}>
-      <div className="modal-card">
-        <div className="modal-header">
+      <div className="modal">
+        <div className="modal-body">
           <p className="eyebrow">{mode === 'results' ? 'Game Results' : 'Resume Game'}</p>
-          <h2>{game.name}</h2>
+          <h2 className="modal-title-dark">{game.name}</h2>
+          <p className="tagline">
+            {mode === 'results'
+              ? `Reviewing the outcome for game ID ${game.id}. Results view is a placeholder.`
+              : `Loading the last saved state for game ID ${game.id}. This is a placeholder for the session view.`}
+          </p>
         </div>
-        <p className="tagline">
-          {mode === 'results'
-            ? `Reviewing the outcome for game ID ${game.id}. Results view is a placeholder.`
-            : `Loading the last saved state for game ID ${game.id}. This is a placeholder for the session view.`}
-        </p>
-        <div className="modal-actions">
-          <SecondaryButton onClick={onClose}>Back to home</SecondaryButton>
-          {mode === 'results' ? (
-            <PrimaryButton onClick={onClose}>Start new game</PrimaryButton>
-          ) : (
-            <PrimaryButton type="button">Continue</PrimaryButton>
-          )}
+        <div className="modal-footer">
+          <div className="modal-actions">
+            <SecondaryButton onClick={onClose}>Back to home</SecondaryButton>
+            {mode === 'results' ? (
+              <PrimaryButton onClick={onClose}>Start new game</PrimaryButton>
+            ) : (
+              <PrimaryButton type="button">Continue</PrimaryButton>
+            )}
+          </div>
         </div>
       </div>
     </ModalBackdrop>

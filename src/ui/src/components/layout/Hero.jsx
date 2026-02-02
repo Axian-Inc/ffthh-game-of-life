@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react'
 import PrimaryButton from '../ui/PrimaryButton'
 
-const Hero = ({ onCreate }) => (
+const Hero = ({ onCreate, buttonRef }) => (
   <header className="hero">
     <div className="app-icon" aria-hidden="true">
       <Sparkles aria-hidden="true" />
@@ -13,7 +13,9 @@ const Hero = ({ onCreate }) => (
         Watch tiny cells spark, survive, and evolve as you explore Conway’s classic universe
         of simple rules and endless outcomes.
       </p>
-      <PrimaryButton onClick={onCreate}>New Game</PrimaryButton>
+      <PrimaryButton onClick={onCreate} ref={buttonRef}>
+        New Game
+      </PrimaryButton>
     </div>
   </header>
 )

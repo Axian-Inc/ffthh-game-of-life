@@ -16,6 +16,7 @@ function App() {
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const newGameCardRef = useRef(null)
+  const newGameButtonRef = useRef(null)
   const { state, openCreate, openSession, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
   const {
@@ -39,24 +40,25 @@ function App() {
     scoringMode,
     setScoringMode,
     players,
-    playerTouched,
+    draftPlayer,
+    draftTouched,
+    draftErrors,
     maxGameNameLength,
     maxPlayerNameLength,
     minPlayers,
     trimmedGameName,
     isGameNameTooLong,
     isGameNameValid,
-    getPlayerValidationError,
     arePlayersValid,
-    hasPlayerValidation,
     resetForm,
     markAllTouched,
     addPlayer,
     removePlayer,
-    updatePlayerName,
-    markPlayerTouched,
-    randomizeAvatar,
+    updateDraftName,
+    markDraftTouched,
+    randomizeDraftAvatar,
   } = useCreateGameForm()
+  const previousViewRef = useRef(view)
 
   const handleCreateClick = () => {
     openCreate()
@@ -107,6 +109,10 @@ function App() {
       resetForm()
       setIsCreating(false)
     }, 700)
+  }
+
+  const handleAddPlayer = () => {
+    addPlayer()
   }
 
   const handleDeleteRequest = (game) => {
@@ -183,6 +189,13 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [view, pendingDelete, isCreating])
 
+  useEffect(() => {
+    if (previousViewRef.current === 'create' && view === 'home') {
+      window.requestAnimationFrame(() => newGameButtonRef.current?.focus())
+    }
+    previousViewRef.current = view
+  }, [view])
+
   const handleBackdropClick = (event) => {
     if (isCreating) {
       return
@@ -219,15 +232,15 @@ function App() {
         players,
         minPlayers,
         maxPlayerNameLength,
-        playerTouched,
-        getPlayerError: getPlayerValidationError,
-        hasPlayerValidation,
+        draftPlayer,
+        draftTouched,
+        draftErrors,
         arePlayersValid,
-        onAddPlayer: addPlayer,
+        onAddPlayer: handleAddPlayer,
         onRemovePlayer: removePlayer,
-        onPlayerNameChange: updatePlayerName,
-        onPlayerBlur: markPlayerTouched,
-        onRandomizeAvatar: randomizeAvatar,
+        onDraftNameChange: (event) => updateDraftName(event.target.value),
+        onDraftBlur: markDraftTouched,
+        onDraftShuffle: randomizeDraftAvatar,
         createError,
         isCreating,
       }}
@@ -236,7 +249,7 @@ function App() {
 
   return (
     <PageShell isBlurred={view !== 'home' || pendingDelete} modals={modals}>
-      <Hero onCreate={handleCreateClick} />
+      <Hero onCreate={handleCreateClick} buttonRef={newGameButtonRef} />
       <GameListSection count={games.length} isLoading={isLoading}>
         {fetchError ? (
           <GameErrorState message={fetchError} onRetry={() => loadGames()} />

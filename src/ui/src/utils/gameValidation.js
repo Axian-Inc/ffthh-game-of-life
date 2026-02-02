@@ -1,7 +1,4 @@
-export const createDefaultPlayers = () => [
-  { id: 1, name: 'Player 1', avatar: '🧩' },
-  { id: 2, name: 'Player 2', avatar: '⚡' },
-]
+export const createDefaultPlayers = () => []
 
 export const buildNameCounts = (players) => {
   const counts = {}
@@ -17,18 +14,19 @@ export const buildNameCounts = (players) => {
   return counts
 }
 
-export const getPlayerError = ({ player, nameCounts, maxPlayerNameLength }) => {
+export const getPlayerErrors = ({ player, nameCounts, maxPlayerNameLength }) => {
+  const errors = { name: '' }
   const trimmedName = player.name.trim()
   if (!trimmedName) {
-    return 'Player name is required.'
+    errors.name = 'Nickname is required.'
   }
   if (trimmedName.length > maxPlayerNameLength) {
-    return `Name must be ${maxPlayerNameLength} characters or fewer.`
+    errors.name = `Name must be ${maxPlayerNameLength} characters or fewer.`
   }
   if (nameCounts[trimmedName.toLowerCase()] > 1) {
-    return 'Names must be unique.'
+    errors.name = 'Names must be unique.'
   }
-  return ''
+  return errors
 }
 
 export const getGameNameError = ({ isValid, isTooLong, maxLength }) => {

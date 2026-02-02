@@ -5,77 +5,88 @@ const PlayersSection = ({
   players,
   minPlayers,
   maxPlayerNameLength,
-  playerTouched,
-  getPlayerError,
-  hasPlayerValidation,
+  draftPlayer,
+  draftTouched,
+  draftErrors,
   arePlayersValid,
   onAddPlayer,
   onRemovePlayer,
-  onPlayerNameChange,
-  onPlayerBlur,
-  onRandomizeAvatar,
+  onDraftNameChange,
+  onDraftBlur,
+  onDraftShuffle,
   isCreating,
-}) => (
-  <div className="players-section">
-    <div className="players-header">
-      <div>
-        <span>Players</span>
-        <p className="players-summary">
-          {players.length} players (minimum {minPlayers})
-        </p>
+}) => {
+  const showNameError = draftTouched.name && draftErrors.name
+
+  return (
+    <div className="players-section">
+      <div className="players-header">
+        <div>
+          <div className="players-title">Players ({players.length})</div>
+          <p className="players-summary">Minimum {minPlayers} player</p>
+        </div>
       </div>
-      <SecondaryButton onClick={onAddPlayer} disabled={isCreating}>
-        Add player
-      </SecondaryButton>
-    </div>
-    <div className="players-list">
-      {players.map((player) => {
-        const playerError = getPlayerError(player)
-        const showError = playerTouched[player.id] && playerError
-        return (
-          <div className="player-row" key={player.id}>
-            <div className="player-avatar">
-              <span aria-hidden="true">{player.avatar}</span>
+      <div className="players-panel">
+        <div className="player-avatar-row">
+          <button
+            className="avatar-tile"
+            type="button"
+            onClick={onDraftShuffle}
+            aria-label="Shuffle avatar"
+            disabled={isCreating}
+          >
+            {draftPlayer.avatar}
+          </button>
+          <div className="avatar-hint">Click to shuffle avatar</div>
+        </div>
+        <label className="field">
+          <span>Nickname</span>
+          <input
+            type="text"
+            placeholder="Player nickname"
+            maxLength={maxPlayerNameLength}
+            value={draftPlayer.name}
+            onChange={onDraftNameChange}
+            onBlur={() => onDraftBlur('name')}
+            aria-invalid={Boolean(showNameError)}
+            disabled={isCreating}
+          />
+          {showNameError ? <span className="field-error">{draftErrors.name}</span> : null}
+        </label>
+        <SecondaryButton className="btn-teal" onClick={onAddPlayer} disabled={isCreating}>
+          Add Player
+        </SecondaryButton>
+      </div>
+      {players.length ? (
+        <div className="players-added">
+          {players.map((player) => (
+            <div className="player-summary" key={player.id}>
+              <div className="player-summary-info">
+                <span className="player-summary-avatar" aria-hidden="true">
+                  {player.avatar}
+                </span>
+                <div>
+                  <div className="player-summary-name">{player.name}</div>
+                </div>
+              </div>
               <IconButton
+                className="remove"
                 type="button"
-                onClick={() => onRandomizeAvatar(player.id)}
-                aria-label={`Randomize avatar for ${player.name || 'player'}`}
+                onClick={() => onRemovePlayer(player.id)}
+                aria-label={`Remove ${player.name || 'player'}`}
                 disabled={isCreating}
               >
-                🎲
+                ✕
               </IconButton>
             </div>
-            <label className="field player-field">
-              <span>Player name</span>
-              <input
-                type="text"
-                placeholder="Player name"
-                maxLength={maxPlayerNameLength}
-                value={player.name}
-                onChange={(event) => onPlayerNameChange(player.id, event.target.value)}
-                onBlur={() => onPlayerBlur(player.id)}
-                aria-invalid={Boolean(showError)}
-                disabled={isCreating}
-              />
-              {showError ? <span className="field-error">{playerError}</span> : null}
-            </label>
-            <IconButton
-              className="remove"
-              type="button"
-              onClick={() => onRemovePlayer(player.id)}
-              aria-label={`Remove ${player.name || 'player'}`}
-              disabled={players.length <= minPlayers || isCreating}
-            >
-              ✕
-            </IconButton>
-          </div>
-        )
-      })}
+          ))}
+        </div>
+      ) : null}
+      {!arePlayersValid && players.length >= minPlayers ? (
+        <p className="field-error">Check player details before starting.</p>
+      ) : null}
     </div>
-    {!arePlayersValid && hasPlayerValidation ? (
-      <p className="field-error">Add at least {minPlayers} players with unique names.</p>
-    ) : null}
-  </div>
-)
+  )
+}
 
 export default PlayersSection

@@ -1,6 +1,6 @@
+import { Gamepad2, X } from 'lucide-react'
 import ModalBackdrop from './ModalBackdrop'
 import PrimaryButton from '../ui/PrimaryButton'
-import SecondaryButton from '../ui/SecondaryButton'
 import TextField from '../ui/TextField'
 import SelectField from '../ui/SelectField'
 import PlayersSection from '../forms/PlayersSection'
@@ -25,15 +25,15 @@ const CreateGameModal = ({
   players,
   minPlayers,
   maxPlayerNameLength,
-  playerTouched,
-  getPlayerError,
-  hasPlayerValidation,
+  draftPlayer,
+  draftTouched,
+  draftErrors,
   arePlayersValid,
   onAddPlayer,
   onRemovePlayer,
-  onPlayerNameChange,
-  onPlayerBlur,
-  onRandomizeAvatar,
+  onDraftNameChange,
+  onDraftBlur,
+  onDraftShuffle,
   createError,
   isCreating,
 }) => {
@@ -46,83 +46,95 @@ const CreateGameModal = ({
     isTooLong: isGameNameTooLong,
     maxLength: maxGameNameLength,
   })
+  const playerCount = players.length
+  const canStartGame = isGameNameValid && arePlayersValid
+  const startLabel = `Start Game with ${playerCount} Player${playerCount === 1 ? '' : 's'}`
 
   return (
     <ModalBackdrop onBackdropClick={onBackdropClick}>
-      <div className="modal-card">
+      <div className="modal">
         <div className="modal-header">
-          <p className="eyebrow">Create Game</p>
-          <h2>Build a new universe</h2>
-        </div>
-        <form className="create-form" onSubmit={(event) => event.preventDefault()}>
-          <TextField
-            id="game-name"
-            label="Game name"
-            type="text"
-            placeholder="Family Game Night"
-            maxLength={maxGameNameLength}
-            value={gameName}
-            onChange={onGameNameChange}
-            onBlur={onGameNameBlur}
-            aria-invalid={!isGameNameValid && gameNameTouched}
-            disabled={isCreating}
-            error={gameNameTouched ? gameNameError : ''}
-          />
-          <div className="field-row">
-            <SelectField
-              id="game-type"
-              label="Game type"
-              value={gameType}
-              onChange={onGameTypeChange}
-              disabled={isCreating}
-            >
-              <option value="classic">Classic</option>
-              <option value="highlife">HighLife</option>
-              <option value="seeds">Seeds</option>
-            </SelectField>
-            <SelectField
-              id="scoring-mode"
-              label="Scoring mode"
-              value={scoringMode}
-              onChange={onScoringModeChange}
-              disabled={isCreating}
-            >
-              <option value="standard">Standard</option>
-              <option value="speed">Speed</option>
-              <option value="endless">Endless</option>
-            </SelectField>
+          <div className="modal-header-left">
+            <div className="modal-header-icon" aria-hidden="true">
+              <Gamepad2 aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="modal-title">New Game</h2>
+              <p className="modal-subtitle">Let's get the fun started!</p>
+            </div>
           </div>
-          <PlayersSection
-            players={players}
-            minPlayers={minPlayers}
-            maxPlayerNameLength={maxPlayerNameLength}
-            playerTouched={playerTouched}
-            getPlayerError={getPlayerError}
-            hasPlayerValidation={hasPlayerValidation}
-            arePlayersValid={arePlayersValid}
-            onAddPlayer={onAddPlayer}
-            onRemovePlayer={onRemovePlayer}
-            onPlayerNameChange={onPlayerNameChange}
-            onPlayerBlur={onPlayerBlur}
-            onRandomizeAvatar={onRandomizeAvatar}
-            isCreating={isCreating}
-          />
-        </form>
-        {createError ? (
-          <p className="field-error" role="alert">
-            {createError}
-          </p>
-        ) : null}
-        <div className="modal-actions">
-          <SecondaryButton onClick={onCancel} disabled={isCreating}>
-            Back to home
-          </SecondaryButton>
-          <PrimaryButton
-            onClick={onSubmit}
-            disabled={!isGameNameValid || !arePlayersValid || isCreating}
-          >
-            {isCreating ? 'Creating...' : 'Start setup'}
+          <button className="modal-close" type="button" onClick={onCancel} aria-label="Close modal">
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <div className="modal-body">
+          <form className="create-form" onSubmit={(event) => event.preventDefault()}>
+            <TextField
+              id="game-name"
+              label="Game Name"
+              type="text"
+              placeholder="Family Game Night"
+              maxLength={maxGameNameLength}
+              value={gameName}
+              onChange={onGameNameChange}
+              onBlur={onGameNameBlur}
+              aria-invalid={!isGameNameValid && gameNameTouched}
+              disabled={isCreating}
+              error={gameNameTouched ? gameNameError : ''}
+            />
+            <div className="field-row">
+              <SelectField
+                id="game-type"
+                label="Game type"
+                value={gameType}
+                onChange={onGameTypeChange}
+                disabled={isCreating}
+              >
+                <option value="classic">Classic</option>
+                <option value="highlife">HighLife</option>
+                <option value="seeds">Seeds</option>
+              </SelectField>
+              <SelectField
+                id="scoring-mode"
+                label="Scoring mode"
+                value={scoringMode}
+                onChange={onScoringModeChange}
+                disabled={isCreating}
+              >
+                <option value="standard">Standard</option>
+                <option value="speed">Speed</option>
+                <option value="endless">Endless</option>
+              </SelectField>
+            </div>
+            <PlayersSection
+              players={players}
+              minPlayers={minPlayers}
+              maxPlayerNameLength={maxPlayerNameLength}
+              draftPlayer={draftPlayer}
+              draftTouched={draftTouched}
+              draftErrors={draftErrors}
+              arePlayersValid={arePlayersValid}
+              onAddPlayer={onAddPlayer}
+              onRemovePlayer={onRemovePlayer}
+              onDraftNameChange={onDraftNameChange}
+              onDraftBlur={onDraftBlur}
+              onDraftShuffle={onDraftShuffle}
+              isCreating={isCreating}
+            />
+          </form>
+          {createError ? (
+            <p className="field-error" role="alert">
+              {createError}
+            </p>
+          ) : null}
+        </div>
+        <div className="modal-footer create-footer">
+          <PrimaryButton onClick={onSubmit} disabled={!canStartGame || isCreating}>
+            {isCreating ? 'Creating...' : startLabel}
           </PrimaryButton>
+          {playerCount === 0 ? (
+            <p className="footer-hint">Add at least one player to start.</p>
+          ) : null}
         </div>
       </div>
     </ModalBackdrop>

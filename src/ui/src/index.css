@@ -1,10 +1,65 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap');
 
 :root {
-  font-family: 'Space Grotesk', sans-serif;
+  /* Canvas / surfaces */
+  --bg-canvas: #fffdf5;
+  --surface: #ffffff;
+  --surface-2: #f0f5ec;
+
+  /* Text */
+  --text-1: #272d3e;
+  --text-2: #667086;
+  --text-3: rgba(39, 45, 62, 0.65);
+
+  /* Lines */
+  --border-soft: rgba(39, 45, 62, 0.1);
+  --border-input: #eae8de;
+  --border-dashed: rgba(39, 45, 62, 0.18);
+
+  /* Overlay */
+  --overlay: rgba(39, 45, 62, 0.22);
+
+  /* Brand accents */
+  --brand-teal: #22c5b5;
+  --brand-teal-2: #5cc6d4;
+  --brand-blue: #44a5e8;
+  --brand-purple: #a377e5;
+
+  /* Success */
+  --success-bg: rgba(34, 197, 181, 0.18);
+  --success-fg: #22c5b5;
+
+  /* Gradients */
+  --grad-primary: linear-gradient(90deg, #5cc6d4 0%, #44a5e8 45%, #a377e5 100%);
+  --grad-disabled: linear-gradient(90deg, #9edadf 0%, #9ed1ec 45%, #c0c0eb 100%);
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radii */
+  --radius-card: 24px;
+  --radius-panel: 20px;
+  --radius-input: 9999px;
+  --radius-icon: 16px;
+
+  /* Shadows */
+  --shadow-card: 0 12px 30px rgba(39, 45, 62, 0.08);
+  --shadow-modal: 0 30px 80px rgba(39, 45, 62, 0.18);
+
+  font-family: var(--font-sans);
   line-height: 1.5;
-  font-weight: 400;
-  color: #f5efe3;
+  font-weight: 500;
+  color: var(--text-1);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -19,10 +74,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(255, 178, 71, 0.35), transparent 55%),
-    radial-gradient(circle at 20% 80%, rgba(90, 222, 174, 0.28), transparent 50%),
-    linear-gradient(135deg, #18120e 0%, #1e1b16 45%, #2c2018 100%);
+  background: var(--bg-canvas);
 }
 
 #root {
