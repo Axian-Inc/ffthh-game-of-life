@@ -32,3 +32,45 @@ DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion 
 Simply run `codex --yolo` to get started using Codex for development
 
 NOTE: (the `--yolo` command allows Codex to run without any restrctions, hence the container)
+
+# Architecture
+
+- UI: React + TypeScript app built with Vite in `src/ui`.
+- Hosting: Terraform-managed S3 bucket (private) with CloudFront and Origin Access Control (OAC) in `terraform/`.
+- Scripts: `scripts/build-ui.sh` builds the UI; `scripts/deploy-ui.sh` builds and syncs to S3 (requires explicit confirmation).
+
+# Local Setup
+
+1. Enter the UI directory: `cd src/ui`
+2. Install dependencies: `npm install`
+3. Run the dev server: `npm run dev`
+4. Open the Vite URL printed in your terminal (typically `http://localhost:5173/`).
+
+# Deployment
+
+## Terraform (Infrastructure)
+
+1. `cd terraform`
+2. Ensure a non-default workspace is selected:
+   - `terraform workspace list`
+   - `terraform workspace select <your-workspace>` (or `terraform workspace new <your-workspace>`)
+3. `terraform init`
+4. `terraform plan`
+5. `terraform apply`
+
+Outputs include the CloudFront distribution domain for the site.
+
+## UI Build + Upload
+
+1. Build only: `./scripts/build-ui.sh`
+2. Deploy (safe by default; shows the command without `--confirm`):
+   - Dry run: `./scripts/deploy-ui.sh --bucket <bucket-name>`
+   - Deploy: `./scripts/deploy-ui.sh --bucket <bucket-name> --confirm`
+
+## CloudFront Cache Refresh
+
+After deploy, invalidate CloudFront to refresh cached assets:
+
+```
+aws cloudfront create-invalidation --distribution-id <distribution-id> --paths "/*"
+```
