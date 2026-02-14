@@ -48,11 +48,12 @@ const CreateGameModal = ({
   })
   const playerCount = players.length
   const canStartGame = isGameNameValid && arePlayersValid
+  const isGameNameMissing = !gameName.trim()
   const startLabel = `Start Game with ${playerCount} Player${playerCount === 1 ? '' : 's'}`
 
   return (
     <ModalBackdrop onBackdropClick={onBackdropClick}>
-      <div className="modal">
+      <div className="modal" data-test-id="create-game-modal">
         <div className="modal-header">
           <div className="modal-header-left">
             <div className="modal-header-icon" aria-hidden="true">
@@ -81,6 +82,7 @@ const CreateGameModal = ({
               aria-invalid={!isGameNameValid && gameNameTouched}
               disabled={isCreating}
               error={gameNameTouched ? gameNameError : ''}
+              data-test-id="game-name-input"
             />
             <div className="field-row">
               <SelectField
@@ -89,6 +91,7 @@ const CreateGameModal = ({
                 value={gameType}
                 onChange={onGameTypeChange}
                 disabled={isCreating}
+                data-test-id="career-path-select"
               >
                 <option value="classic">Classic</option>
                 <option value="highlife">HighLife</option>
@@ -100,6 +103,7 @@ const CreateGameModal = ({
                 value={scoringMode}
                 onChange={onScoringModeChange}
                 disabled={isCreating}
+                data-test-id="scoring-mode-select"
               >
                 <option value="standard">Standard</option>
                 <option value="speed">Speed</option>
@@ -129,11 +133,14 @@ const CreateGameModal = ({
           ) : null}
         </div>
         <div className="modal-footer create-footer">
-          <PrimaryButton onClick={onSubmit} disabled={!canStartGame || isCreating}>
+          <PrimaryButton onClick={onSubmit} disabled={!canStartGame || isCreating} data-test-id="start-game-button">
             {isCreating ? 'Creating...' : startLabel}
           </PrimaryButton>
           {playerCount === 0 ? (
             <p className="footer-hint">Add at least one player to start.</p>
+          ) : null}
+          {isGameNameMissing ? (
+            <p className="footer-hint">Enter a game name to continue.</p>
           ) : null}
         </div>
       </div>

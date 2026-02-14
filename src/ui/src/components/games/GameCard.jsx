@@ -15,7 +15,14 @@ const GameCard = ({
   isNew,
   newCardRef,
 }) => (
-  <div className="game-card" tabIndex={isNew ? -1 : undefined} ref={isNew ? newCardRef : undefined}>
+  <div
+    className="game-card"
+    tabIndex={isNew ? -1 : undefined}
+    ref={isNew ? newCardRef : undefined}
+    data-test-id="game-card"
+    data-game-id={game.id}
+    data-game-name={game.name}
+  >
     <div className="game-card-header">
       <h3>{game.name}</h3>
       <StatusPill status={game.status} />

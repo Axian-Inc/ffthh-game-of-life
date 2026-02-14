@@ -13,7 +13,7 @@ const Hero = ({ onCreate, buttonRef }) => (
         Watch tiny cells spark, survive, and evolve as you explore Conway’s classic universe
         of simple rules and endless outcomes.
       </p>
-      <PrimaryButton onClick={onCreate} ref={buttonRef}>
+      <PrimaryButton onClick={onCreate} ref={buttonRef} data-test-id="new-game-button">
         New Game
       </PrimaryButton>
     </div>

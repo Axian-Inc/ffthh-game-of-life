@@ -12,3 +12,8 @@ output "cloudfront_domain_name" {
   value       = aws_cloudfront_distribution.app.domain_name
   description = "CloudFront domain name for the app."
 }
+
+output "games_table_name" {
+  value       = aws_dynamodb_table.games.name
+  description = "DynamoDB table name for persisted games."
+}

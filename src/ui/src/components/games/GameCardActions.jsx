@@ -13,6 +13,7 @@ const GameCardActions = ({
     <PrimaryButton
       onClick={() => (game.status === 'completed' ? onViewResults(game) : onResume(game))}
       disabled={isLoading || game.status === 'paused'}
+      data-test-id={game.status === 'completed' ? 'view-results-button' : 'resume-game-button'}
     >
       {game.status === 'completed' ? 'View results' : 'Resume'}
     </PrimaryButton>
@@ -20,6 +21,7 @@ const GameCardActions = ({
       onClick={() => onDelete(game)}
       aria-label={`Delete ${game.name}`}
       disabled={isLoading}
+      data-test-id="delete-game-button"
     >
       <Trash2 aria-hidden="true" />
     </SecondaryButton>

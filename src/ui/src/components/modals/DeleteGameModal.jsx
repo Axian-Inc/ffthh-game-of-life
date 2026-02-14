@@ -9,7 +9,7 @@ const DeleteGameModal = ({ isOpen, game, onCancel, onConfirm, onBackdropClick })
 
   return (
     <ModalBackdrop onBackdropClick={onBackdropClick}>
-      <div className="modal">
+      <div className="modal" data-test-id="delete-game-modal">
         <div className="modal-body">
           <p className="eyebrow">Delete Game</p>
           <h2 className="modal-title-dark">Remove “{game.name}”?</h2>
@@ -20,7 +20,9 @@ const DeleteGameModal = ({ isOpen, game, onCancel, onConfirm, onBackdropClick })
         <div className="modal-footer">
           <div className="modal-actions">
             <SecondaryButton onClick={onCancel}>Cancel</SecondaryButton>
-            <PrimaryButton onClick={onConfirm}>Delete game</PrimaryButton>
+            <PrimaryButton onClick={onConfirm} data-test-id="confirm-delete-button">
+              Delete game
+            </PrimaryButton>
           </div>
         </div>
       </div>

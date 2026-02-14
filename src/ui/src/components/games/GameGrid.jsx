@@ -13,7 +13,7 @@ const GameGrid = ({
   newGameId,
   newGameCardRef,
 }) => (
-  <ul className="game-items">
+  <ul className="game-items" data-test-id="game-list">
     {isLoading
       ? Array.from({ length: 4 }).map((_, index) => (
           <li key={`skeleton-${index}`}>

@@ -130,3 +130,32 @@ data "aws_iam_policy_document" "app" {
     }
   }
 }
+
+resource "aws_dynamodb_table" "games" {
+  name         = "${local.name_prefix}-games"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "user_id"
+  range_key = "game_id"
+
+  attribute {
+    name = "user_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "game_id"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "game_id_idx"
+    hash_key        = "game_id"
+    projection_type = "ALL"
+  }
+
+  tags = {
+    Application = var.app_name
+    Workspace   = local.name_suffix
+  }
+}

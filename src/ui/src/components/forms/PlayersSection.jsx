@@ -34,6 +34,7 @@ const PlayersSection = ({
             onClick={onDraftShuffle}
             aria-label="Shuffle avatar"
             disabled={isCreating}
+            data-test-id="shuffle-avatar"
           >
             {draftPlayer.avatar}
           </button>
@@ -50,15 +51,16 @@ const PlayersSection = ({
             onBlur={() => onDraftBlur('name')}
             aria-invalid={Boolean(showNameError)}
             disabled={isCreating}
+            data-test-id="player-name-input"
           />
           {showNameError ? <span className="field-error">{draftErrors.name}</span> : null}
         </label>
-        <SecondaryButton className="btn-teal" onClick={onAddPlayer} disabled={isCreating}>
+        <SecondaryButton className="btn-teal" onClick={onAddPlayer} disabled={isCreating} data-test-id="add-player-button">
           Add Player
         </SecondaryButton>
       </div>
       {players.length ? (
-        <div className="players-added">
+        <div className="players-added" data-test-id="players-list">
           {players.map((player) => (
             <div className="player-summary" key={player.id}>
               <div className="player-summary-info">
@@ -75,6 +77,7 @@ const PlayersSection = ({
                 onClick={() => onRemovePlayer(player.id)}
                 aria-label={`Remove ${player.name || 'player'}`}
                 disabled={isCreating}
+                data-test-id="remove-player-button"
               >
                 ✕
               </IconButton>

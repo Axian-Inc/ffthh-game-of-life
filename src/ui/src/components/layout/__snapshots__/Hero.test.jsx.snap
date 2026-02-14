@@ -1,0 +1,65 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Hero > calls onCreate when New Game is clicked 1`] = `
+<header
+  class="hero"
+>
+  <div
+    aria-hidden="true"
+    class="app-icon"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-sparkles"
+      fill="none"
+      height="24"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"
+      />
+      <path
+        d="M20 2v4"
+      />
+      <path
+        d="M22 4h-4"
+      />
+      <circle
+        cx="4"
+        cy="20"
+        r="2"
+      />
+    </svg>
+  </div>
+  <div
+    class="hero-copy"
+  >
+    <p
+      class="eyebrow"
+    >
+      Game Hub
+    </p>
+    <h1>
+      Game of LIFE
+    </h1>
+    <p
+      class="tagline"
+    >
+      Watch tiny cells spark, survive, and evolve as you explore Conway’s classic universe of simple rules and endless outcomes.
+    </p>
+    <button
+      class="primary-action"
+      data-test-id="new-game-button"
+      type="button"
+    >
+      New Game
+    </button>
+  </div>
+</header>
+`;

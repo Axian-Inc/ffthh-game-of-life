@@ -14,6 +14,9 @@ export const seedGames = () => {
       lastUpdated: now - 60 * 60 * 1000,
       createdAt: now - 5 * 60 * 60 * 1000,
       resumable: true,
+      currentTurnState: {},
+      metadata: {},
+      version: 1,
     },
     {
       id: 2,
@@ -30,6 +33,9 @@ export const seedGames = () => {
       lastUpdated: now - 3 * 60 * 60 * 1000,
       createdAt: now - 7 * 60 * 60 * 1000,
       resumable: false,
+      currentTurnState: {},
+      metadata: {},
+      version: 1,
     },
     {
       id: 3,
@@ -42,6 +48,9 @@ export const seedGames = () => {
       lastUpdated: now - 24 * 60 * 60 * 1000,
       createdAt: now - 2 * 24 * 60 * 60 * 1000,
       resumable: false,
+      currentTurnState: {},
+      metadata: {},
+      version: 1,
     },
   ]
 }

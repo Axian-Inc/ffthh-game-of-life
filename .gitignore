@@ -36,3 +36,7 @@ node_modules/
 
 # Local auth secret
 auth.json
+
+# For Socat
+nohup.out
+nohup.api.out
