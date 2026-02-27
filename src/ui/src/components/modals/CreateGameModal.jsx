@@ -1,8 +1,6 @@
 import { Gamepad2, X } from 'lucide-react'
 import ModalBackdrop from './ModalBackdrop'
 import PrimaryButton from '../ui/PrimaryButton'
-import TextField from '../ui/TextField'
-import SelectField from '../ui/SelectField'
 import PlayersSection from '../forms/PlayersSection'
 import { getGameNameError } from '../../utils/gameValidation'
 
@@ -18,10 +16,6 @@ const CreateGameModal = ({
   isGameNameValid,
   isGameNameTooLong,
   maxGameNameLength,
-  gameType,
-  scoringMode,
-  onGameTypeChange,
-  onScoringModeChange,
   players,
   minPlayers,
   maxPlayerNameLength,
@@ -33,7 +27,7 @@ const CreateGameModal = ({
   onRemovePlayer,
   onDraftNameChange,
   onDraftBlur,
-  onDraftShuffle,
+  onDraftAvatarCycle,
   createError,
   isCreating,
 }) => {
@@ -69,43 +63,21 @@ const CreateGameModal = ({
         </div>
         <div className="modal-body">
           <form className="create-form" onSubmit={(event) => event.preventDefault()}>
-            <TextField
-              id="game-name"
-              label="Game Name"
-              type="text"
-              placeholder="Family Game Night"
-              maxLength={maxGameNameLength}
-              value={gameName}
-              onChange={onGameNameChange}
-              onBlur={onGameNameBlur}
-              aria-invalid={!isGameNameValid && gameNameTouched}
-              disabled={isCreating}
-              error={gameNameTouched ? gameNameError : ''}
-            />
-            <div className="field-row">
-              <SelectField
-                id="game-type"
-                label="Game type"
-                value={gameType}
-                onChange={onGameTypeChange}
+            <label className="game-name-row" htmlFor="game-name">
+              <span className="game-name-label">Game Name</span>
+              <input
+                id="game-name"
+                type="text"
+                placeholder="Family Game Night"
+                maxLength={maxGameNameLength}
+                value={gameName}
+                onChange={onGameNameChange}
+                onBlur={onGameNameBlur}
+                aria-invalid={!isGameNameValid && gameNameTouched}
                 disabled={isCreating}
-              >
-                <option value="classic">Classic</option>
-                <option value="highlife">HighLife</option>
-                <option value="seeds">Seeds</option>
-              </SelectField>
-              <SelectField
-                id="scoring-mode"
-                label="Scoring mode"
-                value={scoringMode}
-                onChange={onScoringModeChange}
-                disabled={isCreating}
-              >
-                <option value="standard">Standard</option>
-                <option value="speed">Speed</option>
-                <option value="endless">Endless</option>
-              </SelectField>
-            </div>
+              />
+            </label>
+            {gameNameTouched && gameNameError ? <span className="field-error">{gameNameError}</span> : null}
             <PlayersSection
               players={players}
               minPlayers={minPlayers}
@@ -118,10 +90,11 @@ const CreateGameModal = ({
               onRemovePlayer={onRemovePlayer}
               onDraftNameChange={onDraftNameChange}
               onDraftBlur={onDraftBlur}
-              onDraftShuffle={onDraftShuffle}
+              onDraftAvatarCycle={onDraftAvatarCycle}
               isCreating={isCreating}
             />
           </form>
+          {playerCount === 0 ? <p className="footer-hint">Add at least one player to start.</p> : null}
           {createError ? (
             <p className="field-error" role="alert">
               {createError}
@@ -132,9 +105,6 @@ const CreateGameModal = ({
           <PrimaryButton onClick={onSubmit} disabled={!canStartGame || isCreating}>
             {isCreating ? 'Creating...' : startLabel}
           </PrimaryButton>
-          {playerCount === 0 ? (
-            <p className="footer-hint">Add at least one player to start.</p>
-          ) : null}
         </div>
       </div>
     </ModalBackdrop>

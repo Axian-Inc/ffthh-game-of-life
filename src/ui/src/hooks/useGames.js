@@ -1,43 +1,47 @@
-import { useEffect, useState } from 'react'
-import { seedGames } from '../data/seedGames'
-
-const INITIAL_NEXT_ID = 4
+import { useEffect, useMemo, useState } from 'react'
+import { createGameStorage } from '../services/gameStorage'
 
 const useGames = () => {
+  const storage = useMemo(() => createGameStorage(), [])
   const [games, setGames] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState('')
-  const [nextId, setNextId] = useState(INITIAL_NEXT_ID)
   const [newGameId, setNewGameId] = useState(null)
 
-  const loadGames = ({ shouldFail = false } = {}) => {
+  const loadGames = async () => {
     setIsLoading(true)
     setFetchError('')
 
-    window.setTimeout(() => {
-      if (shouldFail) {
-        setFetchError('Unable to load games. Check your connection and try again.')
-        setIsLoading(false)
-        return
-      }
-
-      setGames(seedGames())
+    try {
+      const loadedGames = await storage.listGames()
+      setGames(loadedGames)
+    } catch (error) {
+      setFetchError('Unable to load games. Check your connection and try again.')
+    } finally {
       setIsLoading(false)
-    }, 900)
+    }
   }
 
   useEffect(() => {
     loadGames()
   }, [])
 
-  const addGame = (game) => {
-    setGames((current) => [game, ...current])
-    setNextId((current) => current + 1)
-    setNewGameId(game.id)
+  const createGame = async (game) => {
+    const createdGame = await storage.createGame(game)
+    setGames((current) => [createdGame, ...current])
+    setNewGameId(createdGame.id)
+    return createdGame
   }
 
-  const deleteGame = (gameId) => {
+  const deleteGame = async (gameId) => {
+    await storage.deleteGame(gameId)
     setGames((current) => current.filter((game) => game.id !== gameId))
+  }
+
+  const updateGame = async (gameId, updates) => {
+    const updatedGame = await storage.updateGame(gameId, updates)
+    setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
+    return updatedGame
   }
 
   return {
@@ -45,9 +49,9 @@ const useGames = () => {
     isLoading,
     fetchError,
     loadGames,
-    addGame,
+    createGame,
     deleteGame,
-    nextId,
+    updateGame,
     newGameId,
     setNewGameId,
   }

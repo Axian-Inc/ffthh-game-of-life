@@ -18,6 +18,20 @@ const reducer = (state, action) => {
         activeGame: action.payload.game,
         activeGameMode: action.payload.mode || 'resume',
       }
+    case 'OPEN_SETUP':
+      return {
+        ...state,
+        view: 'setup',
+        activeGame: action.payload.game,
+        activeGameMode: 'resume',
+      }
+    case 'OPEN_PLAY':
+      return {
+        ...state,
+        view: 'play',
+        activeGame: action.payload.game,
+        activeGameMode: 'resume',
+      }
     case 'OPEN_DELETE':
       return { ...state, pendingDelete: action.payload, view: 'home' }
     case 'CLOSE_ALL':
@@ -34,6 +48,8 @@ const useModalState = () => {
     state,
     openCreate: () => dispatch({ type: 'OPEN_CREATE' }),
     openSession: (game, mode) => dispatch({ type: 'OPEN_SESSION', payload: { game, mode } }),
+    openSetup: (game) => dispatch({ type: 'OPEN_SETUP', payload: { game } }),
+    openPlay: (game) => dispatch({ type: 'OPEN_PLAY', payload: { game } }),
     openDelete: (game) => dispatch({ type: 'OPEN_DELETE', payload: game }),
     closeAll: () => dispatch({ type: 'CLOSE_ALL' }),
   }

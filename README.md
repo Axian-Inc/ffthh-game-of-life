@@ -32,3 +32,14 @@ DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion 
 Simply run `codex --yolo` to get started using Codex for development
 
 NOTE: (the `--yolo` command allows Codex to run without any restrctions, hence the container)
+
+## Headless browser testing
+
+The dev container includes Chromium + chromedriver + Xvfb for running headless UI tests locally.
+`CHROME_BIN` is set to `/usr/bin/chromium`.
+
+Playwright E2E tests: `npm --prefix src/ui run test:e2e` (CI: `npm --prefix src/ui run test:e2e:ci`).
+
+# Architecture
+
+See `ARCHITECTURE.md` for system design and data flow.

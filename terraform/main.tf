@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.4"
+    }
   }
 }
 
@@ -129,4 +133,155 @@ data "aws_iam_policy_document" "app" {
       values   = [aws_cloudfront_distribution.app.arn]
     }
   }
+}
+
+resource "aws_dynamodb_table" "games" {
+  name         = "${local.name_prefix}-games"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  tags = {
+    Application = var.app_name
+    Workspace   = local.name_suffix
+  }
+}
+
+data "aws_iam_policy_document" "lambda_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "games_api" {
+  name               = "${local.name_prefix}-games-api-role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
+}
+
+data "aws_iam_policy_document" "games_api_policy" {
+  statement {
+    actions = [
+      "dynamodb:DeleteItem",
+      "dynamodb:PutItem",
+      "dynamodb:Scan",
+    ]
+    resources = [aws_dynamodb_table.games.arn]
+  }
+
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+}
+
+resource "aws_iam_role_policy" "games_api" {
+  name   = "${local.name_prefix}-games-api-policy"
+  role   = aws_iam_role.games_api.id
+  policy = data.aws_iam_policy_document.games_api_policy.json
+}
+
+data "archive_file" "games_api" {
+  type        = "zip"
+  source_dir  = "${path.module}/../src/api"
+  output_path = "${path.module}/games-api.zip"
+}
+
+resource "aws_lambda_function" "games_api" {
+  function_name = "${local.name_prefix}-games-api"
+  role          = aws_iam_role.games_api.arn
+  handler       = "index.handler"
+  runtime       = "nodejs18.x"
+
+  filename         = data.archive_file.games_api.output_path
+  source_code_hash = data.archive_file.games_api.output_base64sha256
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.games.name
+    }
+  }
+
+  tags = {
+    Application = var.app_name
+    Workspace   = local.name_suffix
+  }
+}
+
+resource "aws_apigatewayv2_api" "games_api" {
+  name          = "${local.name_prefix}-games-api"
+  protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_headers = ["Content-Type"]
+    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_origins = ["*"]
+  }
+
+  tags = {
+    Application = var.app_name
+    Workspace   = local.name_suffix
+  }
+}
+
+resource "aws_apigatewayv2_integration" "games_api" {
+  api_id                 = aws_apigatewayv2_api.games_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.games_api.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "games_list" {
+  api_id    = aws_apigatewayv2_api.games_api.id
+  route_key = "GET /games"
+  target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
+}
+
+resource "aws_apigatewayv2_route" "games_create" {
+  api_id    = aws_apigatewayv2_api.games_api.id
+  route_key = "POST /games"
+  target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
+}
+
+resource "aws_apigatewayv2_route" "games_delete" {
+  api_id    = aws_apigatewayv2_api.games_api.id
+  route_key = "DELETE /games/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
+}
+
+resource "aws_apigatewayv2_route" "games_update" {
+  api_id    = aws_apigatewayv2_api.games_api.id
+  route_key = "PUT /games/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
+}
+
+resource "aws_apigatewayv2_stage" "games_api" {
+  api_id      = aws_apigatewayv2_api.games_api.id
+  name        = "$default"
+  auto_deploy = true
+
+  tags = {
+    Application = var.app_name
+    Workspace   = local.name_suffix
+  }
+}
+
+resource "aws_lambda_permission" "games_api" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.games_api.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.games_api.execution_arn}/*/*"
 }

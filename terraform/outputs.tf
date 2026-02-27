@@ -12,3 +12,8 @@ output "cloudfront_domain_name" {
   value       = aws_cloudfront_distribution.app.domain_name
   description = "CloudFront domain name for the app."
 }
+
+output "api_base_url" {
+  value       = aws_apigatewayv2_api.games_api.api_endpoint
+  description = "Base URL for the games API."
+}

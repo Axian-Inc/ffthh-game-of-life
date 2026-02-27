@@ -6,39 +6,56 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
+import StartNewGamePage from './components/pages/StartNewGamePage'
+import PlayGamePage from './components/pages/PlayGamePage'
 import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
+
+const parseAppRoute = (pathname) => {
+  if (!pathname || pathname === '/') {
+    return { view: 'home' }
+  }
+
+  const match = pathname.match(/^\/games\/([^/]+)\/(careers|play)$/)
+  if (!match) {
+    return { view: 'home' }
+  }
+
+  return {
+    view: match[2] === 'careers' ? 'setup' : 'play',
+    gameId: decodeURIComponent(match[1]),
+  }
+}
+
+const buildAppRoute = (view, activeGame) => {
+  if ((view === 'setup' || view === 'play') && activeGame?.id) {
+    const suffix = view === 'setup' ? 'careers' : 'play'
+    return `/games/${encodeURIComponent(activeGame.id)}/${suffix}`
+  }
+  return '/'
+}
 
 function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
+  const [setupError, setSetupError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [isStartingGame, setIsStartingGame] = useState(false)
+  const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
+  const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
   const newGameButtonRef = useRef(null)
-  const { state, openCreate, openSession, openDelete, closeAll } = useModalState()
+  const { state, openCreate, openSession, openSetup, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const {
-    games,
-    isLoading,
-    fetchError,
-    loadGames,
-    addGame,
-    deleteGame,
-    nextId,
-    newGameId,
-    setNewGameId,
-  } = useGames()
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
+    useGames()
   const {
     gameName,
     setGameName,
     gameNameTouched,
     setGameNameTouched,
-    gameType,
-    setGameType,
-    scoringMode,
-    setScoringMode,
     players,
     draftPlayer,
     draftTouched,
@@ -56,7 +73,7 @@ function App() {
     removePlayer,
     updateDraftName,
     markDraftTouched,
-    randomizeDraftAvatar,
+    cycleDraftAvatar,
   } = useCreateGameForm()
   const previousViewRef = useRef(view)
 
@@ -70,10 +87,12 @@ function App() {
     closeAll()
     resetForm()
     setCreateError('')
+    setSetupError('')
     setIsCreating(false)
+    setIsStartingGame(false)
   }
 
-  const handleCreateGame = () => {
+  const handleCreateGame = async () => {
     if (!isGameNameValid || !arePlayersValid) {
       markAllTouched()
       return
@@ -81,17 +100,9 @@ function App() {
     setIsCreating(true)
     setCreateError('')
 
-    window.setTimeout(() => {
-      const shouldFail = trimmedGameName.toLowerCase().includes('fail')
-      if (shouldFail) {
-        setCreateError('We could not create that game yet. Please try again.')
-        setIsCreating(false)
-        return
-      }
-
+    try {
       const timestamp = Date.now()
       const newGame = {
-        id: nextId,
         name: trimmedGameName,
         status: 'active',
         players: players.map((player) => ({
@@ -101,25 +112,46 @@ function App() {
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
-        type: gameType,
-        scoring: scoringMode,
       }
-      addGame(newGame)
-      closeAll()
+      const createdGame = await createGame(newGame)
+      openSetup(createdGame)
       resetForm()
+    } catch (error) {
+      setCreateError('We could not create that game yet. Please try again.')
+    } finally {
       setIsCreating(false)
-    }, 700)
+    }
   }
 
   const handleAddPlayer = () => {
     addPlayer()
   }
 
+  const handleStartGame = async (gameToStart) => {
+    const game = gameToStart || activeGame
+    if (!game) {
+      return
+    }
+    setSetupError('')
+    setIsStartingGame(true)
+    try {
+      const savedGame = await updateGame(game.id, {
+        ...game,
+        lastUpdated: Date.now(),
+      })
+      openPlay(savedGame)
+    } catch (error) {
+      setSetupError('We could not save career choices yet. Please try again.')
+    } finally {
+      setIsStartingGame(false)
+    }
+  }
+
   const handleDeleteRequest = (game) => {
     openDelete(game)
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!pendingDelete) {
       return
     }
@@ -130,8 +162,16 @@ function App() {
       const { [pendingDelete.id]: _, ...rest } = current
       return rest
     })
-    deleteGame(pendingDelete.id)
-    closeAll()
+    try {
+      await deleteGame(pendingDelete.id)
+      closeAll()
+    } catch (error) {
+      setDeleteErrors((current) => ({
+        ...current,
+        [pendingDelete.id]: 'We could not delete that game yet. Please try again.',
+      }))
+      closeAll()
+    }
   }
 
   const handleDeleteCancel = () => {
@@ -154,12 +194,75 @@ function App() {
       const { [game.id]: _, ...rest } = current
       return rest
     })
-    openSession(game, 'resume')
+
+    const hasPlayers = Array.isArray(game.players) && game.players.length > 0
+    const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
+    if (hasPendingCareerChoices) {
+      openSetup(game)
+      return
+    }
+
+    openPlay(game)
   }
 
   const handleViewResults = (game) => {
     openSession(game, 'results')
   }
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setRouteRequest(parseAppRoute(window.location.pathname))
+      setHasHydratedRoute(false)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
+    if (!routeRequest) {
+      return
+    }
+
+    if (routeRequest.view === 'home') {
+      closeAll()
+      setRouteRequest(null)
+      setHasHydratedRoute(true)
+      return
+    }
+
+    if (isLoading) {
+      return
+    }
+
+    const targetGame = games.find((game) => game.id === routeRequest.gameId)
+    if (!targetGame) {
+      closeAll()
+      setRouteRequest(null)
+      setHasHydratedRoute(true)
+      return
+    }
+
+    if (routeRequest.view === 'setup') {
+      openSetup(targetGame)
+    } else {
+      openPlay(targetGame)
+    }
+
+    setRouteRequest(null)
+    setHasHydratedRoute(true)
+  }, [routeRequest, isLoading, games, closeAll, openSetup, openPlay])
+
+  useEffect(() => {
+    if (!hasHydratedRoute) {
+      return
+    }
+
+    const nextPath = buildAppRoute(view, activeGame)
+    if (window.location.pathname !== nextPath) {
+      window.history.replaceState({}, '', nextPath)
+    }
+  }, [view, activeGame, hasHydratedRoute])
 
   useEffect(() => {
     if (!newGameId || view !== 'home' || isLoading) {
@@ -225,10 +328,6 @@ function App() {
         isGameNameValid,
         isGameNameTooLong,
         maxGameNameLength,
-        gameType,
-        scoringMode,
-        onGameTypeChange: (event) => setGameType(event.target.value),
-        onScoringModeChange: (event) => setScoringMode(event.target.value),
         players,
         minPlayers,
         maxPlayerNameLength,
@@ -240,34 +339,52 @@ function App() {
         onRemovePlayer: removePlayer,
         onDraftNameChange: (event) => updateDraftName(event.target.value),
         onDraftBlur: markDraftTouched,
-        onDraftShuffle: randomizeDraftAvatar,
+        onDraftAvatarCycle: cycleDraftAvatar,
         createError,
         isCreating,
       }}
     />
   )
 
+  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete)
+
   return (
-    <PageShell isBlurred={view !== 'home' || pendingDelete} modals={modals}>
-      <Hero onCreate={handleCreateClick} buttonRef={newGameButtonRef} />
-      <GameListSection count={games.length} isLoading={isLoading}>
-        {fetchError ? (
-          <GameErrorState message={fetchError} onRetry={() => loadGames()} />
-        ) : (
-          <GameGrid
-            games={games}
-            isLoading={isLoading}
-            now={now}
-            onResume={handleResumeGame}
-            onViewResults={handleViewResults}
-            onDelete={handleDeleteRequest}
-            resumeErrors={resumeErrors}
-            deleteErrors={deleteErrors}
-            newGameId={newGameId}
-            newGameCardRef={newGameCardRef}
-          />
-        )}
-      </GameListSection>
+    <PageShell isBlurred={isModalOpen} modals={modals}>
+      {view === 'home' ? (
+        <>
+          <Hero onCreate={handleCreateClick} buttonRef={newGameButtonRef} />
+          <GameListSection count={games.length} isLoading={isLoading}>
+            {fetchError ? (
+              <GameErrorState message={fetchError} onRetry={() => loadGames()} />
+            ) : (
+              <GameGrid
+                games={games}
+                isLoading={isLoading}
+                now={now}
+                onResume={handleResumeGame}
+                onViewResults={handleViewResults}
+                onDelete={handleDeleteRequest}
+                resumeErrors={resumeErrors}
+                deleteErrors={deleteErrors}
+                newGameId={newGameId}
+                newGameCardRef={newGameCardRef}
+              />
+            )}
+          </GameListSection>
+        </>
+      ) : null}
+      {view === 'setup' ? (
+        <StartNewGamePage
+          game={activeGame}
+          onStart={handleStartGame}
+          onBack={closeAll}
+          isStarting={isStartingGame}
+          startError={setupError}
+        />
+      ) : null}
+      {view === 'play' ? (
+        <PlayGamePage game={activeGame} onHome={closeAll} />
+      ) : null}
     </PageShell>
   )
 }

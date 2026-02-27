@@ -1,5 +1,6 @@
 import SecondaryButton from '../ui/SecondaryButton'
 import IconButton from '../ui/IconButton'
+import PlayerAvatar from '../ui/PlayerAvatar'
 
 const PlayersSection = ({
   players,
@@ -13,7 +14,7 @@ const PlayersSection = ({
   onRemovePlayer,
   onDraftNameChange,
   onDraftBlur,
-  onDraftShuffle,
+  onDraftAvatarCycle,
   isCreating,
 }) => {
   const showNameError = draftTouched.name && draftErrors.name
@@ -23,26 +24,23 @@ const PlayersSection = ({
       <div className="players-header">
         <div>
           <div className="players-title">Players ({players.length})</div>
-          <p className="players-summary">Minimum {minPlayers} player</p>
         </div>
       </div>
       <div className="players-panel">
-        <div className="player-avatar-row">
+        <div className="player-entry-row">
           <button
             className="avatar-tile"
             type="button"
-            onClick={onDraftShuffle}
-            aria-label="Shuffle avatar"
+            onClick={onDraftAvatarCycle}
+            aria-label="Click to change avatar"
             disabled={isCreating}
           >
-            {draftPlayer.avatar}
+            <PlayerAvatar avatar={draftPlayer.avatar} decorative />
           </button>
-          <div className="avatar-hint">Click to shuffle avatar</div>
-        </div>
-        <label className="field">
-          <span>Nickname</span>
           <input
             type="text"
+            className="player-name-input"
+            aria-label="Player nickname"
             placeholder="Player nickname"
             maxLength={maxPlayerNameLength}
             value={draftPlayer.name}
@@ -51,11 +49,11 @@ const PlayersSection = ({
             aria-invalid={Boolean(showNameError)}
             disabled={isCreating}
           />
-          {showNameError ? <span className="field-error">{draftErrors.name}</span> : null}
-        </label>
-        <SecondaryButton className="btn-teal" onClick={onAddPlayer} disabled={isCreating}>
-          Add Player
-        </SecondaryButton>
+          <SecondaryButton className="btn-teal" onClick={onAddPlayer} disabled={isCreating}>
+            Add Player
+          </SecondaryButton>
+        </div>
+        {showNameError ? <span className="field-error">{draftErrors.name}</span> : null}
       </div>
       {players.length ? (
         <div className="players-added">
@@ -63,7 +61,7 @@ const PlayersSection = ({
             <div className="player-summary" key={player.id}>
               <div className="player-summary-info">
                 <span className="player-summary-avatar" aria-hidden="true">
-                  {player.avatar}
+                  <PlayerAvatar avatar={player.avatar} decorative />
                 </span>
                 <div>
                   <div className="player-summary-name">{player.name}</div>

@@ -10,8 +10,7 @@ const Hero = ({ onCreate, buttonRef }) => (
       <p className="eyebrow">Game Hub</p>
       <h1>Game of LIFE</h1>
       <p className="tagline">
-        Watch tiny cells spark, survive, and evolve as you explore Conway’s classic universe
-        of simple rules and endless outcomes.
+        Start and career and see how your life unfolds in this easy, fun, and exciting simulation of this game we call life! 
       </p>
       <PrimaryButton onClick={onCreate} ref={buttonRef}>
         New Game

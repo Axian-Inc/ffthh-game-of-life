@@ -26,8 +26,6 @@ const ModalManager = ({
       isGameNameValid={createGameProps.isGameNameValid}
       isGameNameTooLong={createGameProps.isGameNameTooLong}
       maxGameNameLength={createGameProps.maxGameNameLength}
-      gameType={createGameProps.gameType}
-      scoringMode={createGameProps.scoringMode}
       onGameTypeChange={createGameProps.onGameTypeChange}
       onScoringModeChange={createGameProps.onScoringModeChange}
       players={createGameProps.players}
@@ -41,7 +39,7 @@ const ModalManager = ({
       onRemovePlayer={createGameProps.onRemovePlayer}
       onDraftNameChange={createGameProps.onDraftNameChange}
       onDraftBlur={createGameProps.onDraftBlur}
-      onDraftShuffle={createGameProps.onDraftShuffle}
+      onDraftAvatarCycle={createGameProps.onDraftAvatarCycle}
       createError={createGameProps.createError}
       isCreating={createGameProps.isCreating}
     />

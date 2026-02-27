@@ -1,3 +1,5 @@
+import PlayerAvatar from '../ui/PlayerAvatar'
+
 const AvatarRow = ({ players, maxVisible = 4 }) => {
   const visible = players.slice(0, maxVisible)
   const overflow = players.length - visible.length
@@ -6,7 +8,7 @@ const AvatarRow = ({ players, maxVisible = 4 }) => {
     <div className="avatar-row" aria-label={`${players.length} players`}>
       {visible.map((player, index) => (
         <span className="avatar" key={`player-${index}`} aria-hidden="true">
-          {typeof player === 'string' ? player : player.avatar}
+          <PlayerAvatar avatar={typeof player === 'string' ? player : player.avatar} decorative />
         </span>
       ))}
       {overflow > 0 ? (
