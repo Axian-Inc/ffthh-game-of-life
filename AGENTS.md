@@ -1,4 +1,7 @@
-# Repository Guidelines
+# Modern Game of Life Repository Guidelines
+- This repository is an implementation of the Modern Game of Life, a variant of the Hasbro board Game of Life adapted for the web and as an educational tool.
+- Product Requirements Document is found at `./docs/modern-game-of-life-prd.md`
+- Architecture document is found at `./docs/ARCHITECTURE.md`
 
 ## Build, Test, and Development Commands
 - **Terraform workspace rules:** never run `terraform apply` in the implicit `default` workspace. Ensure you never apply terraform if the workspace is still `default`. Include the active workspace name in every resource identifier via `locals` (e.g., `local.name_suffix = terraform.workspace`) so resources remain unique per workspace.

@@ -11,8 +11,7 @@
 
 1.5 Status: Draft.
 
-1.6 Purpose: This document defines the v1 product requirements for a digital family life-simulation game and is intended to be decision-ready for 
-implementation planning.
+1.6 Purpose: This document defines the v1 product requirements for a digital family life-simulation game and is intended to be decision-ready for implementation planning.
 
 1.7 Intended audience: PM, Design, Engineering, QA, and agent implementers.
 
@@ -21,9 +20,9 @@ implementation planning.
 ## 2. Product Vision and Objectives
 2.1 The product must provide a modern, family-friendly, turn-based life simulation inspired by familiar life-path board games without copying protected branding or packaging.
 
-2.2 The game must teach children practical tradeoff thinking through concrete, repeated choices across money, physical, and emothional health.
+2.2 The game must teach children practical tradeoff thinking through concrete, repeated choices across money, physical, and emothional health. When in doubt as to whether a feature should be implemented (or how), ask "What are we trying to teach children ages 6-18?".
 
-2.3 The experience should remind parents that compounding effects, especially debt and neglected health, can materially change outcomes over time.
+2.3 The experience should remind children that compounding effects, especially debt and neglected health, can materially change outcomes over time.
 
 2.4 The game must frame setbacks as recoverable and should avoid shame-based or moral framing.
 
@@ -44,12 +43,19 @@ implementation planning.
 
 ## 4. Core Gameplay Loop
 4.1 One turn must represent one in-game month for one player.
+
 4.2 A life doesn't end, but the game can be paused and resumed between turns.
-4.3 The turn sequence must execute in this order: Net Worth Changes (Income, Recurring Costs, Debt Interest, Asset Updates), Physical Health and Mental Updates, Event Resolution, Player Actions, End-of-Turn Summary.
+
+4.3 The turn sequence must execute in this order: Net Worth Changes (Income, Recurring Costs, Debt Updates, Asset Updates), Physical Health and Mental Updates, Event Resolution, Player Actions, End-of-Turn Summary.
+
 4.4 Each player must receive up to one actions per turn (Relocate, change jobs, join a sports team, go to a concert, look for love?)
+
 4.5 Unused actions do not carry over to future turns.
+
 4.6 The game must rotate turns by fixed seat order determined at game start.
+
 4.7 The game state must persist state after each completed player turn.
+
 4.8 Random outcomes must include an explanation of base chance and active modifiers (how likely was this to happen, what about your life decisions did/didn't make this more/less likely).
 
 ## 5. Simulation Requirements
@@ -69,7 +75,7 @@ implementation planning.
 
 5.8 v1 investment products must include stocks and bonds with distinct risk and return profiles.
 
-5.9 Debt can spiral when debt-to-income gets out of control. Players can declare bankrupcy with related consequences (Bankrupcy to be implemented/refined later.).
+5.9 Debt can spiral when debt-to-income gets out of control. Players can declare bankrupcy with related consequences (bankrupcy to be implemented/refined later.).
 
 5.10 Bankruptcy must not eliminate a player and must trigger a temporary recovery mode with stricter constraints for a fixed period.
 
@@ -85,12 +91,19 @@ implementation planning.
 
 ## 6. Action System Requirements
 6.1 v1 action catalog must include at minimum: Study or School, Job Training, Invest in Stocks, Invest in Bonds, Join Gym, Join Sports Team, Spend Time with Family or Friends, Buy Smartphone, Relocate City, Look for Love, Buy Home, Home Maintenance, Debt Paydown, Side Gig, and Career Switch.
+
 6.2 Every action must define upfront cost, recurring cost and duration if applicable, immediate effects, delayed effects, risk profile, and prerequisite checks. Some actions can't be repeated until a "cool down" has happened.
+
 6.4 Study or School must improve medium-term professional prospects while imposing near-term financial burden.
+
 6.5 Relocate City must change cost-of-living, taxes, and wellbeing modifiers from the following turn. Relocating also means no income for a short period (and moving expenses!).
+
 6.6 Look for Love must include probabilistic outcomes affecting Mental Health (positive or negative!), with optional financial side effects.
+
 6.7 Career Switch must include a transition cost and temporary earning disruption.
+
 6.8 Action selection must preview expected value ranges rather than exact outcomes.
+
 6.9 Turn logs must separate intended outcomes from unintended outcomes.
 
 ## 7. Career and City Systems
@@ -98,7 +111,7 @@ implementation planning.
 
 7.2 Careers must define at least: id, label, start cash, start debt, weekly income model, stability level, risk modifiers, and switch cost.
 
-7.3 v1 careers must include Degree Track (high debt, great prospects), Trades Track (low debt, good prospects), or Street-Trained.
+7.3 v1 careers must include Degree Track (high debt, great prospects), Trades Track (low debt, good prospects), or Street Smart.
 
 7.4 Cities must define at least: id, label, cost-of-living multiplier, tax rate, opportunity multiplier, mental baseline modifier, and physical baseline modifier.
 
@@ -111,7 +124,7 @@ implementation planning.
 ## 8. Outcomes and Reflection
 8.1 v1 must not require a single mandatory winner or loser.
 
-8.2 End-of-session reporting must show a timeline of major decisions, major events, and metric changes.
+8.2 End-of-session reporting must show a timeline of major decisions, major events, and metric changes (Financial, Physical, Mental health).
 
 8.3 Session summary must include at least three auto-generated cause-effect callouts.
 
@@ -120,10 +133,9 @@ implementation planning.
 8.5 Reflection content should emphasize adaptation and next-step choices rather than judgment.
 
 ## 9. Important Public Interfaces and Types (Future Implementation Contract)
-9.1 `GameState` must include game metadata, campaign progression, active player index, random seed, modifier context, and full player state collection.
+9.1 `GameState` must include game metadata, campaign progression, active player index, random seed, modifier context(s), and full player state collection.
 
-9.2 `PlayerState` must include id, name, avatar, age, careerId, cityId, cash, debts collection, assets collection, netWorth, physicalHealth, 
-mentalHealth, statusEffects collection, and actionHistory collection.
+9.2 `PlayerState` must include id, name, avatar, age, careerId, cityId, cash, debts collection, assets collection, netWorth, physicalHealth, mentalHealth, statusEffects collection, and actionHistory collection.
 
 9.3 `CareerDefinition` must include id, label, startCash, startDebt, incomeModel, riskModifiers, and switchCost.
 
@@ -165,6 +177,28 @@ TBD, slicing and wave planning for agents to happen later.
 
 ## 12. Assumptions and Defaults
 12.1 Platform default is a digital web implementation with cloud persistence.
+
 12.2 v1 defaults must be 2-6 players, each player picks a location (US City), profession (pick from the Track [School, Trades, Street-Trained]) which affects starting money.
+
 12.3 Advisor personas for wealth, physical health, and mental health are deferred beyond v1 but should remain enabled by retained event and action history data.
+
 12.4 Financial and health values in this product are gameplay abstractions and must not be presented as professional financial, legal, medical, or mental-health advice.
+
+## 13. Future Features (Not Currently implmented)
+13.1 Assets - Assets like home, cars, can be turned into cash, but require an action and with cost (e.g. depreciation, cost of sale). Hard assets can't be turned into cash without a penalty. TBD.
+
+13.2 Taxes - Are happening all the time. Your city, wage, and other decisions affect taxes. TBD.
+
+13.3 Expenses - Costs change based on where you live and how big you family is. TBD.
+
+13.4 Bankrupcy - When debt to income ratio is out of control, players may declare bankrupcy (lose assets, reset debt). TBD.
+
+13.5 Advisors - To help with the learning, Advisors from various perspectives (e.g. Finance, Physical health, Mental health) weigh in on how to improve a facet of a player's life, and praise favorable actions/decisions. TBD.
+
+13.6 Economy - The economy is constantly changing. It can affect jobs (layoffs, wage reductions), limit wage and asset growth. The Economy is cyclical and affects player options/actions. TBD.
+
+13.7 Investing - Some assets grow faster than others. Some are more volitile. All need to be converted to cash to be used. TBD.
+
+13.8 Housing - Players can live in a house (goes up in value) but are exposed to unexpected costs and debt. TBD.
+
+13.9 Families - When conditions are met a family can start. It increases the cost of some actions (e.g. Vacations), and of regular expenses. Families have a Mental Health benefit?. TBD.
