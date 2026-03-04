@@ -6,7 +6,7 @@ branch: codex/w0-s2-spec-dispatch-skill
 base_branch: codex/wave-0-integration
 test_commands:
   - bash -n skills/spec-dispatch/scripts/dispatch_spec.sh
-  - python3 /Users/tyler/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
+  - python3 /home/vscode/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
 owned_paths:
   - specs/wave-0/W0-S2-spec-dispatch-skill.md
   - skills/spec-dispatch/SKILL.md
@@ -67,5 +67,5 @@ Implement `dispatch_spec.sh` with phases:
 
 ```bash
 bash -n skills/spec-dispatch/scripts/dispatch_spec.sh
-python3 /Users/tyler/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
+python3 /home/vscode/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
 ```
