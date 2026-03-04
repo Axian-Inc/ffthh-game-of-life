@@ -61,6 +61,12 @@ Out of scope:
 
 Because game has not launched, replacing older setup fields is allowed. Remove obsolete setup fields where safe to avoid dual-schema complexity.
 
+# Failure and Rollback Notes
+
+1. If persisted payload drops required nested fields, roll back storage adapter changes and reintroduce schema fields with round-trip tests.
+2. If API mode and local mode diverge, block merge until both adapters serialize and deserialize the same shape.
+3. If seed game loading breaks after schema replacement, restore read-time normalization before reattempting destructive cleanup.
+
 # Acceptance Criteria
 
 1. Persisted game payload includes avatar (gravitar), city, track, job, salary, cash, debt, assets, investments, netWorth.

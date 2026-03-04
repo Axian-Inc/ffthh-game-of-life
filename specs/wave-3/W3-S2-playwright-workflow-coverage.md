@@ -41,6 +41,12 @@ Out of scope:
 1. Run in dev container with Chromium available.
 2. Keep `CHROME_BIN` handling compatible with current repo scripts.
 
+# Failure and Rollback Notes
+
+1. If E2E flow is nondeterministic, roll back to the last stable scenario and reintroduce steps with explicit waits on UI state.
+2. If test data leaks across runs, block merge until cleanup assertions and teardown reliability are restored.
+3. If Chromium/runtime compatibility breaks in CI, revert config deltas and restore known-good `playwright.config.js` behavior before expanding coverage.
+
 # Acceptance Criteria
 
 1. Test is deterministic and self-cleaning.

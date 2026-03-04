@@ -45,6 +45,12 @@ Out of scope:
    - `started`
 3. Start transition sets in-memory active game with `phase=started` and `startedAt` present.
 
+# Failure and Rollback Notes
+
+1. If app flow enters the legacy setup page, roll back routing integration changes and reapply with lifecycle phase guards.
+2. If resume routing misclassifies lifecycle phases, block merge until phase checks are deterministic and covered by tests.
+3. If `/games/:id/play` refresh loses welcome state, revert recent route-state coupling changes and restore stable state initialization first.
+
 # Acceptance Criteria
 
 1. App never opens legacy one-screen career setup page.
