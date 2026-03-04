@@ -48,6 +48,12 @@ Out of scope:
    - optional `mode` (`started` or `resumed`)
 3. Keep old `PlayGamePage` as thin wrapper or alias if needed for route compatibility.
 
+# Failure and Rollback Notes
+
+1. If route compatibility regresses, keep `PlayGamePage` as a wrapper and roll back direct route binding changes.
+2. If required copy or layout sections are missing, block merge and restore the previous complete page structure before polishing styles.
+3. If CTA interaction is not keyboard-accessible, revert button wiring changes and reintroduce with accessibility checks.
+
 # Acceptance Criteria
 
 1. Welcome screen renders in isolation with realistic game data.

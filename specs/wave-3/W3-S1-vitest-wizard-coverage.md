@@ -40,6 +40,12 @@ Out of scope:
 8. Start action callback payload contains computed monthly income, debt, net worth, and lifecycle phase.
 9. Resume render path uses welcome view when lifecycle phase is `started`.
 
+# Failure and Rollback Notes
+
+1. If tests become flaky, remove timing-sensitive assertions and restore deterministic state setup before adding new scenarios.
+2. If coverage misses mandatory scenarios, block merge and add explicit assertions instead of broad snapshots.
+3. If test changes mask regressions in wizard gating or payload shape, roll back those assertions and rework with targeted expectations.
+
 # Acceptance Criteria
 
 1. New and updated test suites are deterministic and pass in CI mode.
