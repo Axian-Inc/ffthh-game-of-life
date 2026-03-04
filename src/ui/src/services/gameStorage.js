@@ -1,6 +1,6 @@
 import { seedGames } from '../data/seedGames'
 
-const STORAGE_KEY = 'ffthh-game-hub.games'
+const STORAGE_KEY = 'ffthh-game-of-life.games'
 
 const normalizeGame = (game) => ({
   ...game,

@@ -1,4 +1,4 @@
-# Game Hub UI Style Guide (Home + New Game Modal)
+# Game of Life UI Style Guide (Home + New Game Modal)
 
 Audience: coding agent implementing the UI shown in the provided screenshots.  
 Goal: reproduce look-and-feel (colors, spacing, radii, shadows, component states).
@@ -477,4 +477,3 @@ When enabled (players >= 1), reuse `.btnPrimary` and update label to `Start Game
 - [ ] Add Player button is solid teal.
 - [ ] Start Game button uses disabled gradient until at least 1 player exists.
 - [ ] Background overlay uses blur + slight dark tint.
-

@@ -17,7 +17,7 @@
 
 1.8 Thesis: The game must teach and reinforce that in life, there is "no free "lunch, meaning every decision has benefits, costs, risks, delayed effects, and cumulative consequences.
 
-1.9 Related UI guidance for the game hub and new game modal is documented at `./docs/game-hub-style-guide.md`.
+1.9 Related UI guidance for the Game of Life home screen and new game modal is documented at `./docs/game-of-life-style-guide.md`.
 
 ## 2. Product Vision and Objectives
 2.1 The product must provide a modern, family-friendly, turn-based life simulation inspired by familiar life-path board games without copying protected branding or packaging.
