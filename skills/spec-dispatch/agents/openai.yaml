@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spec Dispatch"
+  short_description: "Run one spec branch end-to-end"
+  default_prompt: "Use $spec-dispatch to execute a spec file from branch setup through tests and PR creation."
+
+policy:
+  allow_implicit_invocation: true

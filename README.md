@@ -22,8 +22,10 @@ DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion 
 1. Open a fresh terminal and run `aws configure` and follow the prompts to setup the AWS CLI with your access token for the L&D environment. Be sure to set the region to us-west-2
 1. Copy your Codex `auth.json` from your host machine to this exact directory in your container: `~/.codex/auth.json`
 1. Create a new branch with your name in it
-1. Navigate to `terraform` directory and run `terraform init`
-1. Run `terraform workspace new {your initials}`. Ensure that you are on this workspace when you run terraform commands. 
+1. Navigate to `terraform` directory and run `terraform init -reconfigure`
+1. Run `terraform workspace new {your initials}` (or `terraform workspace select {your initials}` if it already exists). Ensure that you are on this workspace when you run terraform commands. 
+
+    - If you pulled recent backend changes and see a backend initialization error, re-run `terraform init -reconfigure` before creating/selecting a workspace.
 
     - There are instructions in the AGENT.MD file for Codex to try and enforce this, as well as for codex to ensure the workspace name is in all deployed resources. This should ensure everyone can deploy their own stack without conflicts with each other
 
