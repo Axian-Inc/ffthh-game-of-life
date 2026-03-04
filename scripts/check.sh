@@ -32,7 +32,12 @@ if ! aws sts get-caller-identity >/dev/null 2>&1; then
   exit 1
 fi
 
-terraform -chdir="$tf_dir" init -input=false >/dev/null
+if ! terraform -chdir="$tf_dir" init -reconfigure -input=false >/dev/null; then
+  echo "Terraform backend init failed." >&2
+  echo "If backend settings recently changed, run:" >&2
+  echo "  terraform -chdir=$tf_dir init -reconfigure" >&2
+  exit 1
+fi
 workspace="$(terraform -chdir="$tf_dir" workspace show)"
 if [[ "$workspace" == "default" ]]; then
   echo "Terraform workspace is default. Select or create a workspace." >&2
