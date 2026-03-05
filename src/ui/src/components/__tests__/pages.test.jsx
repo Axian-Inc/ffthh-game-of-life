@@ -19,7 +19,7 @@ describe('Page components', () => {
 
     expect(screen.getByText('Start New Game')).toBeInTheDocument()
     expect(screen.getByText('Riley')).toBeInTheDocument()
-    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(4)
+    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(3)
     expect(screen.getByRole('button', { name: 'Start Game' })).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: /Degree Track/i }))
@@ -61,17 +61,17 @@ describe('Page components', () => {
     expect(screen.getByText('Avery')).toBeInTheDocument()
     expect(screen.getByText(/Career: Degree Track/)).toBeInTheDocument()
     expect(screen.getByText('Choosing now')).toBeInTheDocument()
-    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(4)
+    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(3)
     expect(screen.getByRole('button', { name: 'Start Game' })).toBeDisabled()
 
-    await user.click(screen.getByRole('button', { name: /Creator Track/i }))
+    await user.click(screen.getByRole('button', { name: /Self-Taught Track/i }))
     await user.click(screen.getByRole('button', { name: 'Start Game' }))
 
     expect(onStart).toHaveBeenCalledWith(
       expect.objectContaining({
         players: [
           expect.objectContaining({ id: 'p1', careerTrack: 'Degree Track' }),
-          expect.objectContaining({ id: 'p2', careerTrack: 'Creator Track' }),
+          expect.objectContaining({ id: 'p2', careerTrack: 'Self-Taught Track' }),
         ],
       }),
     )

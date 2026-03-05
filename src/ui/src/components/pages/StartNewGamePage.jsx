@@ -5,56 +5,42 @@ import PlayerAvatar from '../ui/PlayerAvatar'
 import degreeTrackIcon from 'openmoji/color/svg/1F393.svg'
 import tradesTrackIcon from 'openmoji/color/svg/1F6E0.svg'
 import creatorTrackIcon from 'openmoji/color/svg/1F3AC.svg'
-import aiOperatorTrackIcon from 'openmoji/color/svg/1F916.svg'
+import { educationTracks, jobs } from '../../data/setupCatalog'
 
-const careerOptions = [
-  {
-    key: 'degree-track',
-    title: 'Degree Track',
+const trackDisplay = {
+  'degree-track': {
     iconSrc: degreeTrackIcon,
     iconLabel: 'Graduation cap',
-    start: 'Take $30,000 Student Debt',
-    eachTurn: 'Earn your weekly salary',
-    bonus: '+$250/week (better roles)',
-    cost: '-$150/week until Student Debt is paid',
   },
-  {
-    key: 'trades-track',
-    title: 'Trades Track',
+  'trades-track': {
     iconSrc: tradesTrackIcon,
     iconLabel: 'Hammer and wrench',
-    start: 'No debt',
-    eachTurn: 'Earn your weekly salary',
-    bonus: '+$150/week starting now',
-    cost: 'When an event says "Injury/Burnout", lose 2 weeks of salary',
   },
-  {
-    key: 'creator-track',
-    title: 'Creator Track',
+  'self-taught-track': {
     iconSrc: creatorTrackIcon,
     iconLabel: 'Clapper board',
-    start: 'Unstable income',
-    eachTurn: 'Roll a die',
-    bonus: 'On 5-6, gain +$1,000 (Breakout)',
-    cost: 'On 1-2, earn $0 this turn (Dry spell)',
   },
-  {
-    key: 'ai-operator-track',
-    title: 'AI Operator Track',
-    iconSrc: aiOperatorTrackIcon,
-    iconLabel: 'Robot face',
-    start: 'Tool advantage',
-    eachTurn: 'Earn your weekly salary',
-    bonus: 'Draw 1 extra Event card and choose 1 to keep',
-    cost: 'Pay $400 every 3rd turn (Reskill cost)',
-  },
-]
+}
 
 const StartNewGamePage = ({ game, onStart, onBack, isStarting = false, startError = '' }) => {
   const [selectedCareersByPlayerId, setSelectedCareersByPlayerId] = useState({})
+  const careerOptions = useMemo(
+    () =>
+      educationTracks.map((track) => ({
+        key: track.id,
+        title: track.label,
+        iconSrc: trackDisplay[track.id]?.iconSrc || degreeTrackIcon,
+        iconLabel: trackDisplay[track.id]?.iconLabel || 'Track icon',
+        start: track.debtProfile,
+        eachTurn: `Income profile: ${track.longTermPotential}`,
+        bonus: `Stability: ${track.stabilityLabel}`,
+        cost: `Job options: ${jobs.filter((job) => job.trackId === track.id).length}`,
+      })),
+    [],
+  )
   const careerOptionByTitle = useMemo(
     () => Object.fromEntries(careerOptions.map((option) => [option.title, option])),
-    [],
+    [careerOptions],
   )
 
   useEffect(() => {
@@ -85,7 +71,7 @@ const StartNewGamePage = ({ game, onStart, onBack, isStarting = false, startErro
 
   const careerOptionsByKey = useMemo(
     () => Object.fromEntries(careerOptions.map((option) => [option.key, option])),
-    [],
+    [careerOptions],
   )
 
   const handleCareerSelect = (optionKey) => {
