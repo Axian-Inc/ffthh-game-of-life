@@ -16,7 +16,6 @@ Every spec file includes YAML frontmatter keys consumed by `$spec-dispatch`:
 
 | Wave | Purpose | Specs | Run Mode |
 |---|---|---|---|
-| 0 | Delivery framework | W0-S1, W0-S2, W0-S3 | Parallel |
 | 1 | Setup data + wizard UI + welcome UI | W1-S1, W1-S2, W1-S3 | Parallel |
 | 2 | App flow + storage/resume integration | W2-S1, W2-S2 | Parallel |
 | 3 | Full UI test coverage | W3-S1, W3-S2 | Parallel |

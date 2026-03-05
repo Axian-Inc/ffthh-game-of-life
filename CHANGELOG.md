@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Retired Wave 0 spec scaffolding by deleting `specs/wave-0/*` and updating wave documentation to active waves 1-3 only.
 - Added post-create career selection and play placeholder pages for new games.
 - Added Playwright browser automation tests and run them before deploy.
 - Added deploy/check scripts, Makefile targets, and deploy runbook.

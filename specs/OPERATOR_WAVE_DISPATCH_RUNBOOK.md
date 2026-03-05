@@ -43,7 +43,7 @@ git switch -c <your-initials>/wave-N-integration
 git push -u origin <your-initials>/wave-N-integration
 ```
 
-Replace `N` with `0`, `1`, `2`, or `3`.
+Replace `N` with `1`, `2`, or `3`
 
 ## 3. Create Worktrees (One Per Spec)
 
