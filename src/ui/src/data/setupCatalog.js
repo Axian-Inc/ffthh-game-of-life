@@ -149,3 +149,66 @@ export const getCityById = (cityId) => cities.find((city) => city.id === cityId)
 export const getEducationTrackById = (trackId) =>
   educationTracks.find((track) => track.id === trackId) || null
 export const getJobById = (jobId) => jobs.find((job) => job.id === jobId) || null
+
+const cityTokenById = {
+  'san-francisco-ca': 'SF',
+  'denver-co': 'DN',
+  'tonopah-nv': 'TN',
+}
+
+const trackTokenById = {
+  'degree-track': 'DEG',
+  'trades-track': 'TRD',
+  'self-taught-track': 'ST',
+}
+
+const jobTokenById = {
+  anesthetist: 'AN',
+  veterinarian: 'VT',
+  doctor: 'DR',
+  'dental-hygienist': 'DH',
+  electrician: 'EL',
+  mechanic: 'MC',
+  'polymarket-trader': 'PT',
+  'instagram-influencer': 'II',
+  'vibe-coder': 'VC',
+}
+
+export const setupCatalog = {
+  cities: cities.map((city) => ({
+    id: city.id,
+    name: city.label,
+    iconToken: cityTokenById[city.id] || city.label.slice(0, 2).toUpperCase(),
+    cost: [
+      `Cost Multiplier: x${city.costOfLivingMultiplier.toFixed(1)}`,
+      `Tax: ${(city.taxRate * 100).toFixed(1)}%`,
+    ],
+    opportunity: [`Opportunity Multiplier: x${city.opportunityMultiplier.toFixed(1)}`],
+    wellbeing: [
+      `Mental Baseline: ${city.mentalBaseline}/10`,
+      `Physical Baseline: ${city.physicalBaseline}/10`,
+    ],
+    description: `${city.label} starting profile.`,
+  })),
+  educationTracks: educationTracks.map((track) => ({
+    id: track.id,
+    name: track.label,
+    iconToken: trackTokenById[track.id] || 'TRK',
+    debtInvestment: track.debtProfile,
+    longTermPotential: track.longTermPotential,
+    stability: track.stabilityLabel,
+    description: `${track.label} progression path.`,
+  })),
+  jobs: jobs.map((job) => ({
+    id: job.id,
+    educationTrackId: job.trackId,
+    name: job.label,
+    salaryAnnual: job.annualSalary,
+    stability: job.stability,
+    wageGrowth: job.wageGrowth,
+    outlook: `${job.label} outlook based on current demand profile.`,
+    artToken: jobTokenById[job.id] || 'JB',
+  })),
+}
+
+export const getSetupItemById = (items, id) => items.find((item) => item.id === id) || null

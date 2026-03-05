@@ -8,6 +8,7 @@ test_commands:
   - npm --prefix src/ui run test:ci
 owned_paths:
   - specs/wave-1/W1-S2-wizard-modal-ui.md
+  - src/ui/src/data/setupCatalog.js
   - src/ui/src/components/modals/CreateGameModal.jsx
   - src/ui/src/components/modals/ModalBackdrop.jsx
   - src/ui/src/components/forms/NewGameWizard.jsx
