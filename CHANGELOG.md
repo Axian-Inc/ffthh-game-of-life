@@ -10,3 +10,4 @@ Keep short entries that summarize user-visible or operational changes.
 - Vendor Lambda dependencies so the games API runs on Node.js 18.
 - Added UI component test coverage and enforce tests during deploy.
 - Updated Terraform setup/check flow to reconfigure backend before workspace operations after backend migration changes.
+- Added GitHub CLI (`gh`) to the dev container so agents can create PRs during multi-spec waves.
