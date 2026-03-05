@@ -152,7 +152,14 @@ PY
 [[ -n "$SPEC_ID" ]] || fail "Unable to parse spec_id"
 [[ -n "$BRANCH" ]] || fail "Unable to parse branch"
 [[ -n "$BASE_BRANCH" ]] || fail "Unable to parse base_branch"
-[[ "$BRANCH" == codex/* ]] || fail "Spec branch must start with codex/: $BRANCH"
+
+if [[ -n "${SPEC_BRANCH_PREFIX:-}" ]]; then
+  [[ "${SPEC_BRANCH_PREFIX}" =~ ^[a-z0-9][a-z0-9-]*$ ]] || fail "SPEC_BRANCH_PREFIX must be lowercase letters/numbers/hyphens (for example: th)"
+  BRANCH="${SPEC_BRANCH_PREFIX}/${BRANCH#*/}"
+  BASE_BRANCH="${SPEC_BRANCH_PREFIX}/${BASE_BRANCH#*/}"
+fi
+
+[[ "$BRANCH" =~ ^[a-z0-9][a-z0-9-]*/.+$ ]] || fail "Spec branch must use a participant prefix (for example: th/w1-s2-wizard-modal-ui): $BRANCH"
 
 ensure_branch() {
   local current_branch

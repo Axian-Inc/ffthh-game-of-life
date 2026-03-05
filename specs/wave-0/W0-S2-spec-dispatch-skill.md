@@ -34,7 +34,7 @@ Out of scope:
 # Behavior Requirements
 
 1. Accept one required argument: absolute spec path under `./specs`.
-2. Ensure branch starts with `codex/`; hard fail otherwise.
+2. Ensure branch uses a participant prefix (for example `th/...`); hard fail otherwise.
 3. Ensure active branch equals spec `branch`; create from `origin/base_branch` when missing.
 4. Ensure `npm --prefix src/ui ci` runs when `src/ui/node_modules/.bin/vitest` is missing.
 5. Execute all `test_commands` in order.
