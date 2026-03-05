@@ -71,6 +71,12 @@ Out of scope:
 6. `netWorth = assets + investments + cash - debt`.
 7. Negative net worth is valid.
 
+# Failure and Rollback Notes
+
+1. If catalog records are incomplete or mismatched, block merge and restore the last valid catalog snapshot before retrying.
+2. If setup options remain hardcoded in UI components, revert those component edits and rewire imports from the catalog only.
+3. If computed starting values regress, roll back `startingState` utility changes and reintroduce them with explicit test coverage for each rule.
+
 # Acceptance Criteria
 
 1. Catalog is the only source of truth for cities/tracks/jobs.

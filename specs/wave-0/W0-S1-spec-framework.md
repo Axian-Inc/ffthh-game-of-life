@@ -53,11 +53,17 @@ Every spec must include:
 5. Minimum players to start is `2`.
 6. Game name default is auto-generated from first player name with uniqueness suffix.
 
+# Failure and Rollback Notes
+
+1. If any wave spec is missing required contract fields, block dispatch for that spec and fix the spec before implementation begins.
+2. If `owned_paths` overlap is detected within a wave, pause that wave and reassign ownership paths before dispatching agents.
+3. If frontmatter keys drift from the dispatch contract, revert the spec edit and restore the required key set before rerunning validation.
+
 # Acceptance Criteria
 
 1. All wave spec files exist and include valid frontmatter keys.
 2. All branches and base branches match the approved wave branching table.
-3. No unresolved TODO language remains in any spec.
+3. No unresolved work-marker language remains in any spec.
 4. Canonical job/city/track data appears exactly once as source-of-truth in W1-S1.
 5. All test command lists are executable from repo root.
 

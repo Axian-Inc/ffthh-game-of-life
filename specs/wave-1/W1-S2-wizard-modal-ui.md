@@ -57,6 +57,12 @@ Out of scope:
 3. Keep CSS localized in `new-game-wizard.css` to reduce merge conflicts.
 4. Ensure keyboard accessibility for selection cards (button semantics, focus visibility).
 
+# Failure and Rollback Notes
+
+1. If step navigation or state persistence breaks, roll back to the last passing wizard commit and reapply step changes incrementally.
+2. If Start Game gating allows fewer than 2 players, block merge until gating logic is fixed and validated in tests.
+3. If track-job filtering fails, revert Step 4 rendering changes and restore filtered data flow from selected track before proceeding.
+
 # Acceptance Criteria
 
 1. Wizard can create 2+ configured players and reach summary.

@@ -6,7 +6,7 @@ branch: codex/w0-s2-spec-dispatch-skill
 base_branch: codex/wave-0-integration
 test_commands:
   - bash -n skills/spec-dispatch/scripts/dispatch_spec.sh
-  - python3 /Users/tyler/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
+  - python3 /home/vscode/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
 owned_paths:
   - specs/wave-0/W0-S2-spec-dispatch-skill.md
   - skills/spec-dispatch/SKILL.md
@@ -34,7 +34,7 @@ Out of scope:
 # Behavior Requirements
 
 1. Accept one required argument: absolute spec path under `./specs`.
-2. Ensure branch starts with `codex/`; hard fail otherwise.
+2. Ensure branch uses a participant prefix (for example `th/...`); hard fail otherwise.
 3. Ensure active branch equals spec `branch`; create from `origin/base_branch` when missing.
 4. Ensure `npm --prefix src/ui ci` runs when `src/ui/node_modules/.bin/vitest` is missing.
 5. Execute all `test_commands` in order.
@@ -67,5 +67,5 @@ Implement `dispatch_spec.sh` with phases:
 
 ```bash
 bash -n skills/spec-dispatch/scripts/dispatch_spec.sh
-python3 /Users/tyler/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
+python3 /home/vscode/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/spec-dispatch
 ```

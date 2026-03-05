@@ -16,6 +16,9 @@
     // Git (image already includes git, but this keeps it explicit/up-to-date)
     "ghcr.io/devcontainers/features/git:1": {},
 
+    // GitHub CLI for PR creation from Codex agents
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+
     // Node.js for Codex CLI (installed via npm)
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
