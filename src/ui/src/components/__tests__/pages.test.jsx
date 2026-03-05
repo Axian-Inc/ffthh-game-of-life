@@ -38,10 +38,31 @@ describe('Page components', () => {
 
     render(<PlayGamePage game={createGame({ name: 'Play It' })} onHome={onHome} />)
 
+    expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
+    expect(screen.queryByText('Game board coming soon.')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+
     expect(screen.getByText('Play Game')).toBeInTheDocument()
+    expect(screen.getByText('Game board coming soon.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Back to home' }))
 
     expect(onHome).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders resumed mode messaging on welcome page', () => {
+    render(<PlayGamePage game={createGame({ name: 'Play It' })} mode="resumed" onHome={vi.fn()} />)
+
+    expect(screen.getByText('Resuming Play It.')).toBeInTheDocument()
+  })
+
+  it('shows welcome sections in the required order with quote block', () => {
+    render(<PlayGamePage game={createGame({ name: 'Play It' })} onHome={vi.fn()} />)
+
+    const sectionHeadings = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
+    expect(sectionHeadings).toEqual(['A Month at a Time', 'Choices Matter', 'Life Happens'])
+    expect(screen.getByText(/The best way to predict your future is to create it./)).toBeInTheDocument()
+    expect(screen.getByText('-Abraham Lincoln')).toBeInTheDocument()
   })
 
   it('resumes career selection from the next player without a choice', async () => {

@@ -30,7 +30,7 @@ const reducer = (state, action) => {
         ...state,
         view: 'play',
         activeGame: action.payload.game,
-        activeGameMode: 'resume',
+        activeGameMode: action.payload.mode || 'resumed',
       }
     case 'OPEN_DELETE':
       return { ...state, pendingDelete: action.payload, view: 'home' }
@@ -49,7 +49,7 @@ const useModalState = () => {
     openCreate: () => dispatch({ type: 'OPEN_CREATE' }),
     openSession: (game, mode) => dispatch({ type: 'OPEN_SESSION', payload: { game, mode } }),
     openSetup: (game) => dispatch({ type: 'OPEN_SETUP', payload: { game } }),
-    openPlay: (game) => dispatch({ type: 'OPEN_PLAY', payload: { game } }),
+    openPlay: (game, mode) => dispatch({ type: 'OPEN_PLAY', payload: { game, mode } }),
     openDelete: (game) => dispatch({ type: 'OPEN_DELETE', payload: game }),
     closeAll: () => dispatch({ type: 'CLOSE_ALL' }),
   }

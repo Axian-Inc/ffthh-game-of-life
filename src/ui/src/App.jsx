@@ -139,7 +139,7 @@ function App() {
         ...game,
         lastUpdated: Date.now(),
       })
-      openPlay(savedGame)
+      openPlay(savedGame, 'started')
     } catch (error) {
       setSetupError('We could not save career choices yet. Please try again.')
     } finally {
@@ -202,7 +202,7 @@ function App() {
       return
     }
 
-    openPlay(game)
+    openPlay(game, 'resumed')
   }
 
   const handleViewResults = (game) => {
@@ -246,7 +246,7 @@ function App() {
     if (routeRequest.view === 'setup') {
       openSetup(targetGame)
     } else {
-      openPlay(targetGame)
+      openPlay(targetGame, 'resumed')
     }
 
     setRouteRequest(null)
@@ -383,7 +383,12 @@ function App() {
         />
       ) : null}
       {view === 'play' ? (
-        <PlayGamePage game={activeGame} onHome={closeAll} />
+        <PlayGamePage
+          key={`${activeGame?.id || 'game'}-${activeGameMode}`}
+          game={activeGame}
+          mode={activeGameMode}
+          onHome={closeAll}
+        />
       ) : null}
     </PageShell>
   )
