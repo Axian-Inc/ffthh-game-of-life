@@ -2,7 +2,7 @@
 
 This runbook is written for a rookie operator and assumes all work starts from the repo root:
 
-`/Users/tyler/Code/Axian/ffthh/ffthh-game-of-life`
+`/workspaces/ffthh-game-of-life`
 
 ## 1. One-Time Preconditions
 
@@ -40,18 +40,18 @@ Replace `N` with `0`, `1`, `2`, or `3`.
 
 ## 3. Create Worktrees (One Per Spec)
 
-Create a sibling worktree folder for each spec in the wave:
+Create an in-repo worktree folder for each spec in the wave:
 
 ```bash
-mkdir -p ../worktrees
+mkdir -p ./worktrees
 ```
 
 Example for wave 1:
 
 ```bash
-git worktree add ../worktrees/W1-S1 -b codex/w1-s1-setup-data-contracts origin/codex/wave-1-integration
-git worktree add ../worktrees/W1-S2 -b codex/w1-s2-wizard-modal-ui origin/codex/wave-1-integration
-git worktree add ../worktrees/W1-S3 -b codex/w1-s3-welcome-screen-ui origin/codex/wave-1-integration
+git worktree add ./worktrees/W1-S1 -b codex/w1-s1-setup-data-contracts origin/codex/wave-1-integration
+git worktree add ./worktrees/W1-S2 -b codex/w1-s2-wizard-modal-ui origin/codex/wave-1-integration
+git worktree add ./worktrees/W1-S3 -b codex/w1-s3-welcome-screen-ui origin/codex/wave-1-integration
 ```
 
 ## 4. Launch an Agent Per Spec
@@ -59,8 +59,8 @@ git worktree add ../worktrees/W1-S3 -b codex/w1-s3-welcome-screen-ui origin/code
 In each worktree terminal, run:
 
 ```bash
-cd ../worktrees/W1-S2
-codex --yolo "Use $spec-dispatch with spec /Users/tyler/Code/Axian/ffthh/ffthh-game-of-life/specs/wave-1/W1-S2-wizard-modal-ui.md"
+cd ./worktrees/W1-S2
+codex --yolo "Use $spec-dispatch with spec /workspaces/ffthh-game-of-life/specs/wave-1/W1-S2-wizard-modal-ui.md"
 ```
 
 Repeat for each spec path.
@@ -111,7 +111,7 @@ If `gh` is unavailable, open PR manually in Git hosting UI.
 For each completed spec worktree:
 
 ```bash
-git worktree remove ../worktrees/W1-S2
+git worktree remove ./worktrees/W1-S2
 git branch -d codex/w1-s2-wizard-modal-ui
 ```
 
@@ -150,6 +150,5 @@ Then retry.
 Use existing branch without `-b`:
 
 ```bash
-git worktree add ../worktrees/W1-S2 codex/w1-s2-wizard-modal-ui
+git worktree add ./worktrees/W1-S2 codex/w1-s2-wizard-modal-ui
 ```
-
