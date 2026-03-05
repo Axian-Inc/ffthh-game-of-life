@@ -1,16 +1,26 @@
-# Game of Life UI Style Guide (Home + New Game Modal)
+# Game of Life UI Style Guide (Screens 1-7)
 
-Audience: coding agent implementing the UI shown in the provided screenshots.  
-Goal: reproduce look-and-feel (colors, spacing, radii, shadows, component states).
+Audience: coding agent implementing the UI shown in the provided screenshots.
+Goal: reproduce look-and-feel (colors, spacing, radii, shadows, component states) for:
+
+- `docs/sample-images/1.WelcomeResume.png`
+- `docs/sample-images/2.Life.NewPlayer.png`
+- `docs/sample-images/3.Life.PickCity.png`
+- `docs/sample-images/4.Life.PickTrack.png`
+- `docs/sample-images/5.Life.PickJob.png`
+- `docs/sample-images/6.Life.NewGameSummary.png`
+- `docs/sample-images/7.Life.Start.png`
+
+Note: `docs/sample-images/8.PlayerTurn.png` (Main Game Status) is out of scope for this style guide revision.
 
 ---
 
 ## 1. Design principles
 
-- Bright, friendly, “family” feel with **warm off-white backgrounds** and lots of whitespace.
-- Soft geometry: large radii, pill controls, gentle shadows.
-- Primary brand expression is a **teal → blue → purple gradient** used on hero/primary CTAs and modal header.
-- Surfaces are high-contrast (white cards on warm off-white canvas) with **very subtle borders**.
+- Bright, friendly family tone with warm off-white background and large whitespace.
+- Soft geometry: rounded cards, pill buttons, low-contrast borders.
+- Primary brand expression: teal -> blue -> purple gradient on key CTAs.
+- Clear information hierarchy with strong titles and compact utility labels.
 
 ---
 
@@ -18,26 +28,20 @@ Goal: reproduce look-and-feel (colors, spacing, radii, shadows, component states
 
 ### 2.1 Neutrals
 
-Use these as the base system. Values are sampled/approximated from the screenshots.
-
 ```css
 :root{
-  /* Canvas / surfaces */
-  --bg-canvas: #FFFDF5;          /* warm off-white page & modal body */
-  --surface:   #FFFFFF;          /* cards, inner panels, inputs */
-  --surface-2: #F0F5EC;          /* subtle tinted area (bottom of modal) */
+  --bg-canvas: #FFFDF5;
+  --surface: #FFFFFF;
+  --surface-2: #F0F5EC;
 
-  /* Text */
-  --text-1: #272D3E;             /* near-navy primary text */
-  --text-2: #667086;             /* secondary text */
-  --text-3: rgba(39,45,62,.65);  /* tertiary */
+  --text-1: #272D3E;
+  --text-2: #667086;
+  --text-3: rgba(39,45,62,.65);
 
-  /* Lines */
   --border-soft: rgba(39,45,62,.10);
-  --border-input: #EAE8DE;       /* sampled input stroke */
+  --border-input: #EAE8DE;
   --border-dashed: rgba(39,45,62,.18);
 
-  /* Overlay */
   --overlay: rgba(39,45,62,.22);
 }
 ```
@@ -46,28 +50,37 @@ Use these as the base system. Values are sampled/approximated from the screensho
 
 ```css
 :root{
-  --brand-teal:   #22C5B5; /* sampled Add Player button */
-  --brand-teal-2: #5CC6D4; /* sampled header-left teal */
-  --brand-blue:   #44A5E8; /* sampled header mid */
-  --brand-purple: #A377E5; /* sampled header-right */
+  --brand-teal: #22C5B5;
+  --brand-teal-2: #5CC6D4;
+  --brand-blue: #44A5E8;
+  --brand-purple: #A377E5;
 
-  /* “Active” pill */
   --success-bg: rgba(34,197,181,.18);
   --success-fg: #22C5B5;
 }
 ```
 
-### 2.3 Gradients
+### 2.3 Section bar accents (wizard cards)
 
 ```css
 :root{
-  /* Primary CTA gradient (Home: New Game / Resume; Modal header) */
+  --bar-green: #55C26E;
+  --bar-blue: #4A9BDA;
+  --bar-purple: #9B5AE3;
+  --bar-gold: #D1A64D;
+  --bar-orange: #E5963E;
+}
+```
+
+### 2.4 Gradients
+
+```css
+:root{
   --grad-primary: linear-gradient(90deg,
     #5CC6D4 0%,
     #44A5E8 45%,
     #A377E5 100%);
 
-  /* Disabled CTA gradient (Modal: Start Game with 0 Players) */
   --grad-disabled: linear-gradient(90deg,
     #9EDADF 0%,
     #9ED1EC 45%,
@@ -79,27 +92,29 @@ Use these as the base system. Values are sampled/approximated from the screensho
 
 ## 3. Typography
 
-Use a modern sans (Inter preferred).
-
 ```css
 :root{
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 ```
 
-### Type scale (recommended)
+Recommended scale:
 
-- Page title: 52–60px, weight 800
-- Modal title: 26–30px, weight 800 (white on gradient)
-- Section labels (e.g., “Game Name”, “Players (0)”): 16–18px, weight 700
-- Body / inputs: 16px, weight 500
-- Helper text: 14px, weight 500, color `--text-2`
+- Home title (`Game of LIFE`): 64-76px, weight 800.
+- Wizard modal title: 48-58px, weight 800.
+- Step subtitle (`Step X of 5`): 20-26px, weight 700.
+- Card title: 34-44px, weight 800.
+- Card body/labels: 15-18px, weight 600.
+- Welcome page heading: 72-90px, weight 800.
+- Welcome section headings: 48-56px, weight 800.
+
+Use sentence case for body copy and preserve title case for key headings from screenshots.
 
 ---
 
-## 4. Spacing & layout
+## 4. Spacing, radii, and elevation
 
-Use an 8px spacing system.
+Use 8px spacing scale with larger page paddings.
 
 ```css
 :root{
@@ -110,24 +125,11 @@ Use an 8px spacing system.
   --space-5: 24px;
   --space-6: 32px;
   --space-7: 48px;
-}
-```
+  --space-8: 64px;
 
-### Home layout
-
-- Centered hero stack (icon → H1 → subtitle → primary CTA)
-- “Your Games” section below, then 2-column card grid on desktop, 1-column on mobile.
-- Max content width: 1100–1200px.
-
----
-
-## 5. Radii, borders, shadows
-
-```css
-:root{
   --radius-card: 24px;
   --radius-panel: 20px;
-  --radius-input: 9999px; /* pill */
+  --radius-input: 9999px;
   --radius-icon: 16px;
 
   --shadow-card: 0 12px 30px rgba(39,45,62,.08);
@@ -137,247 +139,221 @@ Use an 8px spacing system.
 
 ---
 
-## 6. Components
+## 5. Screen-by-screen layout contracts
 
-### 6.1 Modal overlay + container (New Game)
+### 5.1 Screen 1 - Home + game list (`1.WelcomeResume.png`)
 
-#### Overlay
-- Darken background slightly + blur.
-- Click outside closes (if supported).
-- Trap focus within modal.
+Required structure:
+
+1. Centered hero stack: icon -> eyebrow (`GAME HUB`) -> title (`Game of LIFE`) -> subtitle -> primary button (`New Game`).
+2. Large rounded `Your Games` container below hero.
+3. Game count badge aligned to right in section header.
+4. At least one game card with compact metadata, avatars, Resume button, delete icon.
+
+Layout notes:
+
+- Max content width: 1100-1200px.
+- Hero and games panel separated by at least `--space-6`.
+- Primary CTA width approximately 420-540px on desktop.
+
+### 5.2 Screens 2-6 - Wizard modal (`2` through `6`)
+
+Modal shell:
+
+1. Full-screen overlay with blur and dimming.
+2. Centered warm-white modal card.
+3. Close X button in top-right.
+4. Footer action row with pill buttons.
+
+Header text pattern:
+
+- Step 1: `New Player Setup`
+- Step 2: `New Player Setup - Pick City`
+- Step 3: `New Player Setup - Education Track`
+- Step 4: `New Player Setup - Pick a Career`
+- Step 5: `New Game - Summary`
+- Subtitle always `Step X of 5`.
+
+### 5.3 Screen 7 - Welcome page (`7.Life.Start.png`)
+
+Required structure:
+
+1. Top logo tile centered.
+2. Large heading `Welcome to Life!`.
+3. Three sections:
+   - `A Month at a Time`
+   - `Choices Matter`
+   - `Life Happens`
+4. Quote callout between section 2 and section 3.
+5. Bottom full-width gradient CTA (`Let's Begin!`).
+
+Layout notes:
+
+- Narrow centered reading column (`~760-900px`).
+- Strong vertical rhythm between sections.
+- CTA anchored near lower fold with clear breathing room.
+
+---
+
+## 6. Wizard components (Screens 2-6)
+
+### 6.1 Overlay and modal container
 
 ```css
 .modalOverlay{
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
+  padding: 32px;
+  display: grid;
+  place-items: center;
   background: var(--overlay);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  display: grid;
-  place-items: center;
-  padding: var(--space-6);
 }
-```
 
-#### Modal container
-- Centered, tall card with soft shadow.
-- Suggested size: `width: min(640px, 92vw); max-height: 90vh;`
-
-```css
 .modal{
-  width: min(640px, 92vw);
+  width: min(1120px, 94vw);
   max-height: 90vh;
   background: var(--bg-canvas);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-modal);
-  overflow: hidden; /* keeps header corners clean */
+  overflow: hidden;
 }
 ```
 
----
-
-### 6.2 Modal header (gradient bar)
-
-- Full-width header with gradient background.
-- Left icon inside a semi-translucent rounded square.
-- Title + subtitle in white.
-- Close button top-right (white “X”), 40px hit target.
-
-```css
-.modalHeader{
-  background: var(--grad-primary);
-  padding: 22px 24px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.modalHeaderLeft{
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-}
-
-.modalHeaderIcon{
-  width: 44px; height: 44px;
-  border-radius: var(--radius-icon);
-  background: rgba(255,255,255,.22);
-  display: grid; place-items: center;
-}
-
-.modalTitle{
-  font: 800 28px/1.1 var(--font-sans);
-  color: #fff;
-  margin: 0;
-}
-
-.modalSubtitle{
-  font: 600 16px/1.3 var(--font-sans);
-  color: rgba(255,255,255,.88);
-  margin-top: 6px;
-}
-
-.modalClose{
-  width: 40px; height: 40px;
-  border-radius: 12px;
-  background: transparent;
-  color: #fff;
-  display: grid; place-items: center;
-}
-.modalClose:hover{ background: rgba(255,255,255,.12); }
-```
-
----
-
-### 6.3 Modal content layout
-
-- Use vertical spacing and clear label separation.
-- Recommended inner padding: 24px.
-
-```css
-.modalBody{
-  padding: 24px;
-  display: grid;
-  gap: 22px;
-}
-.fieldLabel{
-  font: 800 16px/1.2 var(--font-sans);
-  color: var(--text-1);
-  margin-bottom: 10px;
-}
-```
-
----
-
-### 6.4 Inputs (pill fields)
-
-Appearance from screenshot:
-- Large pill, soft border, warm off-white background, subtle inset.
-- Height ~52–56px.
+### 6.2 Inputs and persona tiles (Step 1)
 
 ```css
 .input{
-  height: 54px;
+  height: 56px;
   width: 100%;
   border-radius: var(--radius-input);
   border: 2px solid var(--border-input);
-  background: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.8);
   padding: 0 18px;
   font: 600 16px/1 var(--font-sans);
-  color: var(--text-1);
-  outline: none;
 }
-.input::placeholder{ color: rgba(39,45,62,.55); font-weight: 600; }
-.input:focus{
-  border-color: rgba(34,197,181,.55);
-  box-shadow: 0 0 0 4px rgba(34,197,181,.14);
-}
-.inputError{
-  border-color: rgba(231,76,60,.55);
-  box-shadow: 0 0 0 4px rgba(231,76,60,.12);
-}
-```
 
----
-
-### 6.5 Players panel (dashed inner box)
-
-From screenshot: a white panel with dashed border, rounded corners, generous padding.
-
-```css
-.playersPanel{
-  background: var(--surface);
-  border-radius: var(--radius-panel);
-  border: 2px dashed var(--border-dashed);
-  padding: 22px;
+.personaGrid{
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.personaTile{
+  min-height: 72px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.personaTileSelected{
+  border-color: rgba(68,165,232,.65);
+  box-shadow: 0 0 0 3px rgba(68,165,232,.18);
 }
 ```
 
-#### Avatar shuffle tile
-- Rounded square tile with light warm gray background.
-- Clickable; shows emoji/avatar.
-- Adjacent hint text “Click to shuffle avatar”.
+### 6.3 Selection cards (Steps 2-4)
+
+Card frame:
 
 ```css
-.avatarRow{
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.choiceCard{
+  background: #fff;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 8px 18px rgba(39,45,62,.08);
 }
 
-.avatarTile{
-  width: 72px; height: 72px;
-  border-radius: 18px;
-  background: #EFEDE4;
-  display: grid; place-items: center;
-  cursor: pointer;
-  user-select: none;
+.choiceCardSelected{
+  border-color: rgba(68,165,232,.7);
+  box-shadow: 0 0 0 3px rgba(68,165,232,.18), 0 8px 18px rgba(39,45,62,.10);
 }
-.avatarHint{
-  font: 700 16px/1.2 var(--font-sans);
-  color: var(--text-2);
+```
+
+Section bars inside cards:
+
+```css
+.statBar{
+  border-radius: 8px;
+  color: #fff;
+  font: 800 14px/1 var(--font-sans);
+  padding: 8px 10px;
+}
+.statBarCost{ background: var(--bar-green); }
+.statBarOpportunity{ background: var(--bar-blue); }
+.statBarWellbeing{ background: var(--bar-purple); }
+.statBarIncome{ background: var(--bar-gold); }
+.statBarGrowth{ background: var(--bar-orange); }
+```
+
+Rules:
+
+- Step 2, 3, and 4 each render exactly three cards in desktop layout.
+- Card body includes explanatory paragraph below section bars.
+- Step 4 cards include hero image area at top.
+
+### 6.4 Summary table (Step 5)
+
+Required behavior and structure:
+
+- One horizontal row per configured player.
+- Row split into three clusters: identity, education, job.
+- Use icon + label-value pattern.
+- Two footer buttons:
+  - `+ New Player` (secondary)
+  - `Start Game` (primary gradient)
+
+```css
+.summaryRow{
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid var(--border-soft);
+  padding: 16px;
 }
 ```
 
 ---
 
-### 6.6 Primary button (Home: New Game / Resume)
+## 7. Buttons
 
-- Pill button with gradient.
-- Height 56px, bold white label.
+Primary gradient button (used on Home, wizard Next, Start Game, Welcome CTA):
 
 ```css
 .btnPrimary{
   height: 56px;
-  padding: 0 28px;
   border: 0;
   border-radius: 9999px;
   background: var(--grad-primary);
   color: #fff;
   font: 800 18px/1 var(--font-sans);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
   box-shadow: 0 10px 24px rgba(68,165,232,.22);
-  cursor: pointer;
-}
-.btnPrimary:hover{ filter: brightness(1.03); }
-.btnPrimary:active{ transform: scale(.99); }
-.btnPrimary:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(34,197,181,.18), 0 10px 24px rgba(68,165,232,.22);
 }
 ```
 
----
-
-### 6.7 Secondary solid button (Modal: Add Player)
-
-In screenshot, “Add Player” is a solid teal pill.
+Secondary outline button (wizard Back / New Player):
 
 ```css
-.btnTeal{
+.btnSecondary{
   height: 56px;
-  width: 100%;
-  border: 0;
   border-radius: 9999px;
-  background: var(--brand-teal);
-  color: #fff;
-  font: 800 18px/1 var(--font-sans);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 10px 24px rgba(34,197,181,.20);
+  border: 2px solid rgba(39,45,62,.35);
+  background: #fff;
+  color: var(--text-1);
+  font: 700 18px/1 var(--font-sans);
 }
-.btnTeal:hover{ filter: brightness(1.03); }
-.btnTeal:active{ transform: scale(.99); }
-.btnTeal:disabled{
-  opacity: .55;
+```
+
+Disabled primary:
+
+```css
+.btnPrimary:disabled{
+  background: var(--grad-disabled);
+  opacity: .95;
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -385,95 +361,50 @@ In screenshot, “Add Player” is a solid teal pill.
 
 ---
 
-### 6.8 Disabled primary CTA (Modal: Start Game with 0 Players)
+## 8. Interaction rules
 
-From screenshot:
-- Large gradient button but **disabled** when players = 0.
-- Show helper text beneath: “Add at least one player to start”.
-
-```css
-.btnPrimaryDisabled{
-  height: 64px;
-  width: 100%;
-  border: 0;
-  border-radius: 9999px;
-  background: var(--grad-disabled);
-  color: rgba(255,255,255,.92);
-  font: 900 20px/1 var(--font-sans);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: not-allowed;
-  opacity: .95;
-}
-
-.modalFooter{
-  padding: 18px 24px 26px;
-  background: linear-gradient(180deg,
-    rgba(255,253,245,0) 0%,
-    rgba(240,245,236,.95) 65%,
-    rgba(240,245,236,1) 100%);
-  display: grid;
-  gap: 10px;
-}
-
-.footerHint{
-  text-align: center;
-  font: 700 14px/1.3 var(--font-sans);
-  color: var(--text-2);
-}
-```
-
-When enabled (players >= 1), reuse `.btnPrimary` and update label to `Start Game with N Players`.
+1. Next is disabled until current step requirements are satisfied.
+2. Back preserves prior selections.
+3. Step 4 options are filtered by selected education track.
+4. Step 5 `Start Game` remains disabled for fewer than 2 configured players.
+5. Step 5 `+ New Player` starts a fresh player draft without deleting existing summary rows.
+6. Welcome CTA must be keyboard-operable and route forward.
 
 ---
 
-### 6.9 Status pill (“active”)
+## 9. Accessibility requirements
 
-```css
-.pillActive{
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 9999px;
-  background: var(--success-bg);
-  color: var(--success-fg);
-  font: 800 14px/1 var(--font-sans);
-  display: inline-flex;
-  align-items: center;
-}
-```
+1. Modal traps focus and closes on ESC.
+2. Close button has `aria-label="Close modal"`.
+3. Selectable cards are buttons with visible focus state.
+4. Touch targets are 44px minimum.
+5. White text on gradient buttons must remain readable.
 
 ---
 
-## 7. Interaction rules (modal-specific)
+## 10. Responsive behavior
 
-- **Shuffle avatar:** clicking avatar tile randomizes avatar/emoji.
-- **Add Player:** requires nickname and email validation (email format) before adding.
-- **Start Game:** disabled until `players.length >= 1`.
-- Always show Players count in label: `Players (N)`.
+Desktop target:
 
-### Recommended validation visuals
-- Inline error text: 13–14px, color `rgba(231,76,60,.95)` under the input.
-- Error state uses `.inputError` for fields.
+- Wizard cards displayed in 3-column layout on Steps 2-4.
+- Summary rows remain horizontal.
 
----
+Mobile/tablet fallback:
 
-## 8. Accessibility requirements
-
-- Modal traps focus; ESC closes.
-- Close button has `aria-label="Close modal"`.
-- Buttons have 44px+ hit targets.
-- Ensure gradient text contrast: white text on gradient; adjust opacity only for disabled states.
+- Steps 2-4 collapse to 1 column cards.
+- Summary rows stack sections vertically.
+- Footer buttons remain full-width and legible.
 
 ---
 
-## 9. Implementation checklist
+## 11. Fidelity checklist (required for sign-off)
 
-- [ ] Use CSS variables exactly as above.
-- [ ] Ensure modal header gradient matches `--grad-primary`.
-- [ ] Inputs are pill-shaped with `2px` border.
-- [ ] Players panel is dashed with rounded corners.
-- [ ] Add Player button is solid teal.
-- [ ] Start Game button uses disabled gradient until at least 1 player exists.
-- [ ] Background overlay uses blur + slight dark tint.
+1. Screen 1: hero and games list hierarchy matches reference image.
+2. Screen 2: name input + persona grid and step label match structure.
+3. Screen 3: city cards include Cost, Opportunity, Wellbeing sections.
+4. Screen 4: education cards include Debt/Investment, Long-Term Potential, Stability.
+5. Screen 5: job cards include Income, Stability, Wage Growth.
+6. Screen 6: summary rows include avatar/name/city/education/job and footer buttons.
+7. Screen 7: welcome heading, three sections, quote block, and CTA order matches reference.
+
+Any missing screen-level requirement blocks merge.
