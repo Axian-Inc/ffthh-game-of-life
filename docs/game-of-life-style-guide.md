@@ -1,7 +1,8 @@
 # Game of Life UI Style Guide (Screens 1-7)
 
-Audience: coding agent implementing the UI shown in the provided screenshots.
-Goal: reproduce look-and-feel (colors, spacing, radii, shadows, component states) for:
+Audience: agents implementing the exact Wave 1 visuals shown in the provided screenshots.
+
+Normative reference screens:
 
 - `docs/sample-images/1.WelcomeResume.png`
 - `docs/sample-images/2.Life.NewPlayer.png`
@@ -11,400 +12,216 @@ Goal: reproduce look-and-feel (colors, spacing, radii, shadows, component states
 - `docs/sample-images/6.Life.NewGameSummary.png`
 - `docs/sample-images/7.Life.Start.png`
 
-Note: `docs/sample-images/8.PlayerTurn.png` (Main Game Status) is out of scope for this style guide revision.
+Out of scope:
 
----
+- `docs/sample-images/8.PlayerTurn.png`
 
-## 1. Design principles
+## 1. How to use this guide
+1. Treat the screenshots as exact product requirements, not inspiration.
+2. This guide defines the shared visual system and the non-negotiable screen anatomy for Screens 1-7.
+3. Browser chrome is not part of fidelity. Compare the rendered app surface only.
+4. Wave 1 screenshot baselines must be captured at `1280x720`.
+5. Fidelity means exact layout anatomy, proportion, typography hierarchy, art treatment, button placement, and copy hierarchy. Runtime data may vary only where the owning spec explicitly allows it.
 
-- Bright, friendly family tone with warm off-white background and large whitespace.
-- Soft geometry: rounded cards, pill buttons, low-contrast borders.
-- Primary brand expression: teal -> blue -> purple gradient on key CTAs.
-- Clear information hierarchy with strong titles and compact utility labels.
+## 2. Shared visual system
 
----
+### 2.1 Tone
+- Bright warm canvas, soft shadows, and rounded geometry.
+- Teal-to-blue-to-purple gradient on primary CTAs only.
+- Off-white shells and white cards, not stark white-on-white flat layouts.
+- Large breathing room with centered compositions.
 
-## 2. Color tokens
-
-### 2.1 Neutrals
-
+### 2.2 Core color tokens
 ```css
-:root{
-  --bg-canvas: #FFFDF5;
-  --surface: #FFFFFF;
-  --surface-2: #F0F5EC;
-
-  --text-1: #272D3E;
+:root {
+  --bg-canvas: #fffdf5;
+  --surface: #ffffff;
+  --text-1: #272d3e;
   --text-2: #667086;
-  --text-3: rgba(39,45,62,.65);
+  --border-soft: rgba(39, 45, 62, 0.1);
+  --border-input: #eae8de;
+  --overlay: rgba(39, 45, 62, 0.22);
 
-  --border-soft: rgba(39,45,62,.10);
-  --border-input: #EAE8DE;
-  --border-dashed: rgba(39,45,62,.18);
+  --brand-teal: #22c5b5;
+  --brand-teal-2: #5cc6d4;
+  --brand-blue: #44a5e8;
+  --brand-purple: #a377e5;
 
-  --overlay: rgba(39,45,62,.22);
+  --bar-green: #55c26e;
+  --bar-blue: #4a9bda;
+  --bar-purple: #9b5ae3;
+  --bar-gold: #d1a64d;
+  --bar-orange: #e5963e;
+
+  --grad-primary: linear-gradient(90deg, #5cc6d4 0%, #44a5e8 45%, #a377e5 100%);
+  --grad-disabled: linear-gradient(90deg, #9edadf 0%, #9ed1ec 45%, #c0c0eb 100%);
 }
 ```
 
-### 2.2 Brand accents
+### 2.3 Typography hierarchy
+- Home heading `Game of LIFE`: visually dominant, bold, centered.
+- Wizard titles: large and heavy, centered, but smaller than the home heading.
+- Step subtitles: smaller muted line directly beneath titles.
+- Card titles: bold and prominent.
+- Body/stat text: compact but readable.
+- Welcome heading `Welcome to Life!`: as large and dominant as the reference.
 
-```css
-:root{
-  --brand-teal: #22C5B5;
-  --brand-teal-2: #5CC6D4;
-  --brand-blue: #44A5E8;
-  --brand-purple: #A377E5;
+### 2.4 Shape and elevation
+- Main surfaces use generous radius (`20-28px`) and soft shadow.
+- Inputs and primary/secondary buttons are full pill shapes.
+- Selected cards use a visible glow/ring, not just a subtle border.
+- Overlay blur is required whenever wizard screens are shown.
 
-  --success-bg: rgba(34,197,181,.18);
-  --success-fg: #22C5B5;
-}
-```
+### 2.5 Asset rules
+1. Use locally committed art assets for persona, city, track, job, and summary visuals.
+2. Do not substitute generic text badges such as `SF`, `DN`, `TN`, `DEG`, or `EL`.
+3. Do not use placeholder descriptive copy such as `starting profile` or other generated filler.
+4. In Wave 1, avoid new shared cross-spec visual primitive files unless a single spec owns them outright. Localize assets or inline marks inside the owning spec where necessary to preserve parallelism.
 
-### 2.3 Section bar accents (wizard cards)
+## 3. Screen 1 contract: Game Hub home (`1.WelcomeResume.png`)
 
-```css
-:root{
-  --bar-green: #55C26E;
-  --bar-blue: #4A9BDA;
-  --bar-purple: #9B5AE3;
-  --bar-gold: #D1A64D;
-  --bar-orange: #E5963E;
-}
-```
+### 3.1 Required anatomy
+1. Centered hero stack near the top of the page.
+2. Logo tile above the eyebrow.
+3. Uppercase eyebrow text: `GAME HUB`.
+4. Main heading: `Game of LIFE`.
+5. Subtitle directly beneath the heading.
+6. Wide gradient `New Game` CTA beneath the subtitle.
+7. Large rounded `Your Games` container beneath the hero.
+8. Count badge aligned to the right edge of the `Your Games` header.
+9. A single active game card anchored to the left side of the large games container, leaving significant empty space to the right.
 
-### 2.4 Gradients
+### 3.2 Exact baseline visual state
+1. Seeded game card title: `Choices Matter`.
+2. Metadata line includes `4 players` and `just now`.
+3. Status pill reads `ACTIVE`.
+4. Action row shows `Resume` plus a delete icon button.
 
-```css
-:root{
-  --grad-primary: linear-gradient(90deg,
-    #5CC6D4 0%,
-    #44A5E8 45%,
-    #A377E5 100%);
+### 3.3 Reject conditions
+1. Eyebrow text is not uppercase `GAME HUB`.
+2. Games panel tightly wraps the card with no right-side breathing room.
+3. CTA is rendered as a narrow utility button instead of a wide gradient pill.
 
-  --grad-disabled: linear-gradient(90deg,
-    #9EDADF 0%,
-    #9ED1EC 45%,
-    #C0C0EB 100%);
-}
-```
+## 4. Screens 2-6 contract: New Player wizard
 
----
+### 4.1 Shared wizard shell
+1. Full-screen dimmed blurred overlay.
+2. Warm off-white centered modal shell with close `X` at the top-right.
+3. Step title and subtitle centered at the top.
+4. Footer buttons centered and pill-shaped.
+5. Steps 2-4 use overhanging left/center/right card rails that extend beyond the modal shell.
+6. Step 5 uses a wide summary sheet that also overhangs the modal shell.
 
-## 3. Typography
+### 4.2 Screen 2: New Player Setup (`2.Life.NewPlayer.png`)
+1. Title: `New Player Setup`.
+2. Subtitle: `Step 1 of 5`.
+3. Field label: `Player Name:`.
+4. Persona label: `Choose Your Digital Persona:`.
+5. Persona selector is a 5x5 icon-only grid.
+6. No text captions under persona tiles.
+7. Top-left tile is selected by default in the baseline screenshot.
+8. `Next` is centered as a wide gradient pill.
 
-```css
-:root{
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
-```
+Reject conditions:
 
-Recommended scale:
+1. Validation text is visible before user interaction.
+2. Persona tiles use the old animal set or any fallback emoji/text.
 
-- Home title (`Game of LIFE`): 64-76px, weight 800.
-- Wizard modal title: 48-58px, weight 800.
-- Step subtitle (`Step X of 5`): 20-26px, weight 700.
-- Card title: 34-44px, weight 800.
-- Card body/labels: 15-18px, weight 600.
-- Welcome page heading: 72-90px, weight 800.
-- Welcome section headings: 48-56px, weight 800.
+### 4.3 Screen 3: Pick City (`3.Life.PickCity.png`)
+1. Title: `New Player Setup - Pick City`.
+2. Subtitle: `Step 2 of 5`.
+3. Exactly three city cards render: San Francisco, Denver, Tonopah, NV.
+4. The selected middle card is elevated and outlined.
+5. Each card includes, in order:
+   - illustrated title row
+   - green `Cost` bar
+   - blue `Opportunity` bar
+   - purple `Wellbeing` bar
+   - descriptive paragraph
 
-Use sentence case for body copy and preserve title case for key headings from screenshots.
+Reject conditions:
 
----
+1. City titles include token-badge substitutes instead of illustration + text.
+2. Cards render as a simple in-shell three-column grid with no overhang.
 
-## 4. Spacing, radii, and elevation
+### 4.4 Screen 4: Education Track (`4.Life.PickTrack.png`)
+1. Title: `New Player Setup - Education Track`.
+2. Subtitle: `Step 3 of 5`.
+3. Exactly three track cards render: Degree Track, Trades Track, Self-Taught Track.
+4. The selected middle card is elevated and outlined.
+5. Each card includes, in order:
+   - illustrated title row
+   - green `Debt/Investment` bar
+   - blue `Long-Term Potential` bar
+   - purple `Stability` bar
+   - descriptive paragraph
 
-Use 8px spacing scale with larger page paddings.
+### 4.5 Screen 5: Pick a Career (`5.Life.PickJob.png`)
+1. Title: `New Player Setup - Pick a Career`.
+2. Subtitle: `Step 4 of 5`.
+3. Exactly three job cards render for the chosen track.
+4. Each card includes, in order:
+   - large hero illustration
+   - job title
+   - gold `Income` bar
+   - blue `Stability` bar
+   - orange `Wage Growth` bar
+   - short outlook copy
 
-```css
-:root{
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --space-8: 64px;
+### 4.6 Screen 6: New Game Summary (`6.Life.NewGameSummary.png`)
+1. Title: `New Game - Summary`.
+2. Subtitle: `Step 5 of 5`.
+3. A wide summary sheet spans beyond the shell width.
+4. Rows are horizontal with subtle dividers, not separate boxed cards.
+5. Each row follows the visual cluster order:
+   - avatar + name/city text
+   - city illustration
+   - education label + icon
+   - job label + icon
+6. Footer buttons are centered beneath the summary sheet:
+   - `+ New Player`
+   - `Start Game`
 
-  --radius-card: 24px;
-  --radius-panel: 20px;
-  --radius-input: 9999px;
-  --radius-icon: 16px;
+Reject conditions:
 
-  --shadow-card: 0 12px 30px rgba(39,45,62,.08);
-  --shadow-modal: 0 30px 80px rgba(39,45,62,.18);
-}
-```
+1. Summary content is rendered as boxed cards or stacked pills.
+2. Footer actions are right-aligned or undersized.
 
----
+## 5. Screen 7 contract: Welcome page (`7.Life.Start.png`)
 
-## 5. Screen-by-screen layout contracts
-
-### 5.1 Screen 1 - Home + game list (`1.WelcomeResume.png`)
-
-Required structure:
-
-1. Centered hero stack: icon -> eyebrow (`GAME HUB`) -> title (`Game of LIFE`) -> subtitle -> primary button (`New Game`).
-2. Large rounded `Your Games` container below hero.
-3. Game count badge aligned to right in section header.
-4. At least one game card with compact metadata, avatars, Resume button, delete icon.
-
-Layout notes:
-
-- Max content width: 1100-1200px.
-- Hero and games panel separated by at least `--space-6`.
-- Primary CTA width approximately 420-540px on desktop.
-
-### 5.2 Screens 2-6 - Wizard modal (`2` through `6`)
-
-Modal shell:
-
-1. Full-screen overlay with blur and dimming.
-2. Centered warm-white modal card.
-3. Close X button in top-right.
-4. Footer action row with pill buttons.
-
-Header text pattern:
-
-- Step 1: `New Player Setup`
-- Step 2: `New Player Setup - Pick City`
-- Step 3: `New Player Setup - Education Track`
-- Step 4: `New Player Setup - Pick a Career`
-- Step 5: `New Game - Summary`
-- Subtitle always `Step X of 5`.
-
-### 5.3 Screen 7 - Welcome page (`7.Life.Start.png`)
-
-Required structure:
-
-1. Top logo tile centered.
-2. Large heading `Welcome to Life!`.
-3. Three sections:
+### 5.1 Required anatomy
+1. Narrow centered reading column.
+2. Logo tile above the heading.
+3. Heading: `Welcome to Life!`
+4. Three content sections in order:
    - `A Month at a Time`
    - `Choices Matter`
    - `Life Happens`
-4. Quote callout between section 2 and section 3.
-5. Bottom full-width gradient CTA (`Let's Begin!`).
+5. Quote block appears between section 2 and section 3.
+6. Wide gradient CTA labeled `Let's Begin!` at the bottom of the column.
 
-Layout notes:
+### 5.2 Reject conditions
+1. Any extra mode label or helper caption appears in the baseline screenshot.
+2. The quote block appears after `Life Happens`.
+3. The CTA is narrower or styled differently than the reference.
 
-- Narrow centered reading column (`~760-900px`).
-- Strong vertical rhythm between sections.
-- CTA anchored near lower fold with clear breathing room.
+## 6. Interaction rules
+1. Wizard `Next` stays disabled until the current step is valid.
+2. Wizard `Back` preserves prior selections.
+3. Wizard Step 4 filters jobs by the selected track.
+4. Wizard Step 5 `Start Game` stays disabled with fewer than 2 configured players.
+5. Welcome CTA must be keyboard-operable and route forward.
 
----
+## 7. Accessibility rules
+1. Modal traps focus and closes on `Escape`.
+2. Close button uses `aria-label="Close modal"`.
+3. Selectable cards/tiles are buttons with visible focus treatment.
+4. Decorative art is hidden from assistive tech when duplicated by visible text.
+5. Gradient CTA text remains readable.
 
-## 6. Wizard components (Screens 2-6)
-
-### 6.1 Overlay and modal container
-
-```css
-.modalOverlay{
-  position: fixed;
-  inset: 0;
-  padding: 32px;
-  display: grid;
-  place-items: center;
-  background: var(--overlay);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.modal{
-  width: min(1120px, 94vw);
-  max-height: 90vh;
-  background: var(--bg-canvas);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-modal);
-  overflow: hidden;
-}
-```
-
-### 6.2 Inputs and persona tiles (Step 1)
-
-```css
-.input{
-  height: 56px;
-  width: 100%;
-  border-radius: var(--radius-input);
-  border: 2px solid var(--border-input);
-  background: rgba(255,255,255,.8);
-  padding: 0 18px;
-  font: 600 16px/1 var(--font-sans);
-}
-
-.personaGrid{
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.personaTile{
-  min-height: 72px;
-  border: 1px solid var(--border-soft);
-  border-radius: 14px;
-  background: #fff;
-}
-
-.personaTileSelected{
-  border-color: rgba(68,165,232,.65);
-  box-shadow: 0 0 0 3px rgba(68,165,232,.18);
-}
-```
-
-### 6.3 Selection cards (Steps 2-4)
-
-Card frame:
-
-```css
-.choiceCard{
-  background: #fff;
-  border: 1px solid var(--border-soft);
-  border-radius: 16px;
-  padding: 14px;
-  box-shadow: 0 8px 18px rgba(39,45,62,.08);
-}
-
-.choiceCardSelected{
-  border-color: rgba(68,165,232,.7);
-  box-shadow: 0 0 0 3px rgba(68,165,232,.18), 0 8px 18px rgba(39,45,62,.10);
-}
-```
-
-Section bars inside cards:
-
-```css
-.statBar{
-  border-radius: 8px;
-  color: #fff;
-  font: 800 14px/1 var(--font-sans);
-  padding: 8px 10px;
-}
-.statBarCost{ background: var(--bar-green); }
-.statBarOpportunity{ background: var(--bar-blue); }
-.statBarWellbeing{ background: var(--bar-purple); }
-.statBarIncome{ background: var(--bar-gold); }
-.statBarGrowth{ background: var(--bar-orange); }
-```
-
-Rules:
-
-- Step 2, 3, and 4 each render exactly three cards in desktop layout.
-- Card body includes explanatory paragraph below section bars.
-- Step 4 cards include hero image area at top.
-
-### 6.4 Summary table (Step 5)
-
-Required behavior and structure:
-
-- One horizontal row per configured player.
-- Row split into three clusters: identity, education, job.
-- Use icon + label-value pattern.
-- Two footer buttons:
-  - `+ New Player` (secondary)
-  - `Start Game` (primary gradient)
-
-```css
-.summaryRow{
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 16px;
-  align-items: center;
-  background: #fff;
-  border-bottom: 1px solid var(--border-soft);
-  padding: 16px;
-}
-```
-
----
-
-## 7. Buttons
-
-Primary gradient button (used on Home, wizard Next, Start Game, Welcome CTA):
-
-```css
-.btnPrimary{
-  height: 56px;
-  border: 0;
-  border-radius: 9999px;
-  background: var(--grad-primary);
-  color: #fff;
-  font: 800 18px/1 var(--font-sans);
-  box-shadow: 0 10px 24px rgba(68,165,232,.22);
-}
-```
-
-Secondary outline button (wizard Back / New Player):
-
-```css
-.btnSecondary{
-  height: 56px;
-  border-radius: 9999px;
-  border: 2px solid rgba(39,45,62,.35);
-  background: #fff;
-  color: var(--text-1);
-  font: 700 18px/1 var(--font-sans);
-}
-```
-
-Disabled primary:
-
-```css
-.btnPrimary:disabled{
-  background: var(--grad-disabled);
-  opacity: .95;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-```
-
----
-
-## 8. Interaction rules
-
-1. Next is disabled until current step requirements are satisfied.
-2. Back preserves prior selections.
-3. Step 4 options are filtered by selected education track.
-4. Step 5 `Start Game` remains disabled for fewer than 2 configured players.
-5. Step 5 `+ New Player` starts a fresh player draft without deleting existing summary rows.
-6. Welcome CTA must be keyboard-operable and route forward.
-
----
-
-## 9. Accessibility requirements
-
-1. Modal traps focus and closes on ESC.
-2. Close button has `aria-label="Close modal"`.
-3. Selectable cards are buttons with visible focus state.
-4. Touch targets are 44px minimum.
-5. White text on gradient buttons must remain readable.
-
----
-
-## 10. Responsive behavior
-
-Desktop target:
-
-- Wizard cards displayed in 3-column layout on Steps 2-4.
-- Summary rows remain horizontal.
-
-Mobile/tablet fallback:
-
-- Steps 2-4 collapse to 1 column cards.
-- Summary rows stack sections vertically.
-- Footer buttons remain full-width and legible.
-
----
-
-## 11. Fidelity checklist (required for sign-off)
-
-1. Screen 1: hero and games list hierarchy matches reference image.
-2. Screen 2: name input + persona grid and step label match structure.
-3. Screen 3: city cards include Cost, Opportunity, Wellbeing sections.
-4. Screen 4: education cards include Debt/Investment, Long-Term Potential, Stability.
-5. Screen 5: job cards include Income, Stability, Wage Growth.
-6. Screen 6: summary rows include avatar/name/city/education/job and footer buttons.
-7. Screen 7: welcome heading, three sections, quote block, and CTA order matches reference.
-
-Any missing screen-level requirement blocks merge.
+## 8. Automation and sign-off
+1. Each Wave 1 visual surface must include a deterministic Playwright screenshot test at `1280x720`.
+2. Screens 2-6 may use wizard-owned seeded fixtures/backdrops instead of depending on the Screen 1 implementation.
+3. Screen 1 must seed local storage/time so the screenshot always shows the expected single-card state.
+4. Screen 7 must seed a deterministic started game and capture the pre-CTA state.
+5. Any screenshot drift against Screens 1-7 blocks merge.

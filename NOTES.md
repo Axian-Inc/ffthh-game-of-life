@@ -46,3 +46,11 @@ Lightweight, task-focused log for what changed, why, and where.
 - What changed: Added new pages, updated view flow to move from create modal to career selection and play placeholder, updated styles and tests.
 - Paths: src/ui/src/App.jsx, src/ui/src/components/pages/StartNewGamePage.jsx, src/ui/src/components/pages/PlayGamePage.jsx, src/ui/src/App.css, src/ui/src/hooks/useModalState.js, src/ui/e2e/app.spec.js, src/ui/src/components/__tests__/pages.test.jsx
 - Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run test:e2e:ci
+
+## 2026-03-06
+- Task: Refresh Wave 1 specs for exact high-fidelity Screen 1-7 reruns.
+- Why: The existing Wave 1 contracts enforced behavior but not the actual visual anatomy shown in the reference screenshots.
+- What changed: Rewrote the Wave 1 specs to separate canonical data from UI presentation, added a new `W1-S4` home-screen spec, added per-surface screenshot-test requirements, and updated the style guide plus dispatch docs to encode exact Screen 1-7 expectations.
+- Paths: docs/game-of-life-style-guide.md, specs/README.md, specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md, specs/wave-1/W1-S1-setup-data-contracts.md, specs/wave-1/W1-S2-wizard-modal-ui.md, specs/wave-1/W1-S3-welcome-screen-ui.md, specs/wave-1/W1-S4-game-hub-home-ui.md, CHANGELOG.md
+- Commands/runbooks: specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md
+- Follow-ups: Re-run Wave 1 on fresh branches/worktrees and use the new visual-test requirements as the merge gate.

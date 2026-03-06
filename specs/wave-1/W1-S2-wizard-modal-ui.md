@@ -6,8 +6,13 @@ branch: codex/w1-s2-wizard-modal-ui
 base_branch: codex/wave-1-integration
 test_commands:
   - npm --prefix src/ui run test:ci
+  - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium VITE_STORAGE_MODE=local npm --prefix src/ui run build
+  - npm --prefix src/ui exec playwright test e2e/wizard-visual.spec.js
 owned_paths:
   - specs/wave-1/W1-S2-wizard-modal-ui.md
+  - src/ui/src/data/playerAvatars.js
+  - src/ui/src/data/wizardVisualCatalog.js
+  - src/ui/src/assets/wizard/
   - src/ui/src/components/modals/CreateGameModal.jsx
   - src/ui/src/components/modals/ModalBackdrop.jsx
   - src/ui/src/components/forms/NewGameWizard.jsx
@@ -17,193 +22,302 @@ owned_paths:
   - src/ui/src/components/forms/NewGameWizardStep4Job.jsx
   - src/ui/src/components/forms/NewGameWizardStep5Summary.jsx
   - src/ui/src/components/forms/new-game-wizard.css
+  - src/ui/src/components/ui/PlayerAvatar.jsx
   - src/ui/src/components/__tests__/modals.test.jsx
   - src/ui/src/components/__tests__/setup-flow.test.jsx
+  - src/ui/e2e/wizard-visual.spec.js
+  - src/ui/e2e/__snapshots__/wizard-visual.spec.js-snapshots/
 ---
 
 # Objective
-Replace the current single-form create modal with a five-step wizard that visually and behaviorally matches reference Screens 2-6 (`docs/sample-images/2.Life.NewPlayer.png` through `docs/sample-images/6.Life.NewGameSummary.png`).
+Replace the current generic create flow with a five-step wizard whose rendered Screens 2-6 visually match the reference screenshots 1:1 in anatomy, copy hierarchy, proportions, and art treatment.
+
+# Reference Inputs (All Normative)
+1. `docs/sample-images/2.Life.NewPlayer.png`
+2. `docs/sample-images/3.Life.PickCity.png`
+3. `docs/sample-images/4.Life.PickTrack.png`
+4. `docs/sample-images/5.Life.PickJob.png`
+5. `docs/sample-images/6.Life.NewGameSummary.png`
+6. `docs/game-of-life-style-guide.md`
 
 # Scope
 In scope:
 
-- Convert create modal into a multi-step setup wizard.
-- Implement Steps 1-5 with locked UI structure, card anatomy, and copy hierarchy.
-- Support adding multiple players from Step 5 and returning to Step 1.
-- Preserve all completed selections while moving back/next.
-- Use setup catalog data from `src/ui/src/data/setupCatalog.js`.
+- Implement the full five-step modal experience for Screens 2-6.
+- Match the narrow modal shell, overhanging desktop card rails, and wide summary sheet seen in the references.
+- Create a wizard-owned presentation catalog for exact titles, section lines, descriptive copy, art, and Step 1 persona ordering.
+- Add deterministic Playwright screenshot coverage for Screens 2-6.
 
 Out of scope:
 
-- Main in-game status board fidelity (`docs/sample-images/8.PlayerTurn.png`).
-- Replacing post-welcome play placeholder.
-- Storage schema migrations (handled by Wave 2 specs).
+- Screen 1 home-screen implementation details owned by `W1-S4`.
+- Screen 7 welcome-page implementation details owned by `W1-S3`.
+- Main in-game board fidelity (`docs/sample-images/8.PlayerTurn.png`).
+- Any change to canonical simulation values in `setupCatalog.js`.
 
-# Reference Screens (Normative)
-Treat these image files as requirements, not inspiration:
+# Parallel-Wave Constraints
+1. This spec must not edit `src/ui/src/data/setupCatalog.js`, `src/ui/src/App.css`, or Screen 1/7-owned files.
+2. Any wizard-specific copy, icon order, art assets, or screenshot fixtures must live in wizard-owned paths listed above.
+3. Do not introduce shared visual primitives that require `W1-S3` or `W1-S4` to change the same file.
 
-1. Step 1: `docs/sample-images/2.Life.NewPlayer.png`
-2. Step 2: `docs/sample-images/3.Life.PickCity.png`
-3. Step 3: `docs/sample-images/4.Life.PickTrack.png`
-4. Step 4: `docs/sample-images/5.Life.PickJob.png`
-5. Step 5: `docs/sample-images/6.Life.NewGameSummary.png`
+# Visual Architecture Contract
+1. Baseline desktop viewport for visual tests is `1280x720`.
+2. Modal overlay is full-screen, dimmed, and blurred with the reference warmth and softness; the wizard never renders on a blank white page.
+3. Step 1 uses a narrow centered shell only.
+4. Steps 2-4 keep the same narrow shell, but the three selection cards visibly overhang the shell left and right; the selected center card is elevated above the side cards.
+5. Step 5 keeps the narrow shell for the header/footer but introduces a wide summary sheet that overhangs left/right similar to the reference.
+6. Buttons are pill-shaped, centered at the footer, and sized/proportioned like the references; no small utility-button treatment is allowed.
 
-# Non-Negotiable Fidelity Rules
-1. Modal body is centered on blurred darkened overlay.
-2. Modal width and visual density must match screenshot proportions (desktop-first).
-3. Every step shows heading and subtitle in this format:
-   - Heading: `New Player Setup` (Step 1) or `New Player Setup - <Step Name>` (Steps 2-4)
-   - Heading for Step 5: `New Game - Summary`
-   - Subtitle: `Step X of 5`
-4. Back/Next controls are pill buttons at modal footer; Next uses gradient style.
-5. Selected cards have visible selected-state border/glow.
-6. Card contents must include section bars/labels and explanatory text blocks as shown.
-7. Do not render legacy single-form fields (`Game Name`, `Player nickname`, `Add Player`) inside this modal flow.
+# Wizard-Owned Presentation Data Contract
+`src/ui/src/data/wizardVisualCatalog.js` must be introduced as the wizard display contract and keyed to canonical ids where applicable.
+
+Required exports:
+
+1. `wizardPersonas`
+   - Ordered top-left to bottom-right exactly as shown in Screen 2.
+   - Every entry includes a stable id/key, visible subject label for accessibility, and imported local SVG/PNG asset.
+2. `wizardCities`
+   - One entry per canonical city id with exact Screen 3 display title, section-bar lines, descriptive paragraph, and illustration asset.
+3. `wizardTracks`
+   - One entry per canonical education-track id with exact Screen 4 display title, section-bar lines, descriptive paragraph, and illustration asset pair.
+4. `wizardJobs`
+   - One entry per canonical job id with exact Screen 5 display title, hero art, income/stability/growth lines, and outlook text.
+5. `wizardSummaryFixture`
+   - Seed data for the Screen 6 screenshot baseline only.
+   - This fixture may mirror the exact names/icons visible in the reference even if runtime setup options remain canonical.
+
+Rules:
+
+1. Do not build display copy from canonical numeric fields during rendering for Screens 2-6.
+2. Do not render token badges such as `SF`, `DN`, `TN`, or placeholder descriptions such as `starting profile`.
+3. Do not use the current animal-avatar set for Step 1; the Step 1 grid must visually match Screen 2.
 
 # Step-by-Step Contract
 
-## Step 1 - New Player Setup
-Required controls:
+## Step 1 - New Player Setup (`2.Life.NewPlayer.png`)
+Required visual state:
 
-1. `Player Name` text input with placeholder `Enter a distinct name...`.
-2. Persona grid under label `Choose Your Digital Persona:`.
-3. Persona options are a fixed grid of selectable icon tiles (keyboard accessible).
-4. Next button disabled until:
-   - non-empty trimmed player name
-   - one persona selected
-
-Behavior:
-
-1. Selection is single-select.
-2. Clicking selected persona keeps it selected (no toggle-off).
-3. Back button is hidden/disabled on Step 1.
-
-## Step 2 - Pick City
-Required cards (exact count: 3):
-
-1. San Francisco card
-2. Denver card
-3. Tonopah, NV card
-
-Card anatomy:
-
-1. Title row with icon + city label.
-2. `Cost` section bar with lines for multiplier and tax.
-3. `Opportunity` section bar with growth/opportunity multiplier.
-4. `Wellbeing` section bar with mental/physical baseline lines.
-5. Bottom descriptive paragraph.
+1. Modal title is `New Player Setup`.
+2. Subtitle is `Step 1 of 5`.
+3. Field label is `Player Name:` including the colon.
+4. Second label is `Choose Your Digital Persona:` including the colon.
+5. Persona selector is a 5x5 icon-only grid with no visible text captions under tiles.
+6. Top-left persona tile is selected by default on initial open, matching the reference’s selected state.
+7. `Next` is centered at the modal footer as a wide gradient pill.
 
 Behavior:
 
-1. Single-select card behavior.
-2. Next disabled until one city selected.
-3. Back returns to Step 1 with Step 1 values intact.
+1. `Next` remains disabled until the player name is non-empty after trimming.
+2. Persona selection is single-select and cannot be toggled off to an empty state.
+3. Back is hidden on Step 1.
+4. No validation error text is visible on pristine modal open.
 
-## Step 3 - Education Track
-Required cards (exact count: 3):
+Reject conditions:
+
+1. Text labels appear under persona tiles.
+2. Animal or fallback emoji avatars are shown instead of the reference-style icon set.
+3. Inline error text is shown before user interaction.
+
+## Step 2 - Pick City (`3.Life.PickCity.png`)
+Required visual state:
+
+1. Title is `New Player Setup - Pick City`.
+2. Subtitle is `Step 2 of 5`.
+3. Three tall city cards render in a left/center/right rail that overhangs the modal shell.
+4. The selected center card has the strongest border/glow and sits slightly higher than side cards.
+5. Visible card titles are exactly:
+   - `San Francisco`
+   - `Denver`
+   - `Tonopah, NV`
+6. Section bars appear in this order with the color treatment shown in the screenshot:
+   - `Cost`
+   - `Opportunity`
+   - `Wellbeing`
+
+Exact display copy:
+
+1. San Francisco
+   - `Cost of Living Multiplier: 2.5x`
+   - `Tax Rate: 9%`
+   - `Opportunity Multiplier: 3x`
+   - `Mental Baseline: +5`
+   - `Physical Baseline: +2`
+   - `A dense urban environment with vibrant culture and tech jobs, but very high living expenses. Remember, there is no free lunch. High reward comes with high cost.`
+2. Denver
+   - `1.2x Col`
+   - `5% Tax`
+   - `1.5x Growth`
+   - `Mental +8`
+   - `Physical +9`
+   - `A balanced city with outdoor access. Moderate CoL and good opportunity - a comfortable middle, but not an extreme. The tradeoff is less focus on any single area.`
+3. Tonopah, NV
+   - `0.7x Col`
+   - `2% Tax`
+   - `0.5x Growth`
+   - `Mental +2`
+   - `Physical +3`
+   - `A quiet, rural town with very low expenses but limited job prospects. Perfect for a simple life, but career growth will be much slower.`
+
+Behavior:
+
+1. Single-select cards.
+2. `Next` disabled until one city is selected.
+3. `Back` returns to Step 1 with the Step 1 state intact.
+
+## Step 3 - Education Track (`4.Life.PickTrack.png`)
+Required visual state:
+
+1. Title is `New Player Setup - Education Track`.
+2. Subtitle is `Step 3 of 5`.
+3. Three overhanging track cards render with the selected center card elevated.
+4. Visible titles are exactly:
+   - `Degree Track`
+   - `Trades Track`
+   - `Self-Taught Track`
+5. Section bars appear in this order:
+   - `Debt/Investment`
+   - `Long-Term Potential`
+   - `Stability`
+
+Exact display copy:
 
 1. Degree Track
+   - `High student debt.`
+   - `Delayed income.`
+   - `Great. Access to specialized professional careers.`
+   - `High.`
+   - `Formal university education for specialized professions. Significant up-front investment but strong career path.`
 2. Trades Track
+   - `Lower than Degree track.`
+   - `Practical training.`
+   - `Good. In-demand, skilled technical skills.`
+   - `High.`
+   - `Vocational training for high-demand skilled trades. Lower cost and faster entry into a good income.`
 3. Self-Taught Track
-
-Card anatomy:
-
-1. Title row with track icon + label.
-2. `Debt/Investment` section.
-3. `Long-Term Potential` section.
-4. `Stability` section.
-5. Bottom descriptive paragraph.
+   - `Minimal financial debt.`
+   - `Self-driven learning.`
+   - `Great. Highly variable outcomes.`
+   - `Variable.`
+   - `Rely on self-driven learning and practical experience. Minimal up-front cost, success depends heavily on individual drive and market demand.`
 
 Behavior:
 
-1. Single-select card behavior.
-2. Next disabled until one track selected.
-3. Back returns to Step 2 with selected city retained.
+1. Single-select cards.
+2. `Next` disabled until one track is selected.
+3. `Back` returns to Step 2 with the selected city retained.
 
-## Step 4 - Pick a Career
-Required cards (exact count: 3 at a time):
+## Step 4 - Pick a Career (`5.Life.PickJob.png`)
+Required visual state:
 
-1. Render only jobs for selected track.
-2. For Trades track, cards must include: Dental Hygienist, Electrician, Mechanic.
+1. Title is `New Player Setup - Pick a Career`.
+2. Subtitle is `Step 4 of 5`.
+3. Three overhanging job cards render for the selected track only.
+4. Each card has a large illustrated hero panel at the top.
+5. Section bars appear in this order:
+   - `Income`
+   - `Stability`
+   - `Wage Growth`
 
-Card anatomy:
+Trades-track required cards and copy:
 
-1. Large job illustration area at top.
-2. Title row with job name.
-3. `Income` section showing annual salary format (`$60,000 / yr`).
-4. `Stability` section.
-5. `Wage Growth` section.
-6. Bottom one-line outlook text.
-
-Behavior:
-
-1. Single-select card behavior.
-2. Next disabled until one job selected.
-3. Back returns to Step 3 with track retained.
-
-## Step 5 - New Game Summary
-Required structure:
-
-1. Heading: `New Game - Summary`.
-2. Subtitle: `Step 5 of 5`.
-3. Summary list with one row per configured player.
-4. Per-row fields in order:
-   - avatar + `Name: <name>` and `City: <city>`
-   - education icon + `Education: <track>`
-   - job icon + `Job: <job>`
-5. Footer buttons:
-   - secondary: `+ New Player`
-   - primary: `Start Game`
+1. Dental Hygienist
+   - Hero art depicts a dental-treatment scene.
+   - `\$77,000 / yr`
+   - `High`
+   - `Good (further specialization options)`
+2. Electrician
+   - Hero art depicts an electrician working on a breaker/panel.
+   - `\$60,000 / yr`
+   - `High`
+   - `High (master electrician license track)`
+3. Mechanic
+   - Hero art depicts a mechanic working under an open hood.
+   - `\$42,000 / yr`
+   - `High`
+   - `Good (ASE certification track)`
 
 Behavior:
 
-1. `+ New Player` creates a new draft player and routes to Step 1.
-2. Existing completed players remain intact in summary.
-3. `Start Game` disabled when configured players < 2.
-4. `Start Game` enabled when configured players >= 2.
+1. Render only jobs for the currently selected track.
+2. `Next` disabled until one job is selected.
+3. `Back` returns to Step 3 with the selected track retained.
 
-# State and Data Requirements
-1. Keep wizard data in one container state object:
+## Step 5 - New Game Summary (`6.Life.NewGameSummary.png`)
+Required visual state:
+
+1. Title is `New Game - Summary`.
+2. Subtitle is `Step 5 of 5`.
+3. A wide white summary sheet overhangs the modal shell horizontally.
+4. The sheet shows three horizontal rows separated by subtle dividers, not three standalone boxed cards.
+5. Each row follows this cluster order:
+   - avatar tile, then `Name:` and `City:` stacked text
+   - city illustration tile
+   - `Education:` label and education illustration
+   - `Job:` label and job illustration
+6. Footer buttons are centered below the summary sheet in this order:
+   - `+ New Player`
+   - `Start Game`
+
+Behavior:
+
+1. Runtime rows render dynamic configured players.
+2. Screenshot baseline may seed the exact sample rows from the reference in `wizardSummaryFixture`.
+3. `+ New Player` starts a fresh draft without removing completed rows.
+4. `Start Game` is disabled when configured players `< 2`.
+5. `Start Game` is enabled when configured players `>= 2`.
+
+# State And Data Requirements
+1. Keep wizard state in one container object with:
    - `currentStep`
    - `players[]`
-   - `draftPlayer` (active player being configured)
-2. Required per-player setup fields:
+   - `draftPlayer`
+2. Required runtime player fields remain:
    - `name`
    - `avatar`
    - `cityId`
    - `educationTrackId`
    - `jobId`
-3. Step 4 jobs are derived by filtering `setupCatalog.jobs` by selected `educationTrackId`.
-4. Do not hardcode city/track/job records in component files.
-5. Step transitions must not recompute or clear already chosen values unless user explicitly changes upstream selection.
+3. Use canonical ids from `setupCatalog.js` for runtime logic and filtering.
+4. Use `wizardVisualCatalog.js` for all display copy, art, tile order, and seeded screenshot fixtures.
+5. Upstream changes retain downstream state unless a selection becomes invalid and must be cleared deterministically.
 
 # Accessibility Requirements
-1. Modal traps focus; ESC closes when not blocked by in-flight submit.
-2. Card tiles are real buttons with visible focus styles.
-3. Close button has `aria-label="Close modal"`.
-4. Every Next/Back button remains keyboard reachable.
-5. Step title/subtitle should be announced as part of dialog content.
+1. Modal traps focus and closes on `Escape`.
+2. Close button has `aria-label="Close modal"`.
+3. Persona tiles and cards are real buttons with visible focus treatment.
+4. Step title/subtitle are part of the dialog content.
+5. Decorative art remains ignored by screen readers; meaningful labels come from surrounding text or accessible labels.
 
-# Failure and Rollback Notes
-1. If any step violates card count or required section labels, block merge.
-2. If back navigation drops selections, revert step-state refactor and reintroduce with deterministic tests.
-3. If Step 4 filtering leaks jobs from other tracks, revert Step 4 rendering and restore catalog-driven filter logic.
-4. If summary can start with <2 players, block merge until gating is fixed.
+# Automated Visual Validation Contract
+`src/ui/e2e/wizard-visual.spec.js` must:
+
+1. Use deterministic screenshot states for Screens 2-6.
+2. Set viewport to `1280x720`.
+3. Disable animations/transitions that would destabilize snapshots.
+4. Use a wizard-owned fixture/backdrop state that visually matches the blurred Game Hub scene in the references without depending on `W1-S4` files.
+5. Produce one snapshot per screen:
+   - Step 1 open state
+   - Step 2 with Denver selected
+   - Step 3 with Trades Track selected
+   - Step 4 with Electrician selected
+   - Step 5 summary state
+
+# Failure And Rollback Notes
+1. If any step renders generic in-modal 3-column cards instead of the overhanging composition in Screens 3-5, block merge.
+2. If synthetic token badges, placeholder descriptions, or generated stat-line text appear, block merge.
+3. If Step 1 shows text captions under persona tiles, block merge.
+4. If Step 5 renders boxed cards instead of one wide summary sheet with dividers, block merge.
+5. If screenshot baselines are missing or unstable, revert the affected visual-test wiring and reintroduce it with deterministic fixtures before merge.
 
 # Acceptance Criteria
-1. Legacy one-screen create modal is fully replaced by five-step wizard.
-2. Steps 1-5 match the screenshot structure and hierarchy from Screens 2-6.
-3. Step gating, back/next behavior, and data retention work for 2+ players.
-4. Summary rows include avatar, name, city, education, and job for each player.
-5. Start button gating enforces minimum 2 players.
+1. Screens 2-6 visually match the reference images in layout, scale, hierarchy, and art treatment.
+2. Wizard display copy and art come from a UI-owned visual catalog, not canonical simulation data.
+3. Navigation/back/next gating and data retention remain correct for 2+ players.
+4. Automated visual tests cover Screens 2-6 and pass locally in the dev container.
 
 # Validation
 ```bash
 npm --prefix src/ui run test:ci
+PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium VITE_STORAGE_MODE=local npm --prefix src/ui run build
+npm --prefix src/ui exec playwright test e2e/wizard-visual.spec.js
 ```
-
-Manual visual validation (required):
-
-1. Compare each rendered step against corresponding file in `docs/sample-images/`.
-2. Verify modal overlay blur/dim and centered container proportions.
-3. Verify Step 5 row layout and footer button order (`+ New Player`, `Start Game`).
