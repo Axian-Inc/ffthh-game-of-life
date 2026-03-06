@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-7);
-  padding: 64px 6vw 96px;
-  max-width: 1200px;
+  padding: 54px 6vw 88px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -21,19 +21,19 @@
 
 .hero {
   display: grid;
-  gap: var(--space-5);
+  gap: 18px;
   justify-items: center;
   text-align: center;
 }
 
 .app-icon {
-  width: clamp(88px, 12vw, 128px);
+  width: clamp(88px, 9vw, 104px);
   aspect-ratio: 1;
-  border-radius: var(--radius-panel);
+  border-radius: 22px;
   background: var(--grad-primary);
   display: grid;
   place-items: center;
-  box-shadow: 0 16px 36px rgba(68, 165, 232, 0.2);
+  box-shadow: 0 16px 34px rgba(68, 165, 232, 0.18);
   color: #fff;
 }
 
@@ -44,8 +44,8 @@
 
 .hero-copy {
   display: grid;
-  gap: var(--space-3);
-  max-width: 640px;
+  gap: 14px;
+  max-width: 560px;
 }
 
 .eyebrow {
@@ -58,15 +58,17 @@
 }
 
 h1 {
-  font-size: clamp(3.2rem, 8vw, 4rem);
+  font-size: clamp(3.8rem, 5.3vw, 4.6rem);
+  line-height: 0.94;
   font-weight: 800;
   margin: 0;
   color: var(--text-1);
 }
 
 .tagline {
-  font-size: 1.05rem;
-  line-height: 1.6;
+  max-width: 540px;
+  font-size: 1rem;
+  line-height: 1.45;
   margin: 0;
   color: var(--text-2);
 }
@@ -92,6 +94,11 @@ h1 {
   justify-content: center;
   gap: 10px;
   box-shadow: 0 10px 24px rgba(68, 165, 232, 0.22);
+}
+
+.hero-primary-action {
+  width: min(100%, 474px);
+  margin-top: 8px;
 }
 
 .primary-action:hover {
@@ -160,10 +167,11 @@ h1 {
 
 .game-list {
   width: 100%;
-  padding: var(--space-6);
-  border-radius: var(--radius-card);
+  min-height: 262px;
+  padding: 26px 28px 28px;
+  border-radius: 28px;
   background: var(--surface);
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 18px 36px rgba(39, 45, 62, 0.08);
   border: 1px solid var(--border-soft);
 }
 
@@ -171,45 +179,50 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-5);
+  margin-bottom: 20px;
 }
 
 .game-title {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 12px;
 }
 
 .game-title-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-icon);
-  background: rgba(92, 198, 212, 0.15);
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(92, 198, 212, 0.14);
   display: grid;
   place-items: center;
   color: var(--brand-blue);
 }
 
 .game-title-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .game-list h2 {
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
+  font-size: 0.92rem;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   margin: 0;
   color: var(--text-2);
 }
 
 .game-count {
-  min-width: 44px;
-  padding: 0.35rem 0.8rem;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 10px;
   border-radius: 999px;
-  background: rgba(92, 198, 212, 0.18);
-  color: var(--text-1);
+  background: rgba(92, 198, 212, 0.14);
+  color: var(--text-2);
   font-weight: 700;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .game-items {
@@ -217,17 +230,20 @@ h1 {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-5);
+  gap: 24px;
+  justify-items: start;
 }
 
 .game-card {
   background: var(--surface);
-  border-radius: var(--radius-panel);
+  width: min(100%, 242px);
+  min-height: 124px;
+  border-radius: 16px;
   border: 1px solid var(--border-soft);
-  padding: var(--space-5);
+  padding: 14px 14px 13px;
   display: grid;
-  gap: var(--space-3);
-  box-shadow: 0 10px 24px rgba(39, 45, 62, 0.06);
+  gap: 10px;
+  box-shadow: 0 8px 18px rgba(39, 45, 62, 0.05);
 }
 
 .game-card:focus-visible {
@@ -262,8 +278,8 @@ h1 {
 
 .game-card h3 {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 0.94rem;
+  font-weight: 800;
   color: var(--text-1);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -274,21 +290,22 @@ h1 {
 
 .game-card-meta {
   display: flex;
-  gap: var(--space-4);
-  font-size: 0.9rem;
+  gap: 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--text-2);
 }
 
 .avatar-row {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .avatar {
-  width: 34px;
-  height: 34px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -296,7 +313,7 @@ h1 {
   background: rgba(92, 198, 212, 0.12);
   border: 1px solid rgba(92, 198, 212, 0.2);
   color: var(--text-1);
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 700;
 }
 
@@ -306,22 +323,22 @@ h1 {
 }
 
 .avatar .player-avatar-render {
-  font-size: 1rem;
+  font-size: 0.78rem;
 }
 
 .game-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: 10px;
 }
 
 .status-pill {
-  font-size: 0.75rem;
+  font-size: 0.58rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.35rem 0.65rem;
+  letter-spacing: 0.11em;
+  padding: 0.28rem 0.56rem;
   border-radius: 999px;
   background: rgba(39, 45, 62, 0.08);
   color: var(--text-2);
@@ -345,28 +362,31 @@ h1 {
 .game-card-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .game-card-actions .primary-action {
-  height: 44px;
-  padding: 0 18px;
-  font-size: 0.9rem;
+  height: 32px;
+  padding: 0 14px;
+  font-size: 0.74rem;
   box-shadow: none;
 }
 
 .game-card-actions .secondary-action {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   display: grid;
   place-items: center;
+  border-radius: 10px;
+  background: rgba(39, 45, 62, 0.03);
+  box-shadow: none;
 }
 
 .game-card-actions .secondary-action svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .resume-error,
@@ -815,7 +835,7 @@ h1 {
 
 @media (min-width: 720px) {
   .game-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

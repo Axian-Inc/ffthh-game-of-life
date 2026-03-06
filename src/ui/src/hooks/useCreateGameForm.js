@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
-import { buildNameCounts, createDefaultPlayers, getPlayerErrors } from '../utils/gameValidation'
+import {
+  buildNameCounts,
+  createCommittedPlayer,
+  createDraftPlayer,
+  createSetupDraft,
+  getPlayerErrors,
+} from '../utils/gameValidation'
 import {
   DEFAULT_PLAYER_AVATAR_KEY,
   getNextAvailablePlayerAvatarKey,
@@ -9,19 +15,24 @@ import {
 const DEFAULT_PLAYER_ID = 1
 
 const useCreateGameForm = () => {
-  const [gameName, setGameName] = useState('')
+  const [setupDraft, setSetupDraft] = useState(() =>
+    createSetupDraft({
+      draftPlayer: createDraftPlayer({
+        avatar: DEFAULT_PLAYER_AVATAR_KEY,
+      }),
+    }),
+  )
   const [gameNameTouched, setGameNameTouched] = useState(false)
-  const [players, setPlayers] = useState(createDefaultPlayers)
   const [nextPlayerId, setNextPlayerId] = useState(DEFAULT_PLAYER_ID)
-  const [draftPlayer, setDraftPlayer] = useState({
-    name: '',
-    avatar: DEFAULT_PLAYER_AVATAR_KEY,
-  })
   const [draftTouched, setDraftTouched] = useState({ name: false })
 
   const maxGameNameLength = 60
   const maxPlayerNameLength = 24
-  const minPlayers = 1
+  const minPlayers = 2
+
+  const gameName = setupDraft.name
+  const players = setupDraft.players
+  const draftPlayer = setupDraft.draftPlayer
 
   const trimmedGameName = gameName.trim()
   const isGameNameTooLong = trimmedGameName.length > maxGameNameLength
@@ -58,19 +69,26 @@ const useCreateGameForm = () => {
   const isDraftValid = !draftErrors.name
 
   const resetDraft = (keepAvatar = true) => {
-    setDraftPlayer((current) => ({
-      name: '',
-      avatar: keepAvatar ? current.avatar : DEFAULT_PLAYER_AVATAR_KEY,
+    setSetupDraft((current) => ({
+      ...current,
+      draftPlayer: createDraftPlayer({
+        avatar: keepAvatar ? current.draftPlayer.avatar : DEFAULT_PLAYER_AVATAR_KEY,
+      }),
     }))
     setDraftTouched({ name: false })
   }
 
   const resetForm = () => {
-    setGameName('')
+    setSetupDraft(
+      createSetupDraft({
+        draftPlayer: createDraftPlayer({
+          avatar: DEFAULT_PLAYER_AVATAR_KEY,
+        }),
+      }),
+    )
     setGameNameTouched(false)
-    setPlayers(createDefaultPlayers())
     setNextPlayerId(DEFAULT_PLAYER_ID)
-    resetDraft(false)
+    setDraftTouched({ name: false })
   }
 
   const markAllTouched = () => {
@@ -90,39 +108,70 @@ const useCreateGameForm = () => {
     const trimmedName = draftPlayer.name.trim()
     const nextPlayers = [
       ...players,
-      {
+      createCommittedPlayer({
         id: nextPlayerId,
         name: trimmedName,
         avatar: draftPlayer.avatar,
-      },
+        cityId: draftPlayer.cityId,
+        educationTrackId: draftPlayer.educationTrackId,
+        jobId: draftPlayer.jobId,
+      }),
     ]
-    setPlayers(nextPlayers)
-    setDraftPlayer((current) => ({
-      name: '',
-      avatar: getNextAvailablePlayerAvatarKey(current.avatar, nextPlayers.map((player) => player.avatar)),
+    setSetupDraft((current) => ({
+      ...current,
+      players: nextPlayers,
+      draftPlayer: createDraftPlayer({
+        avatar: getNextAvailablePlayerAvatarKey(
+          current.draftPlayer.avatar,
+          nextPlayers.map((player) => player.avatar),
+        ),
+      }),
     }))
-    setDraftTouched({ name: false })
     setNextPlayerId((current) => current + 1)
+    setDraftTouched({ name: false })
     return true
   }
 
   const removePlayer = (playerId) => {
-    setPlayers((current) => current.filter((player) => player.id !== playerId))
+    setSetupDraft((current) => ({
+      ...current,
+      players: current.players.filter((player) => player.id !== playerId),
+    }))
+  }
+
+  const setGameName = (value) => {
+    setSetupDraft((current) => ({
+      ...current,
+      name: value,
+    }))
   }
 
   const updateDraftName = (value) => {
-    setDraftPlayer((current) => ({ ...current, name: value }))
+    setSetupDraft((current) => ({
+      ...current,
+      draftPlayer: {
+        ...current.draftPlayer,
+        name: value,
+      },
+    }))
   }
 
   const cycleDraftAvatar = () => {
     const unavailableAvatarValues = players.map((player) => player.avatar)
-    setDraftPlayer((current) => ({
+    setSetupDraft((current) => ({
       ...current,
-      avatar: getNextAvailablePlayerAvatarKey(getNextPlayerAvatarKey(current.avatar), unavailableAvatarValues),
+      draftPlayer: {
+        ...current.draftPlayer,
+        avatar: getNextAvailablePlayerAvatarKey(
+          getNextPlayerAvatarKey(current.draftPlayer.avatar),
+          unavailableAvatarValues,
+        ),
+      },
     }))
   }
 
   return {
+    setupDraft,
     gameName,
     setGameName,
     gameNameTouched,

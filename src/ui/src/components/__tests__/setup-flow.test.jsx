@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
+import App from '../../App'
 import CreateGameModal from '../modals/CreateGameModal'
 
 const baseProps = {
@@ -31,6 +32,10 @@ const baseProps = {
   isCreating: false,
 }
 
+const STORAGE_KEY = 'ffthh-game-of-life.games'
+
+const getStoredGames = () => JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]')
+
 const createPlayer = async (user, { name, avatar, city, track, job }) => {
   await user.clear(screen.getByLabelText('Player Name:'))
   await user.type(screen.getByLabelText('Player Name:'), name)
@@ -45,6 +50,11 @@ const createPlayer = async (user, { name, avatar, city, track, job }) => {
 }
 
 describe('New game setup flow', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    window.history.replaceState({}, '', '/')
+  })
+
   it('keeps Next disabled until the game name is non-empty', async () => {
     const user = userEvent.setup()
     render(<CreateGameModal {...baseProps} />)
@@ -144,5 +154,75 @@ describe('New game setup flow', () => {
 
     expect(screen.getByRole('button', { name: 'Start Game' })).toBeDisabled()
     expect(screen.getByText('Add at least two players to start the game.')).toBeInTheDocument()
+  })
+
+  it('persists a new game only after the final start action and keeps both players', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const initialCount = getStoredGames().length
+
+    await user.click(screen.getByRole('button', { name: 'New Game' }))
+    await user.type(screen.getByLabelText('Game Name:'), 'Draft Contract')
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    await createPlayer(user, {
+      name: 'Alex',
+      avatar: 'Robot',
+      city: 'Denver',
+      track: 'Degree Track',
+      job: 'Dental Hygienist',
+    })
+
+    expect(screen.getByRole('button', { name: 'Start Game' })).toBeDisabled()
+    expect(getStoredGames()).toHaveLength(initialCount)
+    expect(getStoredGames().some((game) => game.name === 'Draft Contract')).toBe(false)
+
+    await user.click(screen.getByRole('button', { name: '+ New Player' }))
+    await createPlayer(user, {
+      name: 'Bailey',
+      avatar: 'Cat',
+      city: 'San Francisco',
+      track: 'Trades Track',
+      job: 'Electrician',
+    })
+
+    const startButton = screen.getByRole('button', { name: 'Start Game' })
+    expect(startButton).toBeEnabled()
+
+    await user.click(startButton)
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
+    })
+
+    let savedGame
+    await waitFor(() => {
+      savedGame = getStoredGames().find((game) => game.name === 'Draft Contract')
+      expect(savedGame).toBeDefined()
+    })
+    expect(savedGame.players).toHaveLength(2)
+    expect(savedGame.players).toEqual([
+      expect.objectContaining({
+        name: 'Alex',
+        cityId: 'denver',
+        educationTrackId: 'degree-track',
+        jobId: 'dental-hygienist',
+        careerTrack: 'Degree Track',
+      }),
+      expect.objectContaining({
+        name: 'Bailey',
+        cityId: 'san-francisco',
+        educationTrackId: 'trades-track',
+        jobId: 'electrician',
+        careerTrack: 'Trades Track',
+      }),
+    ])
+
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Draft Contract' })).toBeInTheDocument()
+    })
   })
 })

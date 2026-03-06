@@ -1,9 +1,12 @@
-export const createPlayer = (overrides = {}) => ({
-  id: overrides.id ?? 'player-1',
-  name: overrides.name ?? 'Ari',
-  avatar: overrides.avatar ?? 'monkey-face',
-  ...overrides,
-})
+import { createCommittedPlayer } from '../utils/gameValidation'
+
+export const createPlayer = (overrides = {}) =>
+  createCommittedPlayer({
+    id: overrides.id ?? 'player-1',
+    name: overrides.name ?? 'Ari',
+    avatar: overrides.avatar ?? 'monkey-face',
+    ...overrides,
+  })
 
 export const createGame = (overrides = {}) => ({
   id: overrides.id ?? 'game-1',
