@@ -2,9 +2,24 @@ import { seedGames } from '../data/seedGames'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 
+const normalizePlayer = (player = {}) => ({
+  ...player,
+  id: String(player.id),
+  name: typeof player.name === 'string' ? player.name : '',
+  avatar: typeof player.avatar === 'string' ? player.avatar : 'monkey-face',
+  cityId: typeof player.cityId === 'string' ? player.cityId : '',
+  educationTrackId: typeof player.educationTrackId === 'string' ? player.educationTrackId : '',
+  jobId: typeof player.jobId === 'string' ? player.jobId : '',
+  careerTrack: typeof player.careerTrack === 'string' ? player.careerTrack : '',
+})
+
 const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
+  name: typeof game.name === 'string' ? game.name : '',
+  players: Array.isArray(game.players) ? game.players.map(normalizePlayer) : [],
+  status: game.status || 'active',
+  resumable: game.resumable ?? true,
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)
@@ -66,14 +81,11 @@ const saveLocalGames = (games) => {
 const createLocalStorage = () => ({
   listGames: async () => loadLocalGames(),
   createGame: async (game) => {
-    const games = loadLocalGames()
-    const createdGame = normalizeGame({
+    return normalizeGame({
       ...game,
       id: game.id ? String(game.id) : generateId(),
+      isDraft: true,
     })
-    const updated = [createdGame, ...games]
-    saveLocalGames(updated)
-    return createdGame
   },
   deleteGame: async (gameId) => {
     const games = loadLocalGames()
@@ -84,16 +96,15 @@ const createLocalStorage = () => ({
     const normalizedId = String(gameId)
     const games = loadLocalGames()
     const existing = games.find((game) => game.id === normalizedId)
-    if (!existing) {
-      throw new Error('Game not found')
-    }
-
     const merged = normalizeGame({
       ...existing,
       ...updates,
       id: normalizedId,
+      isDraft: false,
     })
-    const updated = games.map((game) => (game.id === normalizedId ? merged : game))
+    const updated = existing
+      ? games.map((game) => (game.id === normalizedId ? merged : game))
+      : [merged, ...games]
     saveLocalGames(updated)
     return merged
   },
@@ -123,23 +134,34 @@ const createApiStorage = (baseUrl) => ({
     const games = Array.isArray(data?.games) ? data.games : []
     return normalizeGames(games)
   },
-  createGame: async (game) => {
-    const data = await fetchJson(`${baseUrl}/games`, {
-      method: 'POST',
-      body: JSON.stringify({ game }),
-    })
-    const created = data?.game ? normalizeGame(data.game) : normalizeGame({ ...game, id: generateId() })
-    return created
-  },
+  createGame: async (game) =>
+    normalizeGame({
+      ...game,
+      id: game.id ? String(game.id) : generateId(),
+      isDraft: true,
+    }),
   deleteGame: async (gameId) => {
     await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`, { method: 'DELETE' })
   },
   updateGame: async (gameId, updates) => {
-    const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`, {
-      method: 'PUT',
-      body: JSON.stringify({ game: updates }),
-    })
-    return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+    try {
+      const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ game: updates }),
+      })
+      return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+    } catch (error) {
+      const data = await fetchJson(`${baseUrl}/games`, {
+        method: 'POST',
+        body: JSON.stringify({
+          game: {
+            ...updates,
+            id: String(gameId),
+          },
+        }),
+      })
+      return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+    }
   },
 })
 

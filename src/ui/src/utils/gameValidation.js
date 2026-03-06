@@ -1,10 +1,18 @@
 export const createDefaultPlayers = () => []
 
+export const createDefaultDraftPlayer = () => ({
+  name: '',
+  avatar: 'monkey-face',
+  cityId: '',
+  educationTrackId: '',
+  jobId: '',
+})
+
 export const buildNameCounts = (players) => {
   const counts = {}
 
   players.forEach((player) => {
-    const name = player.name.trim().toLowerCase()
+    const name = player?.name?.trim().toLowerCase()
     if (!name) {
       return
     }
