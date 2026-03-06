@@ -20,7 +20,7 @@ describe('Game components', () => {
 
   it('renders StatusPill', () => {
     render(<StatusPill status="active" />)
-    expect(screen.getByText('active')).toBeInTheDocument()
+    expect(screen.getByText('ACTIVE')).toBeInTheDocument()
   })
 
   it('renders AvatarRow with overflow', () => {
