@@ -92,8 +92,10 @@ function App() {
     setIsStartingGame(false)
   }
 
-  const handleCreateGame = async () => {
-    if (!isGameNameValid || !arePlayersValid) {
+  const handleCreateGame = async (setupPayload) => {
+    const nextName = setupPayload?.name?.trim() || ''
+    const nextPlayers = Array.isArray(setupPayload?.players) ? setupPayload.players : []
+    if (!nextName || nextPlayers.length < minPlayers) {
       markAllTouched()
       return
     }
@@ -103,9 +105,9 @@ function App() {
     try {
       const timestamp = Date.now()
       const newGame = {
-        name: trimmedGameName,
+        name: nextName,
         status: 'active',
-        players: players.map((player) => ({
+        players: nextPlayers.map((player) => ({
           ...player,
           name: player.name.trim(),
         })),
@@ -114,7 +116,11 @@ function App() {
         resumable: true,
       }
       const createdGame = await createGame(newGame)
-      openSetup(createdGame)
+      const savedGame = await updateGame(createdGame.id, {
+        ...createdGame,
+        lastUpdated: Date.now(),
+      })
+      openPlay(savedGame)
       resetForm()
     } catch (error) {
       setCreateError('We could not create that game yet. Please try again.')

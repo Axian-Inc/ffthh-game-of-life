@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test'
 
+const createPlayer = async (page, { name, avatar, city, track, job }) => {
+  await page.getByLabel('Player Name:').fill(name)
+  await page.getByRole('button', { name: avatar }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: city }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: track }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: job }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+}
+
 test('create, configure, and delete a game', async ({ page }) => {
   const storageKey = 'ffthh-game-of-life.games'
 
@@ -8,14 +20,16 @@ test('create, configure, and delete a game', async ({ page }) => {
   await page.reload()
 
   await page.getByRole('button', { name: 'New Game' }).click()
-  await page.locator('#game-name').fill('Automation Game')
-  await page.getByPlaceholder('Player nickname').fill('Alex')
-  await page.getByRole('button', { name: 'Add Player' }).click()
-  await expect(page.getByRole('button', { name: /Start Game with 1 Player/i })).toBeDisabled()
+  await page.getByLabel('Game Name:').fill('Automation Game')
+  await page.getByRole('button', { name: 'Next' }).click()
 
-  await page.getByPlaceholder('Player nickname').fill('Bailey')
-  await page.getByRole('button', { name: 'Add Player' }).click()
-  await page.getByRole('button', { name: /Start Game with 2 Players/i }).click()
+  await createPlayer(page, {
+    name: 'Alex',
+    avatar: 'Robot',
+    city: 'Denver',
+    track: 'Degree Track',
+    job: 'Dental Hygienist',
+  })
 
   const existsBeforeFinalStart = await page.evaluate(
     ({ key, name }) => {
@@ -26,12 +40,19 @@ test('create, configure, and delete a game', async ({ page }) => {
   )
   expect(existsBeforeFinalStart).toBe(false)
 
-  await expect(page.getByRole('heading', { name: 'Choose a career path' })).toBeVisible()
-  await page.getByRole('button', { name: /Degree Track/i }).click()
-  await page.getByRole('button', { name: /Trades Track/i }).click()
+  await expect(page.getByRole('button', { name: 'Start Game' })).toBeDisabled()
+  await page.getByRole('button', { name: '+ New Player' }).click()
+  await createPlayer(page, {
+    name: 'Bailey',
+    avatar: 'Cat',
+    city: 'San Francisco',
+    track: 'Trades Track',
+    job: 'Electrician',
+  })
+
   await page.getByRole('button', { name: 'Start Game' }).click()
 
-  await expect(page.getByRole('heading', { name: 'Automation Game' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
 
   const savedGame = await page.evaluate(
     ({ key, name }) => {
@@ -45,7 +66,7 @@ test('create, configure, and delete a game', async ({ page }) => {
   expect(savedGame.players.map((player) => player.name)).toEqual(['Alex', 'Bailey'])
   expect(savedGame.players.map((player) => player.careerTrack)).toEqual(['Degree Track', 'Trades Track'])
 
-  await page.getByRole('button', { name: 'Back to home' }).click()
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
 
   await expect(page.getByRole('heading', { name: 'Automation Game' })).toBeVisible()
 
