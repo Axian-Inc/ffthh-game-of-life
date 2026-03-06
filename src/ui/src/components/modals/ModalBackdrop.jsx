@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const ModalBackdrop = ({ onBackdropClick, children }) => {
+const ModalBackdrop = ({ onBackdropClick, onRequestClose, children }) => {
   const overlayRef = useRef(null)
 
   useEffect(() => {
@@ -22,6 +22,12 @@ const ModalBackdrop = ({ onBackdropClick, children }) => {
     }
 
     const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onRequestClose?.()
+        return
+      }
+
       if (event.key !== 'Tab') {
         return
       }
@@ -42,7 +48,7 @@ const ModalBackdrop = ({ onBackdropClick, children }) => {
 
     overlay.addEventListener('keydown', handleKeyDown)
     return () => overlay.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [onRequestClose])
 
   return (
     <div

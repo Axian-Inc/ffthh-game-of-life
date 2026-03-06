@@ -1,11 +1,16 @@
 import { getPlayerAvatarOption } from '../../data/playerAvatars'
+import { getWizardPersona } from '../../data/wizardVisualCatalog'
 
 const PlayerAvatar = ({ avatar, className = '', decorative = false }) => {
-  const option = getPlayerAvatarOption(avatar)
+  const option =
+    typeof avatar === 'string'
+      ? getPlayerAvatarOption(avatar) || getWizardPersona(avatar)
+      : avatar
   const classes = `player-avatar-render ${className}`.trim()
 
-  if (option) {
-    const { src, label } = option
+  if (option?.src || option?.asset) {
+    const src = option.src || option.asset
+    const label = option.label
     return (
       <span
         aria-hidden={decorative}

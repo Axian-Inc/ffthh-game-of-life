@@ -87,9 +87,10 @@ describe('Modal components', () => {
       />,
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
-    expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByText('New Player Setup')).toBeInTheDocument()
+    expect(screen.getByText('Choose Your Digital Persona:')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Rocket persona' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 
   it('ResumeGameModal renders results mode', () => {

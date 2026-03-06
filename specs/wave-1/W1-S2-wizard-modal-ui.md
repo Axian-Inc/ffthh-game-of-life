@@ -13,6 +13,7 @@ owned_paths:
   - src/ui/src/data/playerAvatars.js
   - src/ui/src/data/wizardVisualCatalog.js
   - src/ui/src/assets/wizard/
+  - src/ui/src/assets/wizard/art.js
   - src/ui/src/components/modals/CreateGameModal.jsx
   - src/ui/src/components/modals/ModalBackdrop.jsx
   - src/ui/src/components/forms/NewGameWizard.jsx
@@ -26,7 +27,12 @@ owned_paths:
   - src/ui/src/components/__tests__/modals.test.jsx
   - src/ui/src/components/__tests__/setup-flow.test.jsx
   - src/ui/e2e/wizard-visual.spec.js
-  - src/ui/e2e/__snapshots__/wizard-visual.spec.js-snapshots/
+  - src/ui/e2e/wizard-visual.spec.js-snapshots/
+  - src/ui/e2e/wizard-visual.spec.js-snapshots/-snapshots-wizard-visual-spec-js-snapshots-wizard-step-1-linux.png
+  - src/ui/e2e/wizard-visual.spec.js-snapshots/-snapshots-wizard-visual-spec-js-snapshots-wizard-step-2-linux.png
+  - src/ui/e2e/wizard-visual.spec.js-snapshots/-snapshots-wizard-visual-spec-js-snapshots-wizard-step-3-linux.png
+  - src/ui/e2e/wizard-visual.spec.js-snapshots/-snapshots-wizard-visual-spec-js-snapshots-wizard-step-4-linux.png
+  - src/ui/e2e/wizard-visual.spec.js-snapshots/-snapshots-wizard-visual-spec-js-snapshots-wizard-step-5-linux.png
 ---
 
 # Objective

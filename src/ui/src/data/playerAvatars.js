@@ -18,8 +18,16 @@ import squid from 'openmoji/color/svg/1F991.svg'
 import tRex from 'openmoji/color/svg/1F996.svg'
 import turtle from 'openmoji/color/svg/1F422.svg'
 import whale from 'openmoji/color/svg/1F433.svg'
+import { wizardPersonas } from './wizardVisualCatalog'
+
+const WIZARD_AVATAR_OPTIONS = wizardPersonas.map((persona) => ({
+  key: persona.id,
+  label: persona.label,
+  src: persona.asset,
+}))
 
 export const PLAYER_AVATAR_OPTIONS = [
+  ...WIZARD_AVATAR_OPTIONS,
   { key: 'octopus', label: 'Octopus', src: octopus },
   { key: 'snake', label: 'Snake', src: snake },
   { key: 'turtle', label: 'Turtle', src: turtle },
