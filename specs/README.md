@@ -1,9 +1,9 @@
-# Spec Waves: New Game Wizard + Welcome Resume
+# Spec Waves: Desktop Wave 1 Restart
 
 This directory contains decision-complete specs organized by wave so multiple agents can work in parallel with low merge risk.
 
 ## Dispatch Contract
-Every spec file includes YAML frontmatter keys consumed by `$spec-dispatch`:
+Every spec file includes YAML frontmatter keys consumed by `spec-dispatch`:
 
 - `spec_id`
 - `wave`
@@ -16,37 +16,38 @@ Every spec file includes YAML frontmatter keys consumed by `$spec-dispatch`:
 
 | Wave | Purpose | Specs | Run Mode |
 |---|---|---|---|
-| 0 | Delivery framework | W0-S1, W0-S2, W0-S3 | Parallel |
-| 1 | Setup data + wizard UI + welcome UI | W1-S1, W1-S2, W1-S3 | Parallel |
+| 1 | Desktop setup-flow restart: persistence, wizard, home + welcome | W1-S1, W1-S2, W1-S3 | Parallel |
 | 2 | App flow + storage/resume integration | W2-S1, W2-S2 | Parallel |
 | 3 | Full UI test coverage | W3-S1, W3-S2 | Parallel |
 
 ## Branching Model
+1. Create one integration branch per wave from the branch that contains the spec pack.
+2. Create one spec branch per spec from the wave integration branch.
+3. Merge all spec PRs into the wave integration branch.
+4. Run wave gate tests on the wave integration branch.
+5. Open one PR from the wave integration branch back to the source branch for that rerun.
 
-1. Create one integration branch per wave (example: `codex/wave-1-integration`).
-2. Create one spec branch per spec (example: `codex/w1-s2-wizard-modal-ui`) from the wave integration branch.
-3. Merge all spec PRs into wave integration branch.
-4. Run wave gate tests on wave integration branch.
-5. Open one PR from wave integration branch to `march_start`.
+For the current Wave 1 restart, the source branch is `march_test`.
 
-## Gittree Pattern
-Use `git worktree` so each agent has isolated filesystem + branch:
+## Parallel-Wave Rule For Wave 1
+Wave 1 remains parallel only because the three specs now split ownership cleanly:
+
+1. `W1-S1` owns the setup draft, saved payload, and end-to-end persistence contract.
+2. `W1-S2` owns the six-step wizard UI and desktop wizard visual baselines.
+3. `W1-S3` owns the home screen, Welcome screen, and desktop routing/navigation behavior.
+4. Do not introduce new shared cross-spec primitives outside an owning spec.
+
+## Worktree Pattern
+Use `git worktree` so each agent has isolated filesystem and branch:
 
 ```bash
-git worktree add ../worktrees/W1-S2 -b codex/w1-s2-wizard-modal-ui origin/codex/wave-1-integration
-```
-
-## Skill Invocation Pattern
-From each worktree:
-
-```bash
-codex --yolo "Use $spec-dispatch with spec /ABS/PATH/TO/specs/wave-1/W1-S2-wizard-modal-ui.md"
+git worktree add ../worktrees/W1-S2 -b codex/w1-s2-six-step-wizard-ui origin/codex/wave-1-integration
 ```
 
 ## Gate Criteria
 A wave is complete only when:
 
 1. All spec PRs merged into the wave integration branch.
-2. All required tests in every spec frontmatter pass.
-3. Operator verifies no owned path violations in merged diff.
-4. Wave PR summary includes behavior changes + test evidence.
+2. All `test_commands` pass.
+3. No owned-path violations appear in the merged diff.
+4. The wave summary records behavior changes and test evidence.
