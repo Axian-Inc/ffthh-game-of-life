@@ -1,0 +1,86 @@
+.welcome-page {
+  min-height: calc(100vh - 160px);
+  display: grid;
+  place-items: start center;
+  padding: 8px 0 40px;
+}
+
+.welcome-shell {
+  width: min(100%, 460px);
+  display: grid;
+  justify-items: center;
+  gap: 24px;
+  color: var(--text-1);
+}
+
+.welcome-logo {
+  width: 108px;
+  height: 108px;
+  border-radius: 24px;
+  background: var(--grad-primary);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 18px 38px rgba(68, 165, 232, 0.18);
+  color: #fff;
+}
+
+.welcome-logo svg {
+  width: 56%;
+  height: 56%;
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: clamp(2.9rem, 6vw, 3.6rem);
+  line-height: 0.98;
+  text-align: center;
+  color: var(--text-1);
+}
+
+.welcome-copy {
+  display: grid;
+  gap: 20px;
+}
+
+.welcome-section {
+  display: grid;
+  gap: 8px;
+}
+
+.welcome-section h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+
+.welcome-section p,
+.welcome-quote p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: #2f3442;
+}
+
+.welcome-quote {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(39, 45, 62, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 20px rgba(39, 45, 62, 0.04);
+}
+
+.welcome-quote-mark {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--text-1);
+}
+
+.welcome-shell .primary-action {
+  width: 100%;
+  max-width: 392px;
+}
