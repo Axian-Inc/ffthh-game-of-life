@@ -1,4 +1,31 @@
+export const createCommittedPlayer = (overrides = {}) => ({
+  id: overrides.id ?? '',
+  name: overrides.name ?? '',
+  avatar: overrides.avatar ?? '',
+  cityId: overrides.cityId ?? '',
+  educationTrackId: overrides.educationTrackId ?? '',
+  jobId: overrides.jobId ?? '',
+  careerTrack: overrides.careerTrack ?? '',
+  ...overrides,
+})
+
+export const createDraftPlayer = (overrides = {}) => ({
+  name: overrides.name ?? '',
+  avatar: overrides.avatar ?? '',
+  cityId: overrides.cityId ?? '',
+  educationTrackId: overrides.educationTrackId ?? '',
+  jobId: overrides.jobId ?? '',
+  ...overrides,
+})
+
 export const createDefaultPlayers = () => []
+
+export const createSetupDraft = (overrides = {}) => ({
+  name: overrides.name ?? '',
+  players: Array.isArray(overrides.players) ? overrides.players.map((player) => createCommittedPlayer(player)) : [],
+  draftPlayer: createDraftPlayer(overrides.draftPlayer),
+  currentStep: overrides.currentStep ?? 1,
+})
 
 export const buildNameCounts = (players) => {
   const counts = {}

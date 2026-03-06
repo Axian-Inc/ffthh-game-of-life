@@ -28,8 +28,6 @@ const useGames = () => {
 
   const createGame = async (game) => {
     const createdGame = await storage.createGame(game)
-    setGames((current) => [createdGame, ...current])
-    setNewGameId(createdGame.id)
     return createdGame
   }
 
@@ -39,8 +37,16 @@ const useGames = () => {
   }
 
   const updateGame = async (gameId, updates) => {
+    const hasExistingGame = games.some((game) => game.id === String(gameId))
     const updatedGame = await storage.updateGame(gameId, updates)
-    setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
+    setGames((current) =>
+      hasExistingGame
+        ? current.map((game) => (game.id === updatedGame.id ? updatedGame : game))
+        : [updatedGame, ...current],
+    )
+    if (!hasExistingGame) {
+      setNewGameId(updatedGame.id)
+    }
     return updatedGame
   }
 
