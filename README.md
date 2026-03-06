@@ -1,34 +1,44 @@
 # WARNING!
-DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion of it)
+DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion of it).
 
-# Pre-Requisites
+# Getting Started
+
+This repository is meant to be opened in a VS Code Dev Container volume rather than run directly on your host machine.
+
+## Prerequisites
 
 1. Docker
-1. VS Code w/Dev Containers extension 
-1. OpenAI Codex Account Token 
-1. AWS Key
+1. VS Code
+1. VS Code Dev Containers extension
+1. OpenAI Codex account token
+1. AWS credentials for the L&D environment
 
-# INITIAL SETUP (Outside Dev Container)
+## First-Time Setup on Your Host Machine
 
-1. Open a new VS Code window and use the Dev Containers extension to "Clone Repository in Container Volume"
-1. Find the `axian-inc/ffthh-game-of-life` repository, and select the `main` (or a more recent one like `march_start`) branch.
+1. Open a new VS Code window.
+1. Open the Command Palette and run `Dev Containers: Clone Repository in Container Volume`.
+   - Depending on your VS Code version, this may instead appear as `Dev Containers: Open Repository in Container Volume`.
+1. Select the `axian-inc/ffthh-game-of-life` repository.
+1. Select the `main` branch unless you have been told to use a different branch (many labs will have a starting branch like `march_start`).
 
-# INITIAL SETUP (In Dev Container)
-1. Open a fresh terminal and run `aws configure` and follow the prompts to setup the AWS CLI with your access token for the L&D environment. Be sure to set the region to us-west-2
-1. Copy your Codex `auth.json` from your host machine to this exact directory in your container: `~/.codex/auth.json`
-1. Create a new branch with your name in it
-1. Navigate to `terraform` directory and run `terraform init -reconfigure`
-1. Run `terraform workspace new {your initials}` (or `terraform workspace select {your initials}` if it already exists). Ensure that you are on this workspace when you run terraform commands. 
+## First-Time Setup Inside the Dev Container
 
-    - If you pulled recent backend changes and see a backend initialization error, re-run `terraform init -reconfigure` before creating/selecting a workspace.
+1. Open a fresh terminal in the dev container.
+1. Run `codex` and complete the sign-in flow from inside the dev container.
+1. Run `aws configure` and enter your AWS access key details for the L&D environment.
+   - Set the default region to `us-west-2`.
+1. Create a new Git branch with your name in it.
+1. Change to the `terraform` directory and run `terraform init -reconfigure`.
+1. Run `terraform workspace new {your initials}` or, if it already exists, `terraform workspace select {your initials}`.
+   - Do not run Terraform in the `default` workspace.
+   - If you pulled recent backend changes and see a backend initialization error, re-run `terraform init -reconfigure` before creating or selecting a workspace.
+   - The Terraform setup is intended to give each workspace uniquely named resources so developers do not collide with each other.
 
-    - There are instructions in the AGENT.MD file for Codex to try and enforce this, as well as for codex to ensure the workspace name is in all deployed resources. This should ensure everyone can deploy their own stack without conflicts with each other
+## Start Developing
 
-# Developing
+Run `codex --yolo` inside the dev container to get started.
 
-Simply run `codex --yolo` to get started using Codex for development
-
-NOTE: (the `--yolo` command allows Codex to run without any restrctions, hence the container)
+The `--yolo` flag allows Codex to run without restrictions, which is why development must happen inside the container.
 
 ## Headless browser testing
 
