@@ -15,7 +15,7 @@ owned_paths:
   - src/ui/src/components/pages/PlayGamePage.jsx
   - src/ui/src/components/__tests__/pages.test.jsx
   - src/ui/e2e/welcome-visual.spec.js
-  - src/ui/e2e/__snapshots__/welcome-visual.spec.js-snapshots/
+  - src/ui/e2e/__snapshots__/welcome-visual.spec.js-snapshots/welcome-screen-linux.png
 ---
 
 # Objective
