@@ -2,6 +2,10 @@ export const createPlayer = (overrides = {}) => ({
   id: overrides.id ?? 'player-1',
   name: overrides.name ?? 'Ari',
   avatar: overrides.avatar ?? 'monkey-face',
+  cityId: overrides.cityId ?? 'denver-co',
+  educationTrackId: overrides.educationTrackId ?? 'degree-track',
+  jobId: overrides.jobId ?? 'engineer',
+  careerTrack: overrides.careerTrack ?? '',
   ...overrides,
 })
 
