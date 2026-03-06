@@ -7,7 +7,7 @@ base_branch: codex/wave-1-integration
 test_commands:
   - npm --prefix src/ui run test:ci
   - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium VITE_STORAGE_MODE=local npm --prefix src/ui run build
-  - npm --prefix src/ui exec playwright test e2e/welcome-visual.spec.js
+  - npm --prefix src/ui exec -- playwright test --config src/ui/playwright.config.js e2e/welcome-visual.spec.js
 owned_paths:
   - specs/wave-1/W1-S3-welcome-screen-ui.md
   - src/ui/src/components/pages/WelcomeToLifePage.jsx
@@ -101,5 +101,5 @@ Out of scope:
 ```bash
 npm --prefix src/ui run test:ci
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium VITE_STORAGE_MODE=local npm --prefix src/ui run build
-npm --prefix src/ui exec playwright test e2e/welcome-visual.spec.js
+npm --prefix src/ui exec -- playwright test --config src/ui/playwright.config.js e2e/welcome-visual.spec.js
 ```

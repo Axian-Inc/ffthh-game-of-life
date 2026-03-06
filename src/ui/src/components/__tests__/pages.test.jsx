@@ -38,7 +38,12 @@ describe('Page components', () => {
 
     render(<PlayGamePage game={createGame({ name: 'Play It' })} onHome={onHome} />)
 
+    expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: "Let's Begin!" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
     expect(screen.getByText('Play Game')).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: 'Back to home' }))
 
     expect(onHome).toHaveBeenCalledTimes(1)
