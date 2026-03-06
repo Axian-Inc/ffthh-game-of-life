@@ -30,24 +30,7 @@ describe('Modal components', () => {
         onCancel={vi.fn()}
         onSubmit={vi.fn()}
         gameName=""
-        onGameNameChange={vi.fn()}
-        onGameNameBlur={vi.fn()}
-        gameNameTouched={false}
-        isGameNameValid={false}
-        isGameNameTooLong={false}
-        maxGameNameLength={60}
         players={[]}
-        minPlayers={1}
-        maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
-        draftTouched={{ name: false }}
-        draftErrors={{ name: '' }}
-        arePlayersValid={false}
-        onAddPlayer={vi.fn()}
-        onRemovePlayer={vi.fn()}
-        onDraftNameChange={vi.fn()}
-        onDraftBlur={vi.fn()}
-        onDraftAvatarCycle={vi.fn()}
         createError=""
         isCreating={false}
       />,
@@ -56,40 +39,24 @@ describe('Modal components', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('CreateGameModal renders fields and hides game type options', () => {
+  it('CreateGameModal renders the six-step wizard entry screen', () => {
     render(
       <CreateGameModal
         isOpen
         onBackdropClick={vi.fn()}
         onCancel={vi.fn()}
         onSubmit={vi.fn()}
-        gameName="Test"
-        onGameNameChange={vi.fn()}
-        onGameNameBlur={vi.fn()}
-        gameNameTouched={false}
-        isGameNameValid
-        isGameNameTooLong={false}
-        maxGameNameLength={60}
+        gameName=""
         players={[createPlayer({ id: 'p1' })]}
-        minPlayers={1}
-        maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
-        draftTouched={{ name: false }}
-        draftErrors={{ name: '' }}
-        arePlayersValid
-        onAddPlayer={vi.fn()}
-        onRemovePlayer={vi.fn()}
-        onDraftNameChange={vi.fn()}
-        onDraftBlur={vi.fn()}
-        onDraftAvatarCycle={vi.fn()}
         createError=""
         isCreating={false}
       />,
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
-    expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByText('New Game Setup')).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
+    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 
   it('ResumeGameModal renders results mode', () => {
@@ -147,7 +114,7 @@ describe('Modal components', () => {
           players: [],
           minPlayers: 1,
           maxPlayerNameLength: 24,
-          draftPlayer: { name: '', avatar: 'monkey-face' },
+          draftPlayer: { name: '', avatar: 'rocket' },
           draftTouched: { name: false },
           draftErrors: { name: '' },
           arePlayersValid: false,

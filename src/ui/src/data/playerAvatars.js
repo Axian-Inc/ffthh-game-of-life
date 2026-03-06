@@ -1,5 +1,20 @@
-import bat from 'openmoji/color/svg/1F987.svg'
-import blowfish from 'openmoji/color/svg/1F421.svg'
+import rocket from 'openmoji/color/svg/1F680.svg'
+import robot from 'openmoji/color/svg/1F916.svg'
+import cat from 'openmoji/color/svg/1F431.svg'
+import octopus from 'openmoji/color/svg/1F419.svg'
+import books from 'openmoji/color/svg/1F4DA.svg'
+import star from 'openmoji/color/svg/2B50.svg'
+import ringedPlanet from 'openmoji/color/svg/1FA90.svg'
+import brain from 'openmoji/color/svg/1F9E0.svg'
+import tree from 'openmoji/color/svg/1F333.svg'
+import book from 'openmoji/color/svg/1F4D5.svg'
+import spider from 'openmoji/color/svg/1F577.svg'
+import sun from 'openmoji/color/svg/2600.svg'
+import car from 'openmoji/color/svg/1F699.svg'
+import snake from 'openmoji/color/svg/1F40D.svg'
+import turtle from 'openmoji/color/svg/1F422.svg'
+import alien from 'openmoji/color/svg/1F47D.svg'
+import microbe from 'openmoji/color/svg/1F9A0.svg'
 import crab from 'openmoji/color/svg/1F980.svg'
 import crocodile from 'openmoji/color/svg/1F40A.svg'
 import dolphin from 'openmoji/color/svg/1F42C.svg'
@@ -8,81 +23,67 @@ import dragonFace from 'openmoji/color/svg/1F432.svg'
 import jellyfish from 'openmoji/color/svg/1FABC.svg'
 import lizard from 'openmoji/color/svg/1F98E.svg'
 import lobster from 'openmoji/color/svg/1F99E.svg'
-import octopus from 'openmoji/color/svg/1F419.svg'
-import sauropod from 'openmoji/color/svg/1F995.svg'
-import scorpion from 'openmoji/color/svg/1F982.svg'
-import shark from 'openmoji/color/svg/1F988.svg'
-import shrimp from 'openmoji/color/svg/1F990.svg'
-import snake from 'openmoji/color/svg/1F40D.svg'
-import squid from 'openmoji/color/svg/1F991.svg'
-import tRex from 'openmoji/color/svg/1F996.svg'
-import turtle from 'openmoji/color/svg/1F422.svg'
-import whale from 'openmoji/color/svg/1F433.svg'
 
 export const PLAYER_AVATAR_OPTIONS = [
+  { key: 'rocket', label: 'Rocket', src: rocket },
+  { key: 'robot', label: 'Robot', src: robot },
+  { key: 'cat', label: 'Cat', src: cat },
   { key: 'octopus', label: 'Octopus', src: octopus },
+  { key: 'books', label: 'Books', src: books },
+  { key: 'star', label: 'Star', src: star },
+  { key: 'ringed-planet', label: 'Ringed Planet', src: ringedPlanet },
+  { key: 'brain', label: 'Brain', src: brain },
+  { key: 'tree', label: 'Tree', src: tree },
+  { key: 'book', label: 'Book', src: book },
+  { key: 'spider', label: 'Spider', src: spider },
+  { key: 'sun', label: 'Sun', src: sun },
+  { key: 'car', label: 'Car', src: car },
   { key: 'snake', label: 'Snake', src: snake },
   { key: 'turtle', label: 'Turtle', src: turtle },
-  { key: 'lizard', label: 'Lizard', src: lizard },
+  { key: 'alien', label: 'Alien', src: alien },
+  { key: 'microbe', label: 'Microbe', src: microbe },
+  { key: 'crab', label: 'Crab', src: crab },
   { key: 'crocodile', label: 'Crocodile', src: crocodile },
-  { key: 't-rex', label: 'T-Rex', src: tRex },
-  { key: 'sauropod', label: 'Sauropod', src: sauropod },
+  { key: 'dolphin', label: 'Dolphin', src: dolphin },
   { key: 'dragon', label: 'Dragon', src: dragon },
   { key: 'dragon-face', label: 'Dragon Face', src: dragonFace },
-  { key: 'scorpion', label: 'Scorpion', src: scorpion },
-  { key: 'bat', label: 'Bat', src: bat },
-  { key: 'crab', label: 'Crab', src: crab },
-  { key: 'squid', label: 'Squid', src: squid },
-  { key: 'shrimp', label: 'Shrimp', src: shrimp },
-  { key: 'lobster', label: 'Lobster', src: lobster },
-  { key: 'shark', label: 'Shark', src: shark },
-  { key: 'whale', label: 'Whale', src: whale },
-  { key: 'dolphin', label: 'Dolphin', src: dolphin },
-  { key: 'blowfish', label: 'Blowfish', src: blowfish },
   { key: 'jellyfish', label: 'Jellyfish', src: jellyfish },
+  { key: 'lizard', label: 'Lizard', src: lizard },
+  { key: 'lobster', label: 'Lobster', src: lobster },
 ]
 
 export const DEFAULT_PLAYER_AVATAR_KEY = PLAYER_AVATAR_OPTIONS[0].key
 
 const LEGACY_AVATAR_KEY_MAP = {
   puzzle: 'octopus',
-  sparkles: 'jellyfish',
+  sparkles: 'star',
   wave: 'dolphin',
   fire: 'dragon',
-  bullseye: 'blowfish',
+  bullseye: 'ringed-planet',
   compass: 'turtle',
-  processor: 'dragon-face',
-  hive: 'lobster',
+  processor: 'robot',
+  hive: 'microbe',
   miner: 'crab',
-  palm: 'dolphin',
-  '🧩': 'octopus',
-  '⚡': 'jellyfish',
-  '🌿': 'dolphin',
-  '🔥': 'dragon',
-  '💫': 'jellyfish',
-  '🪐': 'lobster',
-  '🧠': 'dragon-face',
-  '🎯': 'blowfish',
-  '🛰️': 'lobster',
-  '🌊': 'dolphin',
-  'monkey-face': 'bat',
-  'gorilla': 't-rex',
-  'fox': 'lizard',
-  'cat-face': 'dragon-face',
-  'lion': 'dragon',
-  'tiger-face': 'crocodile',
-  'horse-face': 'sauropod',
-  'zebra': 'shark',
-  'deer': 'turtle',
-  'cow-face': 'whale',
-  'pig-face': 'blowfish',
-  'frog': 'crocodile',
-  'koala': 'turtle',
-  'rabbit-face': 'shrimp',
-  'bear-face': 'whale',
-  'panda': 'lobster',
-  'penguin': 'dolphin',
-  'owl': 'jellyfish',
+  palm: 'tree',
+  'monkey-face': 'rocket',
+  gorilla: 'dragon',
+  fox: 'cat',
+  'cat-face': 'cat',
+  lion: 'dragon-face',
+  'tiger-face': 'lizard',
+  'horse-face': 'dolphin',
+  zebra: 'car',
+  deer: 'tree',
+  'cow-face': 'books',
+  'pig-face': 'brain',
+  frog: 'crocodile',
+  koala: 'turtle',
+  'rabbit-face': 'jellyfish',
+  'bear-face': 'lobster',
+  panda: 'book',
+  penguin: 'dolphin',
+  owl: 'robot',
+  'dog-face': 'star',
 }
 
 export const getPlayerAvatarOption = (avatarValue) => {
