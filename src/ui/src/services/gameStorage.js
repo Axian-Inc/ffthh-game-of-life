@@ -3,17 +3,22 @@ import { createCommittedPlayer } from '../utils/gameValidation'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 
-const normalizePlayer = (player, index) =>
-  createCommittedPlayer({
-    ...player,
-    id: player?.id ? String(player.id) : `player-${index + 1}`,
-    name: typeof player?.name === 'string' ? player.name.trim() : '',
-    avatar: typeof player?.avatar === 'string' ? player.avatar : '',
-    cityId: typeof player?.cityId === 'string' ? player.cityId : '',
-    educationTrackId: typeof player?.educationTrackId === 'string' ? player.educationTrackId : '',
-    jobId: typeof player?.jobId === 'string' ? player.jobId : '',
-    careerTrack: typeof player?.careerTrack === 'string' ? player.careerTrack : '',
-  })
+const normalizePlayer = (player, index) => ({
+  ...player,
+  id: player?.id ? String(player.id) : `player-${index + 1}`,
+  name: typeof player?.name === 'string' ? player.name.trim() : '',
+  avatar: typeof player?.avatar === 'string' ? player.avatar : '',
+  cityId: typeof player?.cityId === 'string' ? player.cityId : '',
+  educationTrackId: typeof player?.educationTrackId === 'string' ? player.educationTrackId : '',
+  jobId: typeof player?.jobId === 'string' ? player.jobId : '',
+  annualSalary: Number(player?.annualSalary) ?? 0,
+  monthlyIncome: typeof player?.monthlyIncome === 'number' ? player.monthlyIncome : 0,
+  cash: Number(player?.cash) ?? 0,
+  debt: Number(player?.debt) ?? 0,
+  assets: Array.isArray(player?.assets) ? player.assets : [],
+  investments: Array.isArray(player?.investments) ? player.investments : [],
+  netWorth: typeof player?.netWorth === 'number' ? player.netWorth : 0,
+})
 
 const normalizeGame = (game) => ({
   ...game,
@@ -22,6 +27,13 @@ const normalizeGame = (game) => ({
   players: Array.isArray(game?.players) ? game.players.map(normalizePlayer) : [],
   status: game?.status || 'active',
   resumable: game?.resumable ?? true,
+  lifecycle: {
+    phase: typeof game?.lifecycle?.phase === 'string' ? game.lifecycle.phase : '',
+    ...game.lifecycle,
+  },
+  startedAt: game?.startedAt ? new Date(game.startedAt).toISOString() : null,
+  lastUpdated: typeof game?.lastUpdated === 'number' ? game.lastUpdated : Date.now(),
+  createdAt: typeof game?.createdAt === 'number' ? game.createdAt : Date.now(),
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)
