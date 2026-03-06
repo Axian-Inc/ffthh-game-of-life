@@ -11,12 +11,7 @@ DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion 
 # INITIAL SETUP (Outside Dev Container)
 
 1. Open a new VS Code window and use the Dev Containers extension to "Clone Repository in Container Volume"
-1. Find the `axian-inc/ffthh-game-of-life` repository, and select the `main` branch
-1. Install & run Codex CLI on your local machine, and go through Web UI user authentication
-    - Example: `brew install codex` or  `npm install -g @openai/codex`
-
-    - NOTE: We’ll only be running codex to enable auth, you won’t need many of its features on the Host OS.
-1. On Mac and Windows find and copy `~/.codex/auth.json` (we will be copying it to your dev container)
+1. Find the `axian-inc/ffthh-game-of-life` repository, and select the `main` (or a more recent one like `march_start`) branch.
 
 # INITIAL SETUP (In Dev Container)
 1. Open a fresh terminal and run `aws configure` and follow the prompts to setup the AWS CLI with your access token for the L&D environment. Be sure to set the region to us-west-2
