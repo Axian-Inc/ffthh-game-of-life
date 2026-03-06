@@ -65,7 +65,7 @@ Lightweight, task-focused log for what changed, why, and where.
 ## 2026-03-06
 - Task: Simplify Wave 1 spec dispatch for operators.
 - Why: The raw `codex --yolo` invocation and manual env setup were too verbose and error-prone for repeated Wave 1 launches.
-- What changed: Added `scripts/spec-launch.sh` to target a spec worktree by id, infer the branch prefix, set local Playwright defaults, run `spec-dispatch` pre/finalize, and open `codex` with a short built-in prompt. Updated the operator runbook and scripts README to use the wrapper and corrected the current Wave 1 rerun base branch to `march_test`.
+- What changed: Added `scripts/spec-launch.sh` to target a spec worktree by id, infer the branch prefix, set local Playwright defaults, run `spec-dispatch` pre/finalize, and open `codex` with a short built-in prompt. Updated the operator runbook and scripts README to use the wrapper and corrected the current Wave 1 rerun base branch to `march_start`.
 - Paths: scripts/spec-launch.sh, scripts/README.md, specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md, NOTES.md
 - Commands/runbooks: scripts/spec-launch.sh, specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md
 

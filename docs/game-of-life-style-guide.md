@@ -1,6 +1,6 @@
 # Game of Life UI Style Guide (Wave 1 Desktop)
 
-Audience: agents implementing the Wave 1 restart from `march_test`.
+Audience: agents implementing the Wave 1 restart from `march_start`.
 
 Normative references:
 

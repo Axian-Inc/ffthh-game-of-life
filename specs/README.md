@@ -27,7 +27,7 @@ Every spec file includes YAML frontmatter keys consumed by `skills/spec-dispatch
 4. Run wave gate tests on the wave integration branch.
 5. Open one PR from the wave integration branch back to the source branch for that rerun.
 
-For the current Wave 1 restart, the source branch is `march_test`.
+For the current Wave 1 restart, the source branch is `march_start`.
 
 ## Parallel-Wave Rule For Wave 1
 Wave 1 remains parallel only because the three specs now split ownership cleanly:
@@ -41,7 +41,7 @@ Wave 1 remains parallel only because the three specs now split ownership cleanly
 Use `git worktree` so each agent has isolated filesystem and branch:
 
 ```bash
-git worktree add ../worktrees/W1-S2 -b codex/w1-s2-six-step-wizard-ui origin/codex/wave-1-integration
+git worktree add ../worktrees/W1-S2 -b <your initials>/w1-s2-six-step-wizard-ui origin/<your initials>/wave-1-integration
 ```
 
 ## Gate Criteria
