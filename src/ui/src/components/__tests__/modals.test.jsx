@@ -87,9 +87,9 @@ describe('Modal components', () => {
       />,
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
+    expect(screen.getByText('New Game Setup')).toBeInTheDocument()
     expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 
   it('ResumeGameModal renders results mode', () => {

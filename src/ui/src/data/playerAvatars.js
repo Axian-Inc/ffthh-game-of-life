@@ -18,6 +18,7 @@ import squid from 'openmoji/color/svg/1F991.svg'
 import tRex from 'openmoji/color/svg/1F996.svg'
 import turtle from 'openmoji/color/svg/1F422.svg'
 import whale from 'openmoji/color/svg/1F433.svg'
+import { wizardAvatarArt } from '../assets/wizard/art'
 
 export const PLAYER_AVATAR_OPTIONS = [
   { key: 'octopus', label: 'Octopus', src: octopus },
@@ -40,6 +41,11 @@ export const PLAYER_AVATAR_OPTIONS = [
   { key: 'dolphin', label: 'Dolphin', src: dolphin },
   { key: 'blowfish', label: 'Blowfish', src: blowfish },
   { key: 'jellyfish', label: 'Jellyfish', src: jellyfish },
+  { key: 'rocket', label: 'Rocket', src: wizardAvatarArt.rocket },
+  { key: 'book', label: 'Book', src: wizardAvatarArt.book },
+  { key: 'tree', label: 'Tree', src: wizardAvatarArt.tree },
+  { key: 'robot', label: 'Robot', src: wizardAvatarArt.robot },
+  { key: 'star', label: 'Star', src: wizardAvatarArt.star },
 ]
 
 export const DEFAULT_PLAYER_AVATAR_KEY = PLAYER_AVATAR_OPTIONS[0].key
