@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Added `scripts/spec-launch.sh` as a short operator entrypoint for Wave/spec dispatch, with automatic branch-prefix inference, local Playwright defaults, and a compact `codex` launch flow.
 - Refreshed the Wave 1 specs to require exact Screen 1-7 visual fidelity, added a new `W1-S4` Game Hub home-screen spec, and updated dispatch docs for the four-spec Wave 1 rerun.
 - Retired Wave 0 spec scaffolding by deleting `specs/wave-0/*` and updating wave documentation to active waves 1-3 only.
 - Added post-create career selection and play placeholder pages for new games.

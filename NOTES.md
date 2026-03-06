@@ -54,3 +54,10 @@ Lightweight, task-focused log for what changed, why, and where.
 - Paths: docs/game-of-life-style-guide.md, specs/README.md, specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md, specs/wave-1/W1-S1-setup-data-contracts.md, specs/wave-1/W1-S2-wizard-modal-ui.md, specs/wave-1/W1-S3-welcome-screen-ui.md, specs/wave-1/W1-S4-game-hub-home-ui.md, CHANGELOG.md
 - Commands/runbooks: specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md
 - Follow-ups: Re-run Wave 1 on fresh branches/worktrees and use the new visual-test requirements as the merge gate.
+
+## 2026-03-06
+- Task: Simplify Wave 1 spec dispatch for operators.
+- Why: The raw `codex --yolo` invocation and manual env setup were too verbose and error-prone for repeated Wave 1 launches.
+- What changed: Added `scripts/spec-launch.sh` to target a spec worktree by id, infer the branch prefix, set local Playwright defaults, run `spec-dispatch` pre/finalize, and open `codex` with a short built-in prompt. Updated the operator runbook and scripts README to use the wrapper and corrected the current Wave 1 rerun base branch to `march_test`.
+- Paths: scripts/spec-launch.sh, scripts/README.md, specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md, NOTES.md
+- Commands/runbooks: scripts/spec-launch.sh, specs/OPERATOR_WAVE_DISPATCH_RUNBOOK.md

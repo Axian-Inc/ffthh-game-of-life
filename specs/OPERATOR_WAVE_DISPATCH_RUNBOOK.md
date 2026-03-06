@@ -32,11 +32,15 @@ Export your prefix once per terminal session:
 export SPEC_BRANCH_PREFIX=<your-initials>
 ```
 
-For each wave `N`, create one integration branch and push it:
+For each wave `N`, create one integration branch and push it from the branch that contains the spec pack you intend to implement.
+
+For the refreshed Wave 1 rerun documented on March 6, 2026, that base is `march_test`.
+
+Example:
 
 ```bash
-git switch march_start
-git pull --ff-only origin march_start
+git switch march_test
+git pull --ff-only origin march_test
 git switch -c <your-initials>/wave-N-integration
 git push -u origin <your-initials>/wave-N-integration
 ```
@@ -60,19 +64,28 @@ git worktree add ./worktrees/W1-S4 -b <your-initials>/w1-s4-game-hub-home-ui ori
 ```
 
 ## 4. Launch An Agent Per Spec
-In each worktree terminal, run:
+Preferred launcher from the main repo checkout:
 
 ```bash
-cd ./worktrees/W1-S2
-SPEC_BRANCH_PREFIX=<your-initials> codex --yolo "Use $spec-dispatch with spec /workspaces/ffthh-game-of-life/specs/wave-1/W1-S2-wizard-modal-ui.md"
+bash scripts/spec-launch.sh W1-S2
 ```
 
-Repeat for each Wave 1 spec path, including:
+Useful variants:
 
-- `/workspaces/ffthh-game-of-life/specs/wave-1/W1-S1-setup-data-contracts.md`
-- `/workspaces/ffthh-game-of-life/specs/wave-1/W1-S2-wizard-modal-ui.md`
-- `/workspaces/ffthh-game-of-life/specs/wave-1/W1-S3-welcome-screen-ui.md`
-- `/workspaces/ffthh-game-of-life/specs/wave-1/W1-S4-game-hub-home-ui.md`
+```bash
+bash scripts/spec-launch.sh W1-S2 pre
+bash scripts/spec-launch.sh W1-S2 finalize
+```
+
+Repeat with `W1-S1`, `W1-S2`, `W1-S3`, and `W1-S4`.
+
+What the launcher does:
+
+1. Targets `./worktrees/<SPEC_ID>`.
+2. Infers `SPEC_BRANCH_PREFIX` from that worktree's branch unless already set.
+3. Sets local Playwright defaults (`CHROME_BIN`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD`, `VITE_STORAGE_MODE`).
+4. Runs `skills/spec-dispatch/scripts/dispatch_spec.sh --phase pre`.
+5. Opens `codex` with a short prompt that points it back to `skills/spec-dispatch/SKILL.md` and the spec file.
 
 ## 5. What The Skill Must Do
 The agent using `$spec-dispatch` must:
