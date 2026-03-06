@@ -7,6 +7,14 @@ description: Execute one implementation spec from ./specs end-to-end. Use when a
 
 Run this skill when implementing one spec file under `./specs`.
 
+For normal operator use from the main repo checkout, prefer:
+
+```bash
+bash scripts/spec-launch.sh <SPEC_ID>
+```
+
+That launcher selects the target worktree/spec, runs this dispatcher for preflight/finalize behavior, and opens `codex` with this skill as instruction context. The direct commands below remain the lower-level manual path.
+
 ## Inputs
 
 1. Absolute path to the spec file.
@@ -18,6 +26,12 @@ Run this skill when implementing one spec file under `./specs`.
 
 ```bash
 bash skills/spec-dispatch/scripts/dispatch_spec.sh <ABS_SPEC_PATH> --phase pre
+```
+
+For shared specs that use a common branch prefix, set `SPEC_BRANCH_PREFIX` to map branches to your personal namespace:
+
+```bash
+SPEC_BRANCH_PREFIX=th bash skills/spec-dispatch/scripts/dispatch_spec.sh <ABS_SPEC_PATH> --phase pre
 ```
 
 After implementation is complete:
@@ -38,8 +52,9 @@ bash skills/spec-dispatch/scripts/dispatch_spec.sh <ABS_SPEC_PATH> --phase final
 
 1. Refuse non-absolute spec paths.
 2. Refuse spec paths outside repo `./specs`.
-3. Refuse non-`codex/` branches.
-4. Refuse changed files outside `owned_paths` unless operator explicitly passes `--allow-outside-owned-paths`.
+3. Refuse branches without a participant prefix (for example: `th/w1-s2-wizard-modal-ui`).
+4. If `SPEC_BRANCH_PREFIX` is set, remap spec `branch` and `base_branch` to `<prefix>/<suffix-after-first-slash>`.
+5. Refuse changed files outside `owned_paths` unless operator explicitly passes `--allow-outside-owned-paths`.
 
 ## Outputs
 
