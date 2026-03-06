@@ -15,7 +15,7 @@ const GameCard = ({
   isNew,
   newCardRef,
 }) => (
-  <div className="game-card" tabIndex={isNew ? -1 : undefined} ref={isNew ? newCardRef : undefined}>
+  <article className="game-card" tabIndex={isNew ? -1 : undefined} ref={isNew ? newCardRef : undefined}>
     <div className="game-card-header">
       <h3>{game.name}</h3>
       <StatusPill status={game.status} />
@@ -42,7 +42,7 @@ const GameCard = ({
         {deleteError}
       </p>
     ) : null}
-  </div>
+  </article>
 )
 
 export default GameCard

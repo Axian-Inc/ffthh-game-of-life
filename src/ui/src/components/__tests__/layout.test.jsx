@@ -11,6 +11,13 @@ describe('Layout components', () => {
     const onCreate = vi.fn()
     render(<Hero onCreate={onCreate} />)
 
+    expect(screen.getByText('GAME HUB')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Start and career and see how your life unfolds in this easy, fun, and exciting simulation of this game we call life!',
+      ),
+    ).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: 'New Game' }))
     expect(onCreate).toHaveBeenCalledTimes(1)
   })

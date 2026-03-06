@@ -1,5 +1,5 @@
 export const formatRelativeTime = (timestamp, now) => {
-  const seconds = Math.floor((now - timestamp) / 1000)
+  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000))
 
   if (seconds < 60) {
     return 'just now'

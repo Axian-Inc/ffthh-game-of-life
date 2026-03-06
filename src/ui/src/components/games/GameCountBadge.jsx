@@ -3,7 +3,7 @@ const GameCountBadge = ({ count, isLoading }) => (
     className="game-count"
     aria-label={isLoading ? 'Loading games' : `${count} games`}
   >
-    {isLoading ? '...' : count}
+    {isLoading ? '...' : String(count)}
   </span>
 )
 

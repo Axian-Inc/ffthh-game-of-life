@@ -11,12 +11,14 @@ const GameCardActions = ({
 }) => (
   <div className="game-card-actions">
     <PrimaryButton
+      className="game-card-resume"
       onClick={() => (game.status === 'completed' ? onViewResults(game) : onResume(game))}
       disabled={isLoading || game.status === 'paused'}
     >
       {game.status === 'completed' ? 'View results' : 'Resume'}
     </PrimaryButton>
     <SecondaryButton
+      className="game-card-delete"
       onClick={() => onDelete(game)}
       aria-label={`Delete ${game.name}`}
       disabled={isLoading}

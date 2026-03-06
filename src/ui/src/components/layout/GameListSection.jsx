@@ -12,7 +12,7 @@ const GameListSection = ({ count, isLoading, children }) => (
       </div>
       <GameCountBadge count={count} isLoading={isLoading} />
     </div>
-    {children}
+    <div className="game-list-body">{children}</div>
   </section>
 )
 

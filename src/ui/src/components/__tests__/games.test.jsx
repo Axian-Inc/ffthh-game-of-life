@@ -20,7 +20,7 @@ describe('Game components', () => {
 
   it('renders StatusPill', () => {
     render(<StatusPill status="active" />)
-    expect(screen.getByText('active')).toBeInTheDocument()
+    expect(screen.getByText('ACTIVE')).toBeInTheDocument()
   })
 
   it('renders AvatarRow with overflow', () => {
@@ -90,14 +90,20 @@ describe('Game components', () => {
 
   it('renders GameCard with errors', () => {
     const game = createGame({
-      players: [createPlayer({ name: 'Mira' })],
-      status: 'paused',
+      name: 'Choices Matter',
+      players: [
+        createPlayer({ id: '1', name: 'Mira' }),
+        createPlayer({ id: '2', name: 'Kai' }),
+        createPlayer({ id: '3', name: 'June' }),
+        createPlayer({ id: '4', name: 'Noah' }),
+      ],
+      status: 'active',
       lastUpdated: 0,
     })
     render(
       <GameCard
         game={game}
-        now={0}
+        now={15_000}
         isLoading={false}
         onResume={vi.fn()}
         onViewResults={vi.fn()}
@@ -108,6 +114,11 @@ describe('Game components', () => {
     )
 
     expect(screen.getByText(game.name)).toBeInTheDocument()
+    expect(screen.getByText('4 players')).toBeInTheDocument()
+    expect(screen.getByText('just now')).toBeInTheDocument()
+    expect(screen.getByText('ACTIVE')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Resume' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: `Delete ${game.name}` })).toBeInTheDocument()
     expect(screen.getByText('Cannot resume')).toBeInTheDocument()
     expect(screen.getByText('Cannot delete')).toBeInTheDocument()
   })
