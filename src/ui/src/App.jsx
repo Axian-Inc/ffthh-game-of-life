@@ -17,15 +17,34 @@ const parseAppRoute = (pathname) => {
     return { view: 'home' }
   }
 
-  const match = pathname.match(/^\/games\/([^/]+)\/(careers|play)$/)
-  if (!match) {
-    return { view: 'home' }
+  // Parse /games/:id/play as the main play/welcome entry point
+  const match = pathname.match(/^\/games\/([^/]+)\/play$/)
+  if (match) {
+    return {
+      view: 'play',
+      gameId: decodeURIComponent(match[1]),
+    }
   }
 
-  return {
-    view: match[2] === 'careers' ? 'setup' : 'play',
-    gameId: decodeURIComponent(match[1]),
+  // Parse /games/:id/careers for setup flow
+  const setupMatch = pathname.match(/^\/games\/([^/]+)\/careers$/)
+  if (setupMatch) {
+    return {
+      view: 'setup',
+      gameId: decodeURIComponent(setupMatch[1]),
+    }
   }
+
+  // Legacy match for backward compatibility
+  const legacyMatch = pathname.match(/^\/games\/([^/]+)\/(careers|play)$/)
+  if (legacyMatch) {
+    return {
+      view: legacyMatch[2] === 'careers' ? 'setup' : 'play',
+      gameId: decodeURIComponent(legacyMatch[1]),
+    }
+  }
+
+  return { view: 'home' }
 }
 
 const buildAppRoute = (view, activeGame) => {
@@ -141,9 +160,14 @@ function App() {
     setSetupError('')
     setIsStartingGame(true)
     try {
+      // Set lifecycle phase to 'started' with timestamp when starting the game
       const savedGame = await updateGame(game.id, {
         ...game,
         lastUpdated: Date.now(),
+        lifecycle: {
+          phase: 'started',
+          startedAt: Date.now(),
+        },
       })
       openPlay(savedGame)
     } catch (error) {
@@ -188,7 +212,7 @@ function App() {
     if (!game.resumable) {
       setResumeErrors((current) => ({
         ...current,
-        [game.id]: 'This game can’t be resumed. Start a new game or duplicate it.',
+        [game.id]: "This game cannot be resumed. Start a new game or duplicate it.",
       }))
       return
     }
@@ -201,13 +225,32 @@ function App() {
       return rest
     })
 
+    // Check game lifecycle phase to determine routing behavior
     const hasPlayers = Array.isArray(game.players) && game.players.length > 0
     const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
+    
+    // Use lifecycle phase if available, otherwise fall back to player-based checks
+    const lifecyclePhase = game.lifecycle?.phase
+    
+    if (lifecyclePhase === 'setup-in-progress' || hasPendingCareerChoices) {
+      // Resume for incomplete setup games routes back to wizard/setup flow
+      openSetup(game)
+      return
+    }
+
+    if (lifecyclePhase === 'started') {
+      // Resume for started games routes to Welcome first
+      openPlay(game)
+      return
+    }
+
+    // Default behavior: check pending career choices
     if (hasPendingCareerChoices) {
       openSetup(game)
       return
     }
 
+    // For any other state, route to play (Welcome page)
     openPlay(game)
   }
 
@@ -249,10 +292,18 @@ function App() {
       return
     }
 
-    if (routeRequest.view === 'setup') {
+    // For play view, check lifecycle phase to determine Welcome vs direct access
+    if (routeRequest.view === 'play') {
+      const lifecyclePhase = targetGame.lifecycle?.phase
+      if (lifecyclePhase === 'setup-in-progress') {
+        // Incomplete setup: route back to wizard/setup flow
+        openSetup(targetGame)
+      } else {
+        // Started game: route to Welcome (play view) first
+        openPlay(targetGame)
+      }
+    } else if (routeRequest.view === 'setup') {
       openSetup(targetGame)
-    } else {
-      openPlay(targetGame)
     }
 
     setRouteRequest(null)
