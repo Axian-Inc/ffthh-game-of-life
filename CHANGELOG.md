@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Extended `scripts/spec-launch.sh` to support Wave 2 and Wave 3 spec ids and to accept `--profile`/`--no-yolo` flags when launching Codex, with env vars kept as fallbacks.
 - Added `scripts/spec-launch.sh` as a short operator entrypoint for Wave/spec dispatch, with automatic branch-prefix inference, local Playwright defaults, and a compact `codex` launch flow.
 - Reworked Wave 1 into a desktop-only three-spec restart pack, updated the dispatch docs, and tightened the style guide around the six-step wizard, multi-game landing spacing, and Welcome-page routing.
 - Retired Wave 0 spec scaffolding by deleting `specs/wave-0/*` and updating wave documentation to active waves 1-3 only.
