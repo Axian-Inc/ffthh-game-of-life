@@ -62,10 +62,9 @@ fi
 [[ -n "$spec_id" ]] || fail "Missing SPEC_ID (example: W1-S2)"
 
 case "$spec_id" in
-  W1-S1) spec_rel="specs/wave-1/W1-S1-setup-data-contracts.md" ;;
-  W1-S2) spec_rel="specs/wave-1/W1-S2-wizard-modal-ui.md" ;;
-  W1-S3) spec_rel="specs/wave-1/W1-S3-welcome-screen-ui.md" ;;
-  W1-S4) spec_rel="specs/wave-1/W1-S4-game-hub-home-ui.md" ;;
+  W1-S1) spec_rel="specs/wave-1/W1-S1-setup-draft-and-persistence.md" ;;
+  W1-S2) spec_rel="specs/wave-1/W1-S2-six-step-wizard-ui.md" ;;
+  W1-S3) spec_rel="specs/wave-1/W1-S3-home-welcome-navigation.md" ;;
   *) fail "Unsupported SPEC_ID: $spec_id" ;;
 esac
 

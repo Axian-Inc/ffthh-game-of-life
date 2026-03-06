@@ -1,12 +1,12 @@
-# Operator Runbook: Dispatching Spec Waves with `$spec-dispatch`
+# Operator Runbook: Dispatching Wave 1 From `march_test`
 
-This runbook assumes all work starts from the repo root:
+This runbook assumes all work starts from:
 
 `/workspaces/ffthh-game-of-life`
 
-## 1. One-Time Preconditions
+## 1. Preconditions
 1. Open the dev container for this repo.
-2. Confirm Git remotes are up to date:
+2. Refresh remotes:
 
 ```bash
 git fetch origin --prune
@@ -21,53 +21,35 @@ npm --prefix src/ui ci
 ## 2. Wave Branch Strategy
 Use a participant prefix for all branches:
 
-- `<your-initials>/wave-N-integration`
-- `<your-initials>/wN-sX-...`
+- `<your-initials>/wave-1-integration`
+- `<your-initials>/w1-s1-setup-draft-and-persistence`
+- `<your-initials>/w1-s2-six-step-wizard-ui`
+- `<your-initials>/w1-s3-home-welcome-navigation`
 
-Example prefix: `th`
-
-Export your prefix once per terminal session:
-
-```bash
-export SPEC_BRANCH_PREFIX=<your-initials>
-```
-
-For each wave `N`, create one integration branch and push it from the branch that contains the spec pack you intend to implement.
-
-For the refreshed Wave 1 rerun documented on March 6, 2026, that base is `march_test`.
-
-Example:
+Wave 1 restart base branch: `march_test`
 
 ```bash
 git switch march_test
 git pull --ff-only origin march_test
-git switch -c <your-initials>/wave-N-integration
-git push -u origin <your-initials>/wave-N-integration
+git switch -c <your-initials>/wave-1-integration
+git push -u origin <your-initials>/wave-1-integration
 ```
 
-Replace `N` with `1`, `2`, or `3`.
-
-## 3. Create Worktrees (One Per Spec)
-Create an in-repo worktree folder for each spec in the wave:
-
+## 3. Create One Worktree Per Spec
 ```bash
 mkdir -p ./worktrees
-```
-
-Example for wave 1:
-
-```bash
-git worktree add ./worktrees/W1-S1 -b <your-initials>/w1-s1-setup-data-contracts origin/<your-initials>/wave-1-integration
-git worktree add ./worktrees/W1-S2 -b <your-initials>/w1-s2-wizard-modal-ui origin/<your-initials>/wave-1-integration
-git worktree add ./worktrees/W1-S3 -b <your-initials>/w1-s3-welcome-screen-ui origin/<your-initials>/wave-1-integration
-git worktree add ./worktrees/W1-S4 -b <your-initials>/w1-s4-game-hub-home-ui origin/<your-initials>/wave-1-integration
+git worktree add ./worktrees/W1-S1 -b <your-initials>/w1-s1-setup-draft-and-persistence origin/<your-initials>/wave-1-integration
+git worktree add ./worktrees/W1-S2 -b <your-initials>/w1-s2-six-step-wizard-ui origin/<your-initials>/wave-1-integration
+git worktree add ./worktrees/W1-S3 -b <your-initials>/w1-s3-home-welcome-navigation origin/<your-initials>/wave-1-integration
 ```
 
 ## 4. Launch An Agent Per Spec
 Preferred launcher from the main repo checkout:
 
 ```bash
+bash scripts/spec-launch.sh W1-S1
 bash scripts/spec-launch.sh W1-S2
+bash scripts/spec-launch.sh W1-S3
 ```
 
 Useful variants:
@@ -77,121 +59,79 @@ bash scripts/spec-launch.sh W1-S2 pre
 bash scripts/spec-launch.sh W1-S2 finalize
 ```
 
-Repeat with `W1-S1`, `W1-S2`, `W1-S3`, and `W1-S4`.
-
 What the launcher does:
-
 1. Targets `./worktrees/<SPEC_ID>`.
-2. Infers `SPEC_BRANCH_PREFIX` from that worktree's branch unless already set.
+2. Infers `SPEC_BRANCH_PREFIX` from that worktree branch unless already set.
 3. Sets local Playwright defaults (`CHROME_BIN`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD`, `VITE_STORAGE_MODE`).
 4. Runs `skills/spec-dispatch/scripts/dispatch_spec.sh --phase pre`.
-5. Opens `codex` with a short prompt that points it back to `skills/spec-dispatch/SKILL.md` and the spec file.
+5. Opens `codex` with the repo-local skill instructions.
 
-## 5. What The Skill Must Do
-The agent using `$spec-dispatch` must:
+## 5. Wave 1 Spec Package
+Wave 1 is desktop-only. All screenshot and Playwright coverage must target `1280x720`.
 
-1. Parse frontmatter from the spec file.
-2. Ensure current branch matches the spec `branch`.
-3. Implement only files in `owned_paths`.
-4. Run all `test_commands` from the spec.
-5. Fix until tests are green.
-6. Create a PR summary and PR targeting the wave integration branch.
+- `W1-S1`: setup draft model, save payload, multi-player persistence, and desktop happy-path E2E coverage
+- `W1-S2`: six-step setup wizard UI for desktop, including the new game-name entry step and editable summary title
+- `W1-S3`: Game Hub home, Welcome page, routing, and desktop multi-game landing layout
 
 ## 6. PR Rules
-1. Spec PR base must be the wave integration branch, not `march_start`.
+1. Spec PR base must be `<your-initials>/wave-1-integration`.
 2. Example:
-   - Head: `<your-initials>/w1-s2-wizard-modal-ui`
+   - Head: `<your-initials>/w1-s2-six-step-wizard-ui`
    - Base: `<your-initials>/wave-1-integration`
-3. Do not merge the wave branch to `march_start` until all spec PRs for that wave are merged.
+3. Do not open the wave PR to `march_start`; Wave 1 restart targets `march_test`.
 
-## 7. Reintegration Flow (Specs -> Wave -> Central)
-Branch flow diagram:
-
+## 7. Reintegration Flow
 ```mermaid
 flowchart LR
-  A[march_start] --> B[<your-initials>/wave-N-integration]
-  B --> C[<your-initials>/wN-s1-*]
-  B --> D[<your-initials>/wN-s2-*]
-  B --> E[<your-initials>/wN-s3-*]
-  B --> F[<your-initials>/wN-s4-*]
+  A[march_test] --> B[<your-initials>/wave-1-integration]
+  B --> C[<your-initials>/w1-s1-setup-draft-and-persistence]
+  B --> D[<your-initials>/w1-s2-six-step-wizard-ui]
+  B --> E[<your-initials>/w1-s3-home-welcome-navigation]
   C --> B
   D --> B
   E --> B
-  F --> B
   B --> A
 ```
 
-Required reintegration order:
-
-1. Each spec branch PR merges into `<your-initials>/wave-N-integration`.
-2. Operator validates the wave branch.
-3. Open the wave PR from `<your-initials>/wave-N-integration` to `march_start`.
-4. Merge the wave PR to `march_start`.
+Required order:
+1. Merge each spec PR into `<your-initials>/wave-1-integration`.
+2. Validate the wave branch.
+3. Open the wave PR from `<your-initials>/wave-1-integration` to `march_test`.
+4. Merge the wave PR to `march_test`.
 5. Delete wave/spec branches and remove local worktrees.
 
 ## 8. Wave Gate Validation
-After all spec PRs in a wave merge into `<your-initials>/wave-N-integration`:
+After all three spec PRs merge into the wave branch:
 
 ```bash
-git switch <your-initials>/wave-N-integration
+git switch <your-initials>/wave-1-integration
 git pull --ff-only
 npm --prefix src/ui run test:ci
-npm --prefix src/ui run test:e2e:ci
+npm --prefix src/ui run build
+npm --prefix src/ui exec -- playwright test --config src/ui/playwright.config.js src/ui/e2e/app.spec.js src/ui/e2e/home-visual.spec.js src/ui/e2e/welcome-visual.spec.js src/ui/e2e/wizard-visual.spec.js
 ```
 
-If `test:e2e:ci` requires Chromium, run this in the dev container where `CHROME_BIN=/usr/bin/chromium` is available.
-
-## 9. Open Wave PR To `march_start`
-
+## 9. Open The Wave PR To `march_test`
 ```bash
 git push
-gh pr create --base march_start --head <your-initials>/wave-N-integration --title "Wave N: High-fidelity Screen implementation" --body "See merged spec PRs in this wave branch."
+gh pr create --base march_test --head <your-initials>/wave-1-integration --title "Wave 1: desktop setup flow restart" --body "See merged Wave 1 spec PRs in this wave branch."
 ```
 
-If `gh` is unavailable, open the PR manually in the Git hosting UI.
-
-## 10. Cleanup Worktrees And Branches After Merge
-After each spec PR is merged, remove the local worktree and local branch:
+## 10. Cleanup
+After each spec PR is merged:
 
 ```bash
 git worktree remove ./worktrees/W1-S2
-git branch -d <your-initials>/w1-s2-wizard-modal-ui
+git branch -d <your-initials>/w1-s2-six-step-wizard-ui
 ```
 
-If a worktree has uncommitted changes and must be removed anyway:
+After the wave PR merges to `march_test`:
 
 ```bash
-git worktree remove --force ./worktrees/W1-S2
-```
-
-After the wave PR merge to `march_start`, remove remote branches and prune worktree metadata:
-
-```bash
-git push origin --delete <your-initials>/w1-s2-wizard-modal-ui
+git push origin --delete <your-initials>/w1-s1-setup-draft-and-persistence
+git push origin --delete <your-initials>/w1-s2-six-step-wizard-ui
+git push origin --delete <your-initials>/w1-s3-home-welcome-navigation
 git push origin --delete <your-initials>/wave-1-integration
 git worktree prune
-```
-
-Optional: remove the empty `worktrees` folder when all waves are complete:
-
-```bash
 rmdir ./worktrees
-```
-
-## 11. Troubleshooting
-
-### Skill Says Wrong Branch
-1. Run `git branch --show-current` in that worktree.
-2. Run `git switch <spec-branch>`.
-3. Re-run the skill command.
-
-### `gh pr create` fails
-1. Run `gh auth status`.
-2. If not authenticated, log in or create the PR manually.
-
-### Worktree creation fails (branch exists)
-Use the existing branch without `-b`:
-
-```bash
-git worktree add ./worktrees/W1-S2 <your-initials>/w1-s2-wizard-modal-ui
 ```
