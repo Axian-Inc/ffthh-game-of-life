@@ -64,7 +64,9 @@ What the launcher does:
 2. Infers `SPEC_BRANCH_PREFIX` from that worktree branch unless already set.
 3. Sets local Playwright defaults (`CHROME_BIN`, `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD`, `VITE_STORAGE_MODE`).
 4. Runs `skills/spec-dispatch/scripts/dispatch_spec.sh --phase pre`.
-5. Opens `codex` with the repo-local skill instructions.
+5. Opens `codex` with the repo-local skill instructions from `skills/spec-dispatch/SKILL.md`.
+
+`scripts/spec-launch.sh` is the preferred operator wrapper. `skills/spec-dispatch/scripts/dispatch_spec.sh` is still the enforcement backend for branch setup, owned-path validation, test execution, and PR summary output; it is not deprecated or safe to remove.
 
 ## 5. Wave 1 Spec Package
 Wave 1 is desktop-only. All screenshot and Playwright coverage must target `1280x720`.

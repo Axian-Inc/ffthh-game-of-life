@@ -7,6 +7,14 @@ description: Execute one implementation spec from ./specs end-to-end. Use when a
 
 Run this skill when implementing one spec file under `./specs`.
 
+For normal operator use from the main repo checkout, prefer:
+
+```bash
+bash scripts/spec-launch.sh <SPEC_ID>
+```
+
+That launcher selects the target worktree/spec, runs this dispatcher for preflight/finalize behavior, and opens `codex` with this skill as instruction context. The direct commands below remain the lower-level manual path.
+
 ## Inputs
 
 1. Absolute path to the spec file.

@@ -3,7 +3,7 @@
 This directory contains decision-complete specs organized by wave so multiple agents can work in parallel with low merge risk.
 
 ## Dispatch Contract
-Every spec file includes YAML frontmatter keys consumed by `spec-dispatch`:
+Every spec file includes YAML frontmatter keys consumed by `skills/spec-dispatch/scripts/dispatch_spec.sh`. In normal operator use, `bash scripts/spec-launch.sh <SPEC_ID>` selects the worktree/spec and then invokes that dispatch contract:
 
 - `spec_id`
 - `wave`
