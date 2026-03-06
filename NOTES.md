@@ -48,6 +48,13 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run test:e2e:ci
 
 ## 2026-03-06
+- Task: Extend spec launch support to Wave 2+ and configurable Codex profiles.
+- Why: Operators needed to launch Wave 2 specs with the same wrapper flow and route launches to non-default Codex profiles without hand-editing commands.
+- What changed: Updated `scripts/spec-launch.sh` to recognize Wave 2 and Wave 3 spec ids, added `--profile` and `--no-yolo` launch flags with env vars kept as fallbacks, and documented the new usage in the scripts README.
+- Paths: scripts/spec-launch.sh, scripts/README.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: scripts/spec-launch.sh
+
+## 2026-03-06
 - Task: Refresh Wave 1 specs for exact high-fidelity Screen 1-7 reruns.
 - Why: The existing Wave 1 contracts enforced behavior but not the actual visual anatomy shown in the reference screenshots.
 - What changed: Rewrote the Wave 1 specs to separate canonical data from UI presentation, added a new `W1-S4` home-screen spec, added per-surface screenshot-test requirements, and updated the style guide plus dispatch docs to encode exact Screen 1-7 expectations.
