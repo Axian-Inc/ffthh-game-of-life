@@ -1,6 +1,8 @@
+import fs from 'node:fs'
 import { expect, test } from '@playwright/test'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
+const readSnapshot = (name) => fs.readFileSync(new URL(`./__snapshots__/${name}`, import.meta.url))
 
 const disableAnimations = async (page) => {
   await page.addStyleTag({
@@ -49,7 +51,7 @@ test('matches the Screen 1 home baseline', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Game of LIFE' })).toBeVisible()
   await expect(page.getByText('Choices Matter')).toBeVisible()
-  await expect(page).toHaveScreenshot('home-baseline.png')
+  expect(await page.screenshot()).toEqual(readSnapshot('home-baseline-linux.png'))
 })
 
 test('keeps multiple game cards in a single desktop column with visible separation', async ({ page }) => {
@@ -112,5 +114,5 @@ test('keeps multiple game cards in a single desktop column with visible separati
   expect(layout.rowGap).toBe('24px')
   expect(new Set(itemOffsets).size).toBe(1)
 
-  await expect(page).toHaveScreenshot('home-multi-game.png')
+  expect(await page.screenshot()).toEqual(readSnapshot('home-multi-game-linux.png'))
 })

@@ -1,6 +1,8 @@
+import fs from 'node:fs'
 import { expect, test } from '@playwright/test'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
+const readSnapshot = (name) => fs.readFileSync(new URL(`./__snapshots__/${name}`, import.meta.url))
 
 const disableAnimations = async (page) => {
   await page.addStyleTag({
@@ -44,7 +46,7 @@ test('matches the Screen 7 welcome baseline', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
   await expect(page.getByRole('button', { name: "Let's Begin!" })).toBeVisible()
   await expect(page.getByText(/Game board coming soon/i)).toHaveCount(0)
-  await expect(page).toHaveScreenshot('welcome-baseline.png')
+  expect(await page.screenshot()).toEqual(readSnapshot('welcome-baseline-linux.png'))
 })
 
 test("returns to the landing page when Let's Begin! is clicked", async ({ page }) => {
