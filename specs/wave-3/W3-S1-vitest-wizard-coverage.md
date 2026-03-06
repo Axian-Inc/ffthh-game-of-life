@@ -46,6 +46,12 @@ Out of scope:
 2. If tests miss mandatory scenarios, block merge.
 3. If assertions are too broad (snapshot-only), replace with explicit semantic checks.
 
+# Failure and Rollback Notes
+
+1. If tests become flaky, remove timing-sensitive assertions and restore deterministic state setup before adding new scenarios.
+2. If coverage misses mandatory scenarios, block merge and add explicit assertions instead of broad snapshots.
+3. If test changes mask regressions in wizard gating or payload shape, roll back those assertions and rework with targeted expectations.
+
 # Acceptance Criteria
 1. All required scenarios pass in CI mode.
 2. No test depends on network or wall-clock timing.
