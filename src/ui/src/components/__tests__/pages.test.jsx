@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import StartNewGamePage from '../pages/StartNewGamePage'
-import PlayGamePage from '../pages/PlayGamePage'
+import WelcomeToLifePage from '../pages/WelcomeToLifePage'
 import { createGame, createPlayer } from '../../test/testUtils'
 
 describe('Page components', () => {
@@ -32,14 +32,15 @@ describe('Page components', () => {
     )
   })
 
-  it('renders PlayGamePage and handles navigation', async () => {
+  it('renders WelcomeToLifePage and handles navigation', async () => {
     const user = userEvent.setup()
     const onHome = vi.fn()
 
-    render(<PlayGamePage game={createGame({ name: 'Play It' })} onHome={onHome} />)
+    render(<WelcomeToLifePage game={createGame({ name: 'Play It' })} onBegin={onHome} />)
 
-    expect(screen.getByText('Play Game')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Back to home' }))
+    expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
+    expect(screen.queryByText('Game board coming soon.')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
 
     expect(onHome).toHaveBeenCalledTimes(1)
   })

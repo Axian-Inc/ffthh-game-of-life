@@ -813,12 +813,6 @@ h1 {
   color: var(--text-2);
 }
 
-@media (min-width: 720px) {
-  .game-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (min-width: 860px) {
   .hero {
     padding-top: var(--space-5);

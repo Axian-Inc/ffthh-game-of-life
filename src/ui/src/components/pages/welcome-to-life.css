@@ -1,0 +1,90 @@
+.welcome-page {
+  display: grid;
+  place-items: center;
+  padding: 24px 0 64px;
+}
+
+.welcome-shell {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 36px 40px 40px;
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.welcome-icon {
+  width: 84px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-panel);
+  background: var(--grad-primary);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 16px 36px rgba(68, 165, 232, 0.2);
+}
+
+.welcome-icon svg {
+  width: 52%;
+  height: 52%;
+}
+
+.welcome-shell h2 {
+  margin: 0;
+  font-size: clamp(2.1rem, 4vw, 2.8rem);
+  color: var(--text-1);
+}
+
+.welcome-game-name {
+  margin: 0;
+  color: var(--text-2);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.welcome-sections {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  text-align: left;
+}
+
+.welcome-sections section {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-soft);
+  background: rgba(92, 198, 212, 0.06);
+}
+
+.welcome-sections h3 {
+  margin: 0;
+  font-size: 1.03rem;
+  color: var(--text-1);
+}
+
+.welcome-sections p {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.welcome-shell blockquote {
+  margin: 2px 0 4px;
+  padding: 12px 16px;
+  width: 100%;
+  border-left: 4px solid rgba(68, 165, 232, 0.5);
+  border-radius: 12px;
+  background: rgba(163, 119, 229, 0.08);
+  color: var(--text-1);
+  font-weight: 600;
+  text-align: left;
+}
+
+.welcome-shell .primary-action {
+  min-width: 240px;
+}
