@@ -8,20 +8,26 @@ import {
 
 const DEFAULT_PLAYER_ID = 1
 
+const createDraftPlayer = (avatar = DEFAULT_PLAYER_AVATAR_KEY) => ({
+  name: '',
+  avatar,
+  cityId: '',
+  educationTrackId: '',
+  jobId: '',
+})
+
 const useCreateGameForm = () => {
   const [gameName, setGameName] = useState('')
   const [gameNameTouched, setGameNameTouched] = useState(false)
   const [players, setPlayers] = useState(createDefaultPlayers)
   const [nextPlayerId, setNextPlayerId] = useState(DEFAULT_PLAYER_ID)
-  const [draftPlayer, setDraftPlayer] = useState({
-    name: '',
-    avatar: DEFAULT_PLAYER_AVATAR_KEY,
-  })
+  const [draftPlayer, setDraftPlayer] = useState(createDraftPlayer)
   const [draftTouched, setDraftTouched] = useState({ name: false })
+  const [currentStep, setCurrentStep] = useState(1)
 
   const maxGameNameLength = 60
   const maxPlayerNameLength = 24
-  const minPlayers = 1
+  const minPlayers = 2
 
   const trimmedGameName = gameName.trim()
   const isGameNameTooLong = trimmedGameName.length > maxGameNameLength
@@ -58,10 +64,7 @@ const useCreateGameForm = () => {
   const isDraftValid = !draftErrors.name
 
   const resetDraft = (keepAvatar = true) => {
-    setDraftPlayer((current) => ({
-      name: '',
-      avatar: keepAvatar ? current.avatar : DEFAULT_PLAYER_AVATAR_KEY,
-    }))
+    setDraftPlayer((current) => createDraftPlayer(keepAvatar ? current.avatar : DEFAULT_PLAYER_AVATAR_KEY))
     setDraftTouched({ name: false })
   }
 
@@ -70,6 +73,7 @@ const useCreateGameForm = () => {
     setGameNameTouched(false)
     setPlayers(createDefaultPlayers())
     setNextPlayerId(DEFAULT_PLAYER_ID)
+    setCurrentStep(1)
     resetDraft(false)
   }
 
@@ -91,16 +95,19 @@ const useCreateGameForm = () => {
     const nextPlayers = [
       ...players,
       {
-        id: nextPlayerId,
+        id: String(nextPlayerId),
         name: trimmedName,
         avatar: draftPlayer.avatar,
+        cityId: draftPlayer.cityId,
+        educationTrackId: draftPlayer.educationTrackId,
+        jobId: draftPlayer.jobId,
+        careerTrack: '',
       },
     ]
     setPlayers(nextPlayers)
-    setDraftPlayer((current) => ({
-      name: '',
-      avatar: getNextAvailablePlayerAvatarKey(current.avatar, nextPlayers.map((player) => player.avatar)),
-    }))
+    setDraftPlayer((current) =>
+      createDraftPlayer(getNextAvailablePlayerAvatarKey(current.avatar, nextPlayers.map((player) => player.avatar))),
+    )
     setDraftTouched({ name: false })
     setNextPlayerId((current) => current + 1)
     return true
@@ -131,6 +138,8 @@ const useCreateGameForm = () => {
     draftPlayer,
     draftTouched,
     draftErrors,
+    currentStep,
+    setCurrentStep,
     maxGameNameLength,
     maxPlayerNameLength,
     minPlayers,

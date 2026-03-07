@@ -1,6 +1,28 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createGameStorage } from '../services/gameStorage'
 
+const DRAFT_ID_PREFIX = 'draft-'
+
+const generateDraftId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return `${DRAFT_ID_PREFIX}${crypto.randomUUID()}`
+  }
+  return `${DRAFT_ID_PREFIX}${Date.now()}-${Math.floor(Math.random() * 100000)}`
+}
+
+const isDraftGame = (gameId, updates) => {
+  if (updates?.__draft) {
+    return true
+  }
+  return typeof gameId === 'string' && gameId.startsWith(DRAFT_ID_PREFIX)
+}
+
+const normalizeDraftGame = (game) => ({
+  ...game,
+  id: game.id || generateDraftId(),
+  __draft: true,
+})
+
 const useGames = () => {
   const storage = useMemo(() => createGameStorage(), [])
   const [games, setGames] = useState([])
@@ -27,20 +49,34 @@ const useGames = () => {
   }, [])
 
   const createGame = async (game) => {
-    const createdGame = await storage.createGame(game)
-    setGames((current) => [createdGame, ...current])
-    setNewGameId(createdGame.id)
-    return createdGame
+    return normalizeDraftGame(game)
   }
 
   const deleteGame = async (gameId) => {
     await storage.deleteGame(gameId)
-    setGames((current) => current.filter((game) => game.id !== gameId))
+    setGames((current) => current.filter((game) => game.id !== String(gameId)))
   }
 
   const updateGame = async (gameId, updates) => {
-    const updatedGame = await storage.updateGame(gameId, updates)
-    setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
+    const shouldPersistDraft = isDraftGame(gameId, updates)
+    const { __draft: _draftMarker, ...persistedUpdates } = updates || {}
+
+    const updatedGame = shouldPersistDraft
+      ? await storage.createGame(persistedUpdates)
+      : await storage.updateGame(gameId, persistedUpdates)
+
+    setGames((current) => {
+      const exists = current.some((game) => game.id === updatedGame.id)
+      if (!exists) {
+        return [updatedGame, ...current]
+      }
+      return current.map((game) => (game.id === updatedGame.id ? updatedGame : game))
+    })
+
+    if (shouldPersistDraft) {
+      setNewGameId(updatedGame.id)
+    }
+
     return updatedGame
   }
 

@@ -27,6 +27,22 @@ const generateId = () => {
   return `game-${Date.now()}-${Math.floor(Math.random() * 100000)}`
 }
 
+const clone = (value) => JSON.parse(JSON.stringify(value))
+
+const sanitizeGameForSave = (game) => {
+  const sanitizedPlayers = Array.isArray(game.players)
+    ? game.players.map((player) => ({
+        ...player,
+        id: String(player.id),
+      }))
+    : []
+
+  return {
+    ...clone(game),
+    players: sanitizedPlayers,
+  }
+}
+
 const getStorageMode = () => {
   const explicitMode = import.meta.env.VITE_STORAGE_MODE
   if (explicitMode === 'local') {
@@ -68,7 +84,7 @@ const createLocalStorage = () => ({
   createGame: async (game) => {
     const games = loadLocalGames()
     const createdGame = normalizeGame({
-      ...game,
+      ...sanitizeGameForSave(game),
       id: game.id ? String(game.id) : generateId(),
     })
     const updated = [createdGame, ...games]
@@ -84,13 +100,20 @@ const createLocalStorage = () => ({
     const normalizedId = String(gameId)
     const games = loadLocalGames()
     const existing = games.find((game) => game.id === normalizedId)
+
     if (!existing) {
-      throw new Error('Game not found')
+      const created = normalizeGame({
+        ...sanitizeGameForSave(updates),
+        id: normalizedId,
+      })
+      const updated = [created, ...games]
+      saveLocalGames(updated)
+      return created
     }
 
     const merged = normalizeGame({
       ...existing,
-      ...updates,
+      ...sanitizeGameForSave(updates),
       id: normalizedId,
     })
     const updated = games.map((game) => (game.id === normalizedId ? merged : game))
@@ -124,22 +147,24 @@ const createApiStorage = (baseUrl) => ({
     return normalizeGames(games)
   },
   createGame: async (game) => {
+    const payload = sanitizeGameForSave(game)
     const data = await fetchJson(`${baseUrl}/games`, {
       method: 'POST',
-      body: JSON.stringify({ game }),
+      body: JSON.stringify({ game: payload }),
     })
-    const created = data?.game ? normalizeGame(data.game) : normalizeGame({ ...game, id: generateId() })
+    const created = data?.game ? normalizeGame(data.game) : normalizeGame({ ...payload, id: generateId() })
     return created
   },
   deleteGame: async (gameId) => {
     await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`, { method: 'DELETE' })
   },
   updateGame: async (gameId, updates) => {
+    const payload = sanitizeGameForSave(updates)
     const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`, {
       method: 'PUT',
-      body: JSON.stringify({ game: updates }),
+      body: JSON.stringify({ game: payload }),
     })
-    return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+    return data?.game ? normalizeGame(data.game) : normalizeGame({ ...payload, id: String(gameId) })
   },
 })
 
