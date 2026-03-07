@@ -13,6 +13,7 @@ describe('Layout components', () => {
 
     await user.click(screen.getByRole('button', { name: 'New Game' }))
     expect(onCreate).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('GAME HUB')).toBeInTheDocument()
   })
 
   it('PageShell applies blur class', () => {
