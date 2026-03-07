@@ -48,6 +48,10 @@
   max-width: 640px;
 }
 
+.hero .primary-action {
+  min-width: 280px;
+}
+
 .eyebrow {
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -217,7 +221,8 @@ h1 {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-5);
+  gap: 24px;
+  max-width: 620px;
 }
 
 .game-card {
@@ -815,7 +820,7 @@ h1 {
 
 @media (min-width: 720px) {
   .game-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 620px;
   }
 }
 

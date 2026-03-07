@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import StartNewGamePage from '../pages/StartNewGamePage'
 import PlayGamePage from '../pages/PlayGamePage'
+import WelcomeToLifePage from '../pages/WelcomeToLifePage'
 import { createGame, createPlayer } from '../../test/testUtils'
 
 describe('Page components', () => {
@@ -42,6 +43,20 @@ describe('Page components', () => {
     await user.click(screen.getByRole('button', { name: 'Back to home' }))
 
     expect(onHome).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders WelcomeToLifePage and handles begin navigation', async () => {
+    const user = userEvent.setup()
+    const onBegin = vi.fn()
+
+    render(<WelcomeToLifePage game={createGame({ name: 'Choices Matter' })} onBegin={onBegin} />)
+
+    expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
+    expect(screen.getByText('Choices Matter', { exact: false })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: "Let's Begin!" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+    expect(onBegin).toHaveBeenCalledTimes(1)
   })
 
   it('resumes career selection from the next player without a choice', async () => {
