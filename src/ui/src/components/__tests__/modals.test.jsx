@@ -37,12 +37,10 @@ describe('Modal components', () => {
         isGameNameTooLong={false}
         maxGameNameLength={60}
         players={[]}
-        minPlayers={1}
         maxPlayerNameLength={24}
         draftPlayer={{ name: '', avatar: 'monkey-face' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
-        arePlayersValid={false}
         onAddPlayer={vi.fn()}
         onRemovePlayer={vi.fn()}
         onDraftNameChange={vi.fn()}
@@ -71,12 +69,10 @@ describe('Modal components', () => {
         isGameNameTooLong={false}
         maxGameNameLength={60}
         players={[createPlayer({ id: 'p1' })]}
-        minPlayers={1}
         maxPlayerNameLength={24}
         draftPlayer={{ name: '', avatar: 'monkey-face' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
-        arePlayersValid
         onAddPlayer={vi.fn()}
         onRemovePlayer={vi.fn()}
         onDraftNameChange={vi.fn()}
@@ -88,7 +84,9 @@ describe('Modal components', () => {
     )
 
     expect(screen.getByRole('heading', { name: 'New Game Setup' })).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
     expect(screen.queryByText('Game type')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 
@@ -112,12 +110,10 @@ describe('Modal components', () => {
           createPlayer({ id: 'p1', name: 'Alex', avatar: 'fox' }),
           createPlayer({ id: 'p2', name: 'Sam', avatar: 'panda' }),
         ]}
-        minPlayers={2}
         maxPlayerNameLength={24}
         draftPlayer={{ name: '', avatar: 'monkey-face' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
-        arePlayersValid
         onAddPlayer={vi.fn()}
         onRemovePlayer={vi.fn()}
         onDraftNameChange={vi.fn()}

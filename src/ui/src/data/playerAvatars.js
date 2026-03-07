@@ -5,19 +5,24 @@ import crocodile from 'openmoji/color/svg/1F40A.svg'
 import dolphin from 'openmoji/color/svg/1F42C.svg'
 import dragon from 'openmoji/color/svg/1F409.svg'
 import dragonFace from 'openmoji/color/svg/1F432.svg'
+import eagle from 'openmoji/color/svg/1F985.svg'
+import foxFace from 'openmoji/color/svg/1F98A.svg'
 import jellyfish from 'openmoji/color/svg/1FABC.svg'
 import lizard from 'openmoji/color/svg/1F98E.svg'
 import lobster from 'openmoji/color/svg/1F99E.svg'
 import octopus from 'openmoji/color/svg/1F419.svg'
+import pandaFace from 'openmoji/color/svg/1F43C.svg'
 import sauropod from 'openmoji/color/svg/1F995.svg'
 import scorpion from 'openmoji/color/svg/1F982.svg'
 import shark from 'openmoji/color/svg/1F988.svg'
 import shrimp from 'openmoji/color/svg/1F990.svg'
+import sloth from 'openmoji/color/svg/1F9A5.svg'
 import snake from 'openmoji/color/svg/1F40D.svg'
 import squid from 'openmoji/color/svg/1F991.svg'
 import tRex from 'openmoji/color/svg/1F996.svg'
 import turtle from 'openmoji/color/svg/1F422.svg'
 import whale from 'openmoji/color/svg/1F433.svg'
+import wolf from 'openmoji/color/svg/1F43A.svg'
 
 export const PLAYER_AVATAR_OPTIONS = [
   { key: 'octopus', label: 'Octopus', src: octopus },
@@ -40,6 +45,11 @@ export const PLAYER_AVATAR_OPTIONS = [
   { key: 'dolphin', label: 'Dolphin', src: dolphin },
   { key: 'blowfish', label: 'Blowfish', src: blowfish },
   { key: 'jellyfish', label: 'Jellyfish', src: jellyfish },
+  { key: 'panda-face', label: 'Panda Face', src: pandaFace },
+  { key: 'fox-face', label: 'Fox Face', src: foxFace },
+  { key: 'wolf', label: 'Wolf', src: wolf },
+  { key: 'eagle', label: 'Eagle', src: eagle },
+  { key: 'sloth', label: 'Sloth', src: sloth },
 ]
 
 export const DEFAULT_PLAYER_AVATAR_KEY = PLAYER_AVATAR_OPTIONS[0].key
