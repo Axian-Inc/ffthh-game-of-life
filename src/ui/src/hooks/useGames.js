@@ -71,6 +71,7 @@ const useGames = () => {
   const updateGame = async (gameId, updates) => {
     const normalizedId = String(gameId)
     const draftGame = draftGamesById[normalizedId]
+    const existingGame = games.find((game) => game.id === normalizedId)
 
     if (draftGame) {
       const createdGame = await storage.createGame({
@@ -87,7 +88,13 @@ const useGames = () => {
       return createdGame
     }
 
-    const updatedGame = await storage.updateGame(gameId, updates)
+    const payload = {
+      ...(existingGame || {}),
+      ...(updates || {}),
+      id: normalizedId,
+    }
+
+    const updatedGame = await storage.updateGame(normalizedId, payload)
     setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
     return updatedGame
   }
