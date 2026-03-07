@@ -217,7 +217,7 @@ h1 {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-5);
+  gap: 24px;
 }
 
 .game-card {
@@ -811,12 +811,6 @@ h1 {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-2);
-}
-
-@media (min-width: 720px) {
-  .game-items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (min-width: 860px) {

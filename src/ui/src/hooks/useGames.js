@@ -1,12 +1,29 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createGameStorage } from '../services/gameStorage'
 
+const generateDraftId = (games, draftGamesById) => {
+  const existingIds = new Set([
+    ...games.map((game) => String(game.id)),
+    ...Object.keys(draftGamesById),
+  ])
+  let nextId = ''
+  do {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      nextId = crypto.randomUUID()
+    } else {
+      nextId = `draft-${Date.now()}-${Math.floor(Math.random() * 100000)}`
+    }
+  } while (existingIds.has(nextId))
+  return nextId
+}
+
 const useGames = () => {
   const storage = useMemo(() => createGameStorage(), [])
   const [games, setGames] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState('')
   const [newGameId, setNewGameId] = useState(null)
+  const [draftGamesById, setDraftGamesById] = useState({})
 
   const loadGames = async () => {
     setIsLoading(true)
@@ -27,27 +44,57 @@ const useGames = () => {
   }, [])
 
   const createGame = async (game) => {
-    const createdGame = await storage.createGame({
+    const draftGame = {
       ...game,
-      lifecycle: game.lifecycle || { phase: 'setup-in-progress' },
-      startedAt: game.startedAt || null,
-    })
-    const finalizedGame = await storage.updateGame(createdGame.id, {
-      ...game,
-      id: createdGame.id,
-    })
-    setGames((current) => [finalizedGame, ...current.filter((existing) => existing.id !== finalizedGame.id)])
-    setNewGameId(finalizedGame.id)
-    return finalizedGame
+      id: game.id ? String(game.id) : generateDraftId(games, draftGamesById),
+    }
+    setDraftGamesById((current) => ({
+      ...current,
+      [draftGame.id]: draftGame,
+    }))
+    return draftGame
   }
 
   const deleteGame = async (gameId) => {
+    const normalizedId = String(gameId)
+    if (draftGamesById[normalizedId]) {
+      setDraftGamesById((current) => {
+        const { [normalizedId]: _ignored, ...rest } = current
+        return rest
+      })
+      return
+    }
     await storage.deleteGame(gameId)
-    setGames((current) => current.filter((game) => game.id !== gameId))
+    setGames((current) => current.filter((game) => game.id !== normalizedId))
   }
 
   const updateGame = async (gameId, updates) => {
-    const updatedGame = await storage.updateGame(gameId, updates)
+    const normalizedId = String(gameId)
+    const draftGame = draftGamesById[normalizedId]
+    const existingGame = games.find((game) => game.id === normalizedId)
+
+    if (draftGame) {
+      const createdGame = await storage.createGame({
+        ...draftGame,
+        ...updates,
+        id: normalizedId,
+      })
+      setDraftGamesById((current) => {
+        const { [normalizedId]: _ignored, ...rest } = current
+        return rest
+      })
+      setGames((current) => [createdGame, ...current.filter((game) => game.id !== createdGame.id)])
+      setNewGameId(createdGame.id)
+      return createdGame
+    }
+
+    const payload = {
+      ...(existingGame || {}),
+      ...(updates || {}),
+      id: normalizedId,
+    }
+
+    const updatedGame = await storage.updateGame(normalizedId, payload)
     setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
     return updatedGame
   }

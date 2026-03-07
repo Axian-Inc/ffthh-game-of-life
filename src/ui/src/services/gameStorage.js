@@ -1,40 +1,62 @@
 import { seedGames } from '../data/seedGames'
 
-const STORAGE_KEY = 'ffthh-game-of-life.games'
+export const GAME_STORAGE_KEY = 'ffthh-game-of-life.games'
 
-const normalizePlayer = (player = {}) => {
-  const annualSalary = Number.isFinite(player.annualSalary) ? player.annualSalary : 0
-  const monthlyIncome = Number.isFinite(player.monthlyIncome) ? player.monthlyIncome : annualSalary / 12
-
-  return {
-    id: String(player.id || (player.name || 'player').trim().toLowerCase().replace(/\s+/g, '-') || 'player'),
-    name: player.name || 'Player',
-    avatar: player.avatar || 'octopus',
-    cityId: player.cityId || '',
-    educationTrackId: player.educationTrackId || '',
-    jobId: player.jobId || '',
-    annualSalary,
-    monthlyIncome,
-    cash: Number.isFinite(player.cash) ? player.cash : 0,
-    debt: Number.isFinite(player.debt) ? player.debt : 0,
-    assets: Number.isFinite(player.assets) ? player.assets : 0,
-    investments: Number.isFinite(player.investments) ? player.investments : 0,
-    netWorth: Number.isFinite(player.netWorth) ? player.netWorth : 0,
-  }
+const normalizeNumber = (value, fallback = 0) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
 }
 
-const normalizeGame = (game) => {
-  const lifecyclePhase = game?.lifecycle?.phase || 'started'
-  return {
-    ...game,
-    id: String(game.id),
-    lifecycle: {
-      phase: lifecyclePhase,
-    },
-    startedAt: game.startedAt || (lifecyclePhase === 'started' ? game.createdAt || Date.now() : null),
-    players: Array.isArray(game.players) ? game.players.map(normalizePlayer) : [],
+const calculateNetWorth = ({ cash, debt, assets, investments }) => cash + assets + investments - debt
+
+const normalizeLifecycle = (game) => {
+  const phase = game?.lifecycle?.phase
+  if (phase === 'setup-in-progress' || phase === 'started') {
+    return { phase }
   }
+
+  if (game?.startedAt) {
+    return { phase: 'started' }
+  }
+
+  return { phase: 'setup-in-progress' }
 }
+
+const normalizePlayer = (player) => ({
+  ...player,
+  id: player?.id ? String(player.id) : '',
+  name: player?.name || '',
+  avatar: player?.avatar || '',
+  cityId: player?.cityId || '',
+  educationTrackId: player?.educationTrackId || '',
+  jobId: player?.jobId || '',
+  careerTrack: player?.careerTrack || '',
+  annualSalary: normalizeNumber(player?.annualSalary),
+  monthlyIncome: normalizeNumber(player?.monthlyIncome),
+  cash: normalizeNumber(player?.cash),
+  debt: normalizeNumber(player?.debt),
+  assets: normalizeNumber(player?.assets),
+  investments: normalizeNumber(player?.investments),
+  netWorth:
+    player?.netWorth === undefined || player?.netWorth === null
+      ? calculateNetWorth({
+          cash: normalizeNumber(player?.cash),
+          debt: normalizeNumber(player?.debt),
+          assets: normalizeNumber(player?.assets),
+          investments: normalizeNumber(player?.investments),
+        })
+      : normalizeNumber(player?.netWorth),
+})
+
+const normalizeGame = (game) => ({
+  ...game,
+  id: String(game.id),
+  name: game?.name || '',
+  players: Array.isArray(game?.players) ? game.players.map(normalizePlayer) : [],
+  currentStep: Number.isInteger(game?.currentStep) ? game.currentStep : 0,
+  lifecycle: normalizeLifecycle(game),
+  startedAt: game?.startedAt ? normalizeNumber(game.startedAt) : null,
+})
 
 const normalizeGames = (games) => games.map(normalizeGame)
 
@@ -79,17 +101,17 @@ const getApiBaseUrl = () => {
 }
 
 const loadLocalGames = () => {
-  const stored = parseJson(window.localStorage.getItem(STORAGE_KEY))
+  const stored = parseJson(window.localStorage.getItem(GAME_STORAGE_KEY))
   if (Array.isArray(stored) && stored.length > 0) {
     return normalizeGames(stored)
   }
   const seeded = normalizeGames(seedGames())
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+  window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(seeded))
   return seeded
 }
 
 const saveLocalGames = (games) => {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(games))
+  window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(games))
 }
 
 const createLocalStorage = () => ({
