@@ -29,6 +29,9 @@ owned_paths:
   - src/ui/e2e/home-visual.spec.js
   - src/ui/e2e/welcome-visual.spec.js
   - src/ui/e2e/__snapshots__/
+  - src/ui/e2e/__snapshots__/home-single-card.png
+  - src/ui/e2e/__snapshots__/home-multi-game-stack.png
+  - src/ui/e2e/__snapshots__/welcome-page.png
 ---
 
 # Objective
