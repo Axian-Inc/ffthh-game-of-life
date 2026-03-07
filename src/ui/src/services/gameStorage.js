@@ -2,9 +2,15 @@ import { seedGames } from '../data/seedGames'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 
+const normalizePlayer = (player, index) => ({
+  ...player,
+  id: player?.id ? String(player.id) : `player-${index + 1}`,
+})
+
 const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
+  players: Array.isArray(game.players) ? game.players.map(normalizePlayer) : [],
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)
@@ -51,7 +57,7 @@ const getApiBaseUrl = () => {
 
 const loadLocalGames = () => {
   const stored = parseJson(window.localStorage.getItem(STORAGE_KEY))
-  if (Array.isArray(stored) && stored.length > 0) {
+  if (Array.isArray(stored)) {
     return normalizeGames(stored)
   }
   const seeded = normalizeGames(seedGames())

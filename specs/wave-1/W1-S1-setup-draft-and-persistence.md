@@ -10,11 +10,16 @@ test_commands:
   - npm --prefix src/ui exec -- playwright test --config src/ui/playwright.config.js src/ui/e2e/app.spec.js
 owned_paths:
   - specs/wave-1/W1-S1-setup-draft-and-persistence.md
+  - src/ui/src/App.jsx
+  - src/ui/src/App.css
   - src/ui/src/hooks/useCreateGameForm.js
   - src/ui/src/hooks/useGames.js
   - src/ui/src/services/gameStorage.js
   - src/ui/src/utils/gameValidation.js
+  - src/ui/src/components/pages/StartNewGamePage.jsx
+  - src/ui/src/components/pages/PlayGamePage.jsx
   - src/ui/src/test/testUtils.js
+  - src/ui/src/components/__tests__/pages.test.jsx
   - src/ui/src/components/__tests__/setup-flow.test.jsx
   - src/ui/e2e/app.spec.js
 ---

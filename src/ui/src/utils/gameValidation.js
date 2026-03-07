@@ -15,7 +15,7 @@ export const buildNameCounts = (players) => {
 }
 
 export const getPlayerErrors = ({ player, nameCounts, maxPlayerNameLength }) => {
-  const errors = { name: '' }
+  const errors = { name: '', cityId: '', educationTrackId: '', jobId: '' }
   const trimmedName = player.name.trim()
   if (!trimmedName) {
     errors.name = 'Nickname is required.'
@@ -27,6 +27,23 @@ export const getPlayerErrors = ({ player, nameCounts, maxPlayerNameLength }) => 
     errors.name = 'Names must be unique.'
   }
   return errors
+}
+
+export const isConfiguredPlayerValid = (player, { maxPlayerNameLength = 24 } = {}) => {
+  if (!player) {
+    return false
+  }
+
+  const trimmedName = player.name?.trim() || ''
+  return Boolean(
+    trimmedName &&
+      trimmedName.length <= maxPlayerNameLength &&
+      player.avatar &&
+      player.cityId &&
+      player.educationTrackId &&
+      player.jobId &&
+      player.careerTrack,
+  )
 }
 
 export const getGameNameError = ({ isValid, isTooLong, maxLength }) => {

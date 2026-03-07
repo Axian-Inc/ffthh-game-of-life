@@ -6,7 +6,6 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
-import StartNewGamePage from './components/pages/StartNewGamePage'
 import PlayGamePage from './components/pages/PlayGamePage'
 import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
@@ -23,15 +22,14 @@ const parseAppRoute = (pathname) => {
   }
 
   return {
-    view: match[2] === 'careers' ? 'setup' : 'play',
+    view: 'play',
     gameId: decodeURIComponent(match[1]),
   }
 }
 
 const buildAppRoute = (view, activeGame) => {
-  if ((view === 'setup' || view === 'play') && activeGame?.id) {
-    const suffix = view === 'setup' ? 'careers' : 'play'
-    return `/games/${encodeURIComponent(activeGame.id)}/${suffix}`
+  if (view === 'play' && activeGame?.id) {
+    return `/games/${encodeURIComponent(activeGame.id)}/play`
   }
   return '/'
 }
@@ -49,9 +47,10 @@ function App() {
   const newGameButtonRef = useRef(null)
   const { state, openCreate, openSession, openSetup, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } =
     useGames()
   const {
+    draft,
     gameName,
     setGameName,
     gameNameTouched,
@@ -60,6 +59,7 @@ function App() {
     draftPlayer,
     draftTouched,
     draftErrors,
+    currentStep,
     maxGameNameLength,
     maxPlayerNameLength,
     minPlayers,
@@ -67,20 +67,27 @@ function App() {
     isGameNameTooLong,
     isGameNameValid,
     arePlayersValid,
+    isDraftIdentityValid,
+    isDraftPlayerConfigured,
     resetForm,
     markAllTouched,
     addPlayer,
     removePlayer,
     updateDraftName,
+    updateDraftPlayerField,
     markDraftTouched,
     cycleDraftAvatar,
+    setCurrentStep,
+    goToNextStep,
+    goToPreviousStep,
+    startNewPlayer,
   } = useCreateGameForm()
   const previousViewRef = useRef(view)
 
   const handleCreateClick = () => {
     openCreate()
-    setGameNameTouched(false)
     setCreateError('')
+    setSetupError('')
   }
 
   const handleBackClick = () => {
@@ -92,17 +99,59 @@ function App() {
     setIsStartingGame(false)
   }
 
-  const handleCreateGame = async () => {
-    if (!isGameNameValid || !arePlayersValid) {
+  const handleCreateGame = async (payload) => {
+    const nextName = payload?.name?.trim() || trimmedGameName
+    const nextPlayers = Array.isArray(payload?.players) ? payload.players : players
+    const isValidPayload =
+      Boolean(nextName) &&
+      nextPlayers.length >= minPlayers &&
+      nextPlayers.every((player) => player?.name?.trim())
+
+    if (!isValidPayload) {
       markAllTouched()
       return
     }
+
     setIsCreating(true)
     setCreateError('')
 
     try {
       const timestamp = Date.now()
-      const newGame = {
+      const savedGame = await createGame({
+        name: nextName,
+        status: 'active',
+        players: nextPlayers.map((player) => ({
+          ...player,
+          name: player.name.trim(),
+        })),
+        lastUpdated: timestamp,
+        createdAt: timestamp,
+        resumable: true,
+      })
+      resetForm()
+      openPlay(savedGame)
+    } catch (error) {
+      setCreateError('We could not create that game yet. Please try again.')
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  const handleAddPlayer = ({ careerTrack }) => {
+    return addPlayer({ careerTrack })
+  }
+
+  const handleStartGame = async () => {
+    if (!isGameNameValid || !arePlayersValid) {
+      markAllTouched()
+      return
+    }
+
+    setSetupError('')
+    setIsStartingGame(true)
+    try {
+      const timestamp = Date.now()
+      const savedGame = await createGame({
         name: trimmedGameName,
         status: 'active',
         players: players.map((player) => ({
@@ -112,36 +161,11 @@ function App() {
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
-      }
-      const createdGame = await createGame(newGame)
-      openSetup(createdGame)
-      resetForm()
-    } catch (error) {
-      setCreateError('We could not create that game yet. Please try again.')
-    } finally {
-      setIsCreating(false)
-    }
-  }
-
-  const handleAddPlayer = () => {
-    addPlayer()
-  }
-
-  const handleStartGame = async (gameToStart) => {
-    const game = gameToStart || activeGame
-    if (!game) {
-      return
-    }
-    setSetupError('')
-    setIsStartingGame(true)
-    try {
-      const savedGame = await updateGame(game.id, {
-        ...game,
-        lastUpdated: Date.now(),
       })
+      resetForm()
       openPlay(savedGame)
     } catch (error) {
-      setSetupError('We could not save career choices yet. Please try again.')
+      setSetupError('We could not save this game yet. Please try again.')
     } finally {
       setIsStartingGame(false)
     }
@@ -195,13 +219,6 @@ function App() {
       return rest
     })
 
-    const hasPlayers = Array.isArray(game.players) && game.players.length > 0
-    const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
-    if (hasPendingCareerChoices) {
-      openSetup(game)
-      return
-    }
-
     openPlay(game)
   }
 
@@ -243,15 +260,11 @@ function App() {
       return
     }
 
-    if (routeRequest.view === 'setup') {
-      openSetup(targetGame)
-    } else {
-      openPlay(targetGame)
-    }
+    openPlay(targetGame)
 
     setRouteRequest(null)
     setHasHydratedRoute(true)
-  }, [routeRequest, isLoading, games, closeAll, openSetup, openPlay])
+  }, [routeRequest, isLoading, games, closeAll, openPlay])
 
   useEffect(() => {
     if (!hasHydratedRoute) {
@@ -293,7 +306,7 @@ function App() {
   }, [view, pendingDelete, isCreating])
 
   useEffect(() => {
-    if (previousViewRef.current === 'create' && view === 'home') {
+    if (previousViewRef.current !== 'home' && view === 'home') {
       window.requestAnimationFrame(() => newGameButtonRef.current?.focus())
     }
     previousViewRef.current = view
@@ -335,7 +348,7 @@ function App() {
         draftTouched,
         draftErrors,
         arePlayersValid,
-        onAddPlayer: handleAddPlayer,
+        onAddPlayer: () => handleAddPlayer({ careerTrack: draftPlayer.educationTrackId }),
         onRemovePlayer: removePlayer,
         onDraftNameChange: (event) => updateDraftName(event.target.value),
         onDraftBlur: markDraftTouched,
@@ -375,9 +388,31 @@ function App() {
       ) : null}
       {view === 'setup' ? (
         <StartNewGamePage
-          game={activeGame}
+          draft={draft}
+          currentStep={currentStep}
+          minPlayers={minPlayers}
+          maxGameNameLength={maxGameNameLength}
+          maxPlayerNameLength={maxPlayerNameLength}
+          gameNameTouched={gameNameTouched}
+          isGameNameValid={isGameNameValid}
+          isGameNameTooLong={isGameNameTooLong}
+          arePlayersValid={arePlayersValid}
+          isDraftIdentityValid={isDraftIdentityValid}
+          isDraftPlayerConfigured={isDraftPlayerConfigured}
+          onGameNameChange={setGameName}
+          onGameNameBlur={() => setGameNameTouched(true)}
+          onDraftNameChange={updateDraftName}
+          onDraftFieldChange={updateDraftPlayerField}
+          onDraftAvatarCycle={cycleDraftAvatar}
+          onDraftBlur={markDraftTouched}
+          onNextStep={goToNextStep}
+          onPreviousStep={goToPreviousStep}
+          onStepChange={setCurrentStep}
+          onAddPlayer={handleAddPlayer}
+          onRemovePlayer={removePlayer}
+          onStartNewPlayer={startNewPlayer}
           onStart={handleStartGame}
-          onBack={closeAll}
+          onBack={handleBackClick}
           isStarting={isStartingGame}
           startError={setupError}
         />
