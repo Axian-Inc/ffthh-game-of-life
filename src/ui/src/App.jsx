@@ -7,7 +7,7 @@ import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
 import StartNewGamePage from './components/pages/StartNewGamePage'
-import PlayGamePage from './components/pages/PlayGamePage'
+import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
@@ -92,20 +92,24 @@ function App() {
     setIsStartingGame(false)
   }
 
-  const handleCreateGame = async () => {
-    if (!isGameNameValid || !arePlayersValid) {
+  const handleCreateGame = async (wizardPayload) => {
+    const payloadName = wizardPayload?.name?.trim() || ''
+    const payloadPlayers = Array.isArray(wizardPayload?.players) ? wizardPayload.players : []
+    if (!payloadName || payloadPlayers.length === 0) {
       markAllTouched()
+      setCreateError('Complete the setup wizard before starting.')
       return
     }
+
     setIsCreating(true)
     setCreateError('')
 
     try {
       const timestamp = Date.now()
       const newGame = {
-        name: trimmedGameName,
+        name: payloadName,
         status: 'active',
-        players: players.map((player) => ({
+        players: payloadPlayers.map((player) => ({
           ...player,
           name: player.name.trim(),
         })),
@@ -383,7 +387,7 @@ function App() {
         />
       ) : null}
       {view === 'play' ? (
-        <PlayGamePage game={activeGame} onHome={closeAll} />
+        <WelcomeToLifePage game={activeGame} onBegin={closeAll} />
       ) : null}
     </PageShell>
   )

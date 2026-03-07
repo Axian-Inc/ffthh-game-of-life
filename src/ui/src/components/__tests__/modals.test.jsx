@@ -6,7 +6,7 @@ import CreateGameModal from '../modals/CreateGameModal'
 import ResumeGameModal from '../modals/ResumeGameModal'
 import DeleteGameModal from '../modals/DeleteGameModal'
 import ModalManager from '../modals/ModalManager'
-import { createGame, createPlayer } from '../../test/testUtils'
+import { createGame } from '../../test/testUtils'
 
 describe('Modal components', () => {
   it('ModalBackdrop triggers backdrop clicks', async () => {
@@ -24,72 +24,19 @@ describe('Modal components', () => {
 
   it('CreateGameModal returns null when closed', () => {
     const { container } = render(
-      <CreateGameModal
-        isOpen={false}
-        onBackdropClick={vi.fn()}
-        onCancel={vi.fn()}
-        onSubmit={vi.fn()}
-        gameName=""
-        onGameNameChange={vi.fn()}
-        onGameNameBlur={vi.fn()}
-        gameNameTouched={false}
-        isGameNameValid={false}
-        isGameNameTooLong={false}
-        maxGameNameLength={60}
-        players={[]}
-        minPlayers={1}
-        maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
-        draftTouched={{ name: false }}
-        draftErrors={{ name: '' }}
-        arePlayersValid={false}
-        onAddPlayer={vi.fn()}
-        onRemovePlayer={vi.fn()}
-        onDraftNameChange={vi.fn()}
-        onDraftBlur={vi.fn()}
-        onDraftAvatarCycle={vi.fn()}
-        createError=""
-        isCreating={false}
-      />,
+      <CreateGameModal isOpen={false} onBackdropClick={vi.fn()} onCancel={vi.fn()} onSubmit={vi.fn()} gameName="" />,
     )
 
     expect(container.firstChild).toBeNull()
   })
 
-  it('CreateGameModal renders fields and hides game type options', () => {
-    render(
-      <CreateGameModal
-        isOpen
-        onBackdropClick={vi.fn()}
-        onCancel={vi.fn()}
-        onSubmit={vi.fn()}
-        gameName="Test"
-        onGameNameChange={vi.fn()}
-        onGameNameBlur={vi.fn()}
-        gameNameTouched={false}
-        isGameNameValid
-        isGameNameTooLong={false}
-        maxGameNameLength={60}
-        players={[createPlayer({ id: 'p1' })]}
-        minPlayers={1}
-        maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
-        draftTouched={{ name: false }}
-        draftErrors={{ name: '' }}
-        arePlayersValid
-        onAddPlayer={vi.fn()}
-        onRemovePlayer={vi.fn()}
-        onDraftNameChange={vi.fn()}
-        onDraftBlur={vi.fn()}
-        onDraftAvatarCycle={vi.fn()}
-        createError=""
-        isCreating={false}
-      />,
-    )
+  it('CreateGameModal renders wizard Step 1', () => {
+    render(<CreateGameModal isOpen onBackdropClick={vi.fn()} onCancel={vi.fn()} onSubmit={vi.fn()} gameName="" />)
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
-    expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByText('New Game Setup')).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
+    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 
   it('ResumeGameModal renders results mode', () => {
