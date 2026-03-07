@@ -11,6 +11,7 @@ describe('Layout components', () => {
     const onCreate = vi.fn()
     render(<Hero onCreate={onCreate} />)
 
+    expect(screen.getByText('Game Hub')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'New Game' }))
     expect(onCreate).toHaveBeenCalledTimes(1)
   })
