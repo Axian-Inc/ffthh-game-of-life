@@ -37,12 +37,10 @@ describe('Modal components', () => {
         isGameNameTooLong={false}
         maxGameNameLength={60}
         players={[]}
-        minPlayers={1}
         maxPlayerNameLength={24}
         draftPlayer={{ name: '', avatar: 'monkey-face' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
-        arePlayersValid={false}
         onAddPlayer={vi.fn()}
         onRemovePlayer={vi.fn()}
         onDraftNameChange={vi.fn()}
@@ -56,7 +54,7 @@ describe('Modal components', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('CreateGameModal renders fields and hides game type options', () => {
+  it('CreateGameModal renders wizard shell and step one controls', () => {
     render(
       <CreateGameModal
         isOpen
@@ -71,12 +69,10 @@ describe('Modal components', () => {
         isGameNameTooLong={false}
         maxGameNameLength={60}
         players={[createPlayer({ id: 'p1' })]}
-        minPlayers={1}
         maxPlayerNameLength={24}
         draftPlayer={{ name: '', avatar: 'monkey-face' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
-        arePlayersValid
         onAddPlayer={vi.fn()}
         onRemovePlayer={vi.fn()}
         onDraftNameChange={vi.fn()}
@@ -87,9 +83,10 @@ describe('Modal components', () => {
       />,
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
-    expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'New Game Setup' })).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
+    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 
   it('ResumeGameModal renders results mode', () => {
@@ -159,7 +156,7 @@ describe('Modal components', () => {
           createError: '',
           isCreating: false,
         }}
-      />,
+      />, 
     )
 
     expect(screen.getByText('Remove “Pending Delete”?')).toBeInTheDocument()

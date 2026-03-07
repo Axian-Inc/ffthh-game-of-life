@@ -1,7 +1,4 @@
-import citySkyline from '../assets/wizard/city-skyline.svg'
-import collegePath from '../assets/wizard/college-path.svg'
-import tradeTools from '../assets/wizard/trade-tools.svg'
-import creatorWave from '../assets/wizard/creator-wave.svg'
+import { WIZARD_ART } from '../assets/wizard/art'
 
 export const CITY_OPTIONS = [
   {
@@ -10,7 +7,7 @@ export const CITY_OPTIONS = [
     kicker: 'Big opportunities, big bills',
     description: 'Tech-heavy market with higher wages and higher monthly costs.',
     facts: ['Cost of Living: High', 'Taxes: Higher', 'Opportunity: High'],
-    art: citySkyline,
+    art: WIZARD_ART.citySkyline,
   },
   {
     id: 'austin',
@@ -18,7 +15,7 @@ export const CITY_OPTIONS = [
     kicker: 'Balanced momentum',
     description: 'Fast growth with moderate costs and strong job variety.',
     facts: ['Cost of Living: Medium', 'Taxes: Medium', 'Opportunity: Medium-High'],
-    art: citySkyline,
+    art: WIZARD_ART.citySkyline,
   },
   {
     id: 'des-moines',
@@ -26,7 +23,7 @@ export const CITY_OPTIONS = [
     kicker: 'Steady and affordable',
     description: 'Lower monthly costs with stable growth and less competition.',
     facts: ['Cost of Living: Lower', 'Taxes: Lower', 'Opportunity: Medium'],
-    art: citySkyline,
+    art: WIZARD_ART.citySkyline,
   },
 ]
 
@@ -37,7 +34,7 @@ export const EDUCATION_TRACK_OPTIONS = [
     kicker: 'Invest now, unlock later',
     description: 'Higher upfront debt with stronger long-term income upside.',
     facts: ['Start Debt: Higher', 'Income Potential: High', 'Stability: Medium'],
-    art: collegePath,
+    art: WIZARD_ART.collegePath,
   },
   {
     id: 'trades-track',
@@ -45,7 +42,7 @@ export const EDUCATION_TRACK_OPTIONS = [
     kicker: 'Earn sooner',
     description: 'Low debt and practical skills with consistent pay growth.',
     facts: ['Start Debt: Low', 'Income Potential: Medium-High', 'Stability: High'],
-    art: tradeTools,
+    art: WIZARD_ART.tradeTools,
   },
   {
     id: 'street-smart',
@@ -53,7 +50,7 @@ export const EDUCATION_TRACK_OPTIONS = [
     kicker: 'Learn by doing',
     description: 'No school debt with flexible paths and higher income swings.',
     facts: ['Start Debt: None', 'Income Potential: Variable', 'Stability: Variable'],
-    art: creatorWave,
+    art: WIZARD_ART.creatorWave,
   },
 ]
 
@@ -64,7 +61,7 @@ export const JOB_OPTIONS = [
     subtitle: 'Build products and solve technical problems',
     income: '$1,450 / month',
     careerTrack: 'Degree Track',
-    art: collegePath,
+    art: WIZARD_ART.collegePath,
   },
   {
     id: 'electrician',
@@ -72,7 +69,7 @@ export const JOB_OPTIONS = [
     subtitle: 'Install and maintain critical systems',
     income: '$1,320 / month',
     careerTrack: 'Trades Track',
-    art: tradeTools,
+    art: WIZARD_ART.tradeTools,
   },
   {
     id: 'content-creator',
@@ -80,7 +77,7 @@ export const JOB_OPTIONS = [
     subtitle: 'Grow an audience with digital storytelling',
     income: '$1,100 / month',
     careerTrack: 'Street Smart',
-    art: creatorWave,
+    art: WIZARD_ART.creatorWave,
   },
 ]
 
