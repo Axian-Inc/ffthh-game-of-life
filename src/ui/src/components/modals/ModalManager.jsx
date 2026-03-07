@@ -15,7 +15,7 @@ const ModalManager = ({
 }) => (
   <>
     <CreateGameModal
-      isOpen={view === 'create'}
+      isOpen={view === 'create' || view === 'setup'}
       onBackdropClick={onBackdropClick}
       onCancel={onCloseAll}
       onSubmit={createGameProps.onSubmit}

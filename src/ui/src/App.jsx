@@ -12,6 +12,13 @@ import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
 
+const LIFECYCLE_PHASE = {
+  SETUP: 'setup-in-progress',
+  STARTED: 'started',
+}
+
+const getLifecyclePhase = (game) => game?.lifecycle?.phase || LIFECYCLE_PHASE.STARTED
+
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
     return { view: 'home' }
@@ -109,6 +116,10 @@ function App() {
           ...player,
           name: player.name.trim(),
         })),
+        lifecycle: {
+          phase: LIFECYCLE_PHASE.SETUP,
+        },
+        startedAt: null,
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
@@ -135,9 +146,14 @@ function App() {
     setSetupError('')
     setIsStartingGame(true)
     try {
+      const now = Date.now()
       const savedGame = await updateGame(game.id, {
         ...game,
-        lastUpdated: Date.now(),
+        lifecycle: {
+          phase: LIFECYCLE_PHASE.STARTED,
+        },
+        startedAt: game.startedAt || now,
+        lastUpdated: now,
       })
       openPlay(savedGame)
     } catch (error) {
@@ -195,9 +211,8 @@ function App() {
       return rest
     })
 
-    const hasPlayers = Array.isArray(game.players) && game.players.length > 0
-    const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
-    if (hasPendingCareerChoices) {
+    const phase = getLifecyclePhase(game)
+    if (phase === LIFECYCLE_PHASE.SETUP) {
       openSetup(game)
       return
     }
@@ -243,12 +258,12 @@ function App() {
       return
     }
 
-    if (routeRequest.view === 'setup') {
+    const phase = getLifecyclePhase(targetGame)
+    if (routeRequest.view === 'setup' || phase === LIFECYCLE_PHASE.SETUP) {
       openSetup(targetGame)
     } else {
       openPlay(targetGame)
     }
-
     setRouteRequest(null)
     setHasHydratedRoute(true)
   }, [routeRequest, isLoading, games, closeAll, openSetup, openPlay])
@@ -346,7 +361,7 @@ function App() {
     />
   )
 
-  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete)
+  const isModalOpen = view === 'create' || view === 'setup' || view === 'session' || Boolean(pendingDelete)
 
   return (
     <PageShell isBlurred={isModalOpen} modals={modals}>
