@@ -6,7 +6,7 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
-import PlayGamePage from './components/pages/PlayGamePage'
+import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
@@ -365,7 +365,7 @@ function App() {
         </>
       ) : null}
       {view === 'play' ? (
-        <PlayGamePage game={activeGame} onHome={closeAll} />
+        <WelcomeToLifePage game={activeGame} onBegin={closeAll} />
       ) : null}
     </PageShell>
   )
