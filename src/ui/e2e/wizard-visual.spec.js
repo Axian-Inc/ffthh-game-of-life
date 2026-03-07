@@ -11,11 +11,11 @@ test('wizard surface renders and can be captured for visual review', async ({ pa
   await page.reload()
 
   await page.getByRole('button', { name: 'New Game' }).click()
-  await expect(page.getByRole('heading', { name: 'New Game' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'New Game Setup' })).toBeVisible()
 
-  await page.locator('#game-name').fill('Wave 1 Wizard Visual')
-  await page.getByPlaceholder('Player nickname').fill('Player One')
-  await page.getByRole('button', { name: 'Add Player' }).click()
+  await page.locator('#wizard-game-name').fill('Wave 1 Wizard Visual')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByRole('heading', { name: 'New Player Setup' })).toBeVisible()
 
   const screenshot = await page.screenshot({ fullPage: true })
   expect(screenshot.length).toBeGreaterThan(10000)

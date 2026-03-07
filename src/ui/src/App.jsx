@@ -59,7 +59,7 @@ function App() {
   const newGameButtonRef = useRef(null)
   const { state, openCreate, openSession, openSetup, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
+  const { games, isLoading, fetchError, loadGames, deleteGame, updateGame, newGameId, setNewGameId } = useGames()
   const {
     gameName,
     setGameName,
@@ -99,8 +99,8 @@ function App() {
     setIsCreating(false)
   }
 
-  const handleCreateGame = async () => {
-    if (!isGameNameValid || !arePlayersValid) {
+  const handleCreateGame = async (submittedGame) => {
+    if (!isGameNameValid || !arePlayersValid || !submittedGame?.name || !Array.isArray(submittedGame.players)) {
       markAllTouched()
       return
     }
@@ -110,9 +110,10 @@ function App() {
     try {
       const timestamp = Date.now()
       const newGame = {
-        name: trimmedGameName,
+        ...submittedGame,
+        name: submittedGame.name.trim(),
         status: 'active',
-        players: players.map((player) => ({
+        players: submittedGame.players.map((player) => ({
           ...player,
           name: player.name.trim(),
         })),
@@ -124,8 +125,11 @@ function App() {
         createdAt: timestamp,
         resumable: true,
       }
-      const createdGame = await createGame(newGame)
-      openPlay(createdGame)
+      const savedGame = await updateGame(`draft-${timestamp}`, {
+        ...newGame,
+        __draft: true,
+      })
+      openPlay(savedGame)
       resetForm()
     } catch (error) {
       setCreateError('We could not create that game yet. Please try again.')

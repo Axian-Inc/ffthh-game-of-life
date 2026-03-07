@@ -46,6 +46,7 @@ const storageState = vi.hoisted(() => {
 
 vi.mock('../../services/gameStorage', () => ({
   createGameStorage: () => storageState.storage,
+  normalizeGameRecord: (game) => game,
 }))
 
 describe('Wave 1 setup draft and persistence contract', () => {

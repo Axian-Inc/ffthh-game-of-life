@@ -56,7 +56,7 @@ describe('Modal components', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('CreateGameModal renders fields and hides game type options', () => {
+  it('CreateGameModal renders wizard entry state and hides game type options', () => {
     render(
       <CreateGameModal
         isOpen
@@ -87,9 +87,9 @@ describe('Modal components', () => {
       />,
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'New Game Setup' })).toBeInTheDocument()
     expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 
   it('ResumeGameModal renders results mode', () => {
