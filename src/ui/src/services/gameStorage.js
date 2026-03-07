@@ -2,6 +2,26 @@ import { seedGames } from '../data/seedGames'
 
 export const GAME_STORAGE_KEY = 'ffthh-game-of-life.games'
 
+const normalizeNumber = (value, fallback = 0) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const calculateNetWorth = ({ cash, debt, assets, investments }) => cash + assets + investments - debt
+
+const normalizeLifecycle = (game) => {
+  const phase = game?.lifecycle?.phase
+  if (phase === 'setup-in-progress' || phase === 'started') {
+    return { phase }
+  }
+
+  if (game?.startedAt) {
+    return { phase: 'started' }
+  }
+
+  return { phase: 'setup-in-progress' }
+}
+
 const normalizePlayer = (player) => ({
   ...player,
   id: player?.id ? String(player.id) : '',
@@ -11,6 +31,21 @@ const normalizePlayer = (player) => ({
   educationTrackId: player?.educationTrackId || '',
   jobId: player?.jobId || '',
   careerTrack: player?.careerTrack || '',
+  annualSalary: normalizeNumber(player?.annualSalary),
+  monthlyIncome: normalizeNumber(player?.monthlyIncome),
+  cash: normalizeNumber(player?.cash),
+  debt: normalizeNumber(player?.debt),
+  assets: normalizeNumber(player?.assets),
+  investments: normalizeNumber(player?.investments),
+  netWorth:
+    player?.netWorth === undefined || player?.netWorth === null
+      ? calculateNetWorth({
+          cash: normalizeNumber(player?.cash),
+          debt: normalizeNumber(player?.debt),
+          assets: normalizeNumber(player?.assets),
+          investments: normalizeNumber(player?.investments),
+        })
+      : normalizeNumber(player?.netWorth),
 })
 
 const normalizeGame = (game) => ({
@@ -19,6 +54,8 @@ const normalizeGame = (game) => ({
   name: game?.name || '',
   players: Array.isArray(game?.players) ? game.players.map(normalizePlayer) : [],
   currentStep: Number.isInteger(game?.currentStep) ? game.currentStep : 0,
+  lifecycle: normalizeLifecycle(game),
+  startedAt: game?.startedAt ? normalizeNumber(game.startedAt) : null,
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)
