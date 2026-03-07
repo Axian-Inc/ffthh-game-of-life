@@ -10,7 +10,7 @@ const initialState = {
 const reducer = (state, action) => {
   switch (action.type) {
     case 'OPEN_CREATE':
-      return { ...state, view: 'create' }
+      return { ...state, view: 'create', activeGame: null, activeGameMode: 'resume' }
     case 'OPEN_SESSION':
       return {
         ...state,
@@ -33,7 +33,7 @@ const reducer = (state, action) => {
         activeGameMode: 'resume',
       }
     case 'OPEN_DELETE':
-      return { ...state, pendingDelete: action.payload, view: 'home' }
+      return { ...state, pendingDelete: action.payload, view: 'home', activeGame: null, activeGameMode: 'resume' }
     case 'CLOSE_ALL':
       return { ...state, view: 'home', activeGame: null, activeGameMode: 'resume', pendingDelete: null }
     default:

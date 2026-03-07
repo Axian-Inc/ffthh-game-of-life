@@ -6,11 +6,13 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
-import StartNewGamePage from './components/pages/StartNewGamePage'
 import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
+
+const LIFECYCLE_PHASE_SETUP_IN_PROGRESS = 'setup-in-progress'
+const LIFECYCLE_PHASE_STARTED = 'started'
 
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
@@ -36,13 +38,29 @@ const buildAppRoute = (view, activeGame) => {
   return '/'
 }
 
+const getLifecycleEntryView = (game, fallbackView = 'play') => {
+  const phase = game?.lifecycle?.phase
+  if (phase === LIFECYCLE_PHASE_SETUP_IN_PROGRESS) {
+    return 'setup'
+  }
+  if (phase === LIFECYCLE_PHASE_STARTED) {
+    return 'play'
+  }
+
+  const hasPlayers = Array.isArray(game?.players) && game.players.length > 0
+  const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
+  if (hasPendingCareerChoices) {
+    return 'setup'
+  }
+
+  return fallbackView
+}
+
 function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
-  const [setupError, setSetupError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
-  const [isStartingGame, setIsStartingGame] = useState(false)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
@@ -63,7 +81,6 @@ function App() {
     maxGameNameLength,
     maxPlayerNameLength,
     minPlayers,
-    trimmedGameName,
     isGameNameTooLong,
     isGameNameValid,
     arePlayersValid,
@@ -87,13 +104,12 @@ function App() {
     closeAll()
     resetForm()
     setCreateError('')
-    setSetupError('')
     setIsCreating(false)
-    setIsStartingGame(false)
   }
 
-  const handleCreateGame = async () => {
-    if (!isGameNameValid || !arePlayersValid) {
+  const handleCreateGame = async ({ name, players: submittedPlayers }) => {
+    const normalizedName = (name || '').trim()
+    if (!normalizedName || !Array.isArray(submittedPlayers) || submittedPlayers.length === 0) {
       markAllTouched()
       return
     }
@@ -102,19 +118,50 @@ function App() {
 
     try {
       const timestamp = Date.now()
+      const normalizedPlayers = submittedPlayers.map((player) => ({
+        ...player,
+        name: player.name.trim(),
+      }))
+
+      if (view === 'setup' && activeGame?.id) {
+        const resumedGame = await updateGame(activeGame.id, {
+          ...activeGame,
+          name: normalizedName,
+          players: normalizedPlayers,
+          status: 'active',
+          resumable: true,
+          lastUpdated: timestamp,
+          startedAt: activeGame.startedAt || timestamp,
+          lifecycle: {
+            phase: LIFECYCLE_PHASE_STARTED,
+          },
+        })
+        openPlay(resumedGame)
+        resetForm()
+        return
+      }
+
       const newGame = {
-        name: trimmedGameName,
+        name: normalizedName,
         status: 'active',
-        players: players.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-        })),
+        players: normalizedPlayers,
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
+        lifecycle: {
+          phase: LIFECYCLE_PHASE_SETUP_IN_PROGRESS,
+        },
       }
       const createdGame = await createGame(newGame)
-      openSetup(createdGame)
+      const startedGame = await updateGame(createdGame.id, {
+        ...createdGame,
+        ...newGame,
+        startedAt: timestamp,
+        lifecycle: {
+          phase: LIFECYCLE_PHASE_STARTED,
+        },
+      })
+      openPlay(startedGame)
       resetForm()
     } catch (error) {
       setCreateError('We could not create that game yet. Please try again.')
@@ -125,26 +172,6 @@ function App() {
 
   const handleAddPlayer = () => {
     addPlayer()
-  }
-
-  const handleStartGame = async (gameToStart) => {
-    const game = gameToStart || activeGame
-    if (!game) {
-      return
-    }
-    setSetupError('')
-    setIsStartingGame(true)
-    try {
-      const savedGame = await updateGame(game.id, {
-        ...game,
-        lastUpdated: Date.now(),
-      })
-      openPlay(savedGame)
-    } catch (error) {
-      setSetupError('We could not save career choices yet. Please try again.')
-    } finally {
-      setIsStartingGame(false)
-    }
   }
 
   const handleDeleteRequest = (game) => {
@@ -195,9 +222,8 @@ function App() {
       return rest
     })
 
-    const hasPlayers = Array.isArray(game.players) && game.players.length > 0
-    const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
-    if (hasPendingCareerChoices) {
+    const entryView = getLifecycleEntryView(game, 'play')
+    if (entryView === 'setup') {
       openSetup(game)
       return
     }
@@ -243,7 +269,8 @@ function App() {
       return
     }
 
-    if (routeRequest.view === 'setup') {
+    const targetView = getLifecycleEntryView(targetGame, routeRequest.view)
+    if (targetView === 'setup') {
       openSetup(targetGame)
     } else {
       openPlay(targetGame)
@@ -265,6 +292,15 @@ function App() {
   }, [view, activeGame, hasHydratedRoute])
 
   useEffect(() => {
+    if (view !== 'setup' || !activeGame) {
+      return
+    }
+    setGameName(activeGame.name || '')
+    setGameNameTouched(false)
+    setCreateError('')
+  }, [view, activeGame, setGameName, setGameNameTouched])
+
+  useEffect(() => {
     if (!newGameId || view !== 'home' || isLoading) {
       return
     }
@@ -275,7 +311,7 @@ function App() {
   }, [newGameId, view, isLoading])
 
   useEffect(() => {
-    if (view !== 'create' && view !== 'session' && !pendingDelete) {
+    if (view !== 'create' && view !== 'setup' && view !== 'session' && !pendingDelete) {
       return
     }
 
@@ -290,7 +326,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [view, pendingDelete, isCreating])
+  }, [view, pendingDelete, isCreating, closeAll])
 
   useEffect(() => {
     if (previousViewRef.current === 'create' && view === 'home') {
@@ -346,7 +382,7 @@ function App() {
     />
   )
 
-  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete)
+  const isModalOpen = view === 'create' || view === 'setup' || view === 'session' || Boolean(pendingDelete)
 
   return (
     <PageShell isBlurred={isModalOpen} modals={modals}>
@@ -372,15 +408,6 @@ function App() {
             )}
           </GameListSection>
         </>
-      ) : null}
-      {view === 'setup' ? (
-        <StartNewGamePage
-          game={activeGame}
-          onStart={handleStartGame}
-          onBack={closeAll}
-          isStarting={isStartingGame}
-          startError={setupError}
-        />
       ) : null}
       {view === 'play' ? (
         <WelcomeToLifePage game={activeGame} onBegin={closeAll} />
