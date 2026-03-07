@@ -6,32 +6,44 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
-import StartNewGamePage from './components/pages/StartNewGamePage'
 import PlayGamePage from './components/pages/PlayGamePage'
 import useGames from './hooks/useGames'
 import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
+
+const SETUP_IN_PROGRESS_PHASE = 'setup-in-progress'
+const STARTED_PHASE = 'started'
+
+const getLifecyclePhase = (game) => {
+  const phase = game?.lifecycle?.phase
+  if (phase === SETUP_IN_PROGRESS_PHASE || phase === STARTED_PHASE) {
+    return phase
+  }
+
+  const hasPlayers = Array.isArray(game?.players) && game.players.length > 0
+  const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
+  return hasPendingCareerChoices ? SETUP_IN_PROGRESS_PHASE : STARTED_PHASE
+}
 
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
     return { view: 'home' }
   }
 
-  const match = pathname.match(/^\/games\/([^/]+)\/(careers|play)$/)
+  const match = pathname.match(/^\/games\/([^/]+)\/play$/)
   if (!match) {
     return { view: 'home' }
   }
 
   return {
-    view: match[2] === 'careers' ? 'setup' : 'play',
+    view: 'play',
     gameId: decodeURIComponent(match[1]),
   }
 }
 
 const buildAppRoute = (view, activeGame) => {
-  if ((view === 'setup' || view === 'play') && activeGame?.id) {
-    const suffix = view === 'setup' ? 'careers' : 'play'
-    return `/games/${encodeURIComponent(activeGame.id)}/${suffix}`
+  if (view === 'play' && activeGame?.id) {
+    return `/games/${encodeURIComponent(activeGame.id)}/play`
   }
   return '/'
 }
@@ -40,17 +52,14 @@ function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
-  const [setupError, setSetupError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
-  const [isStartingGame, setIsStartingGame] = useState(false)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
   const newGameButtonRef = useRef(null)
   const { state, openCreate, openSession, openSetup, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
-    useGames()
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
   const {
     gameName,
     setGameName,
@@ -87,9 +96,7 @@ function App() {
     closeAll()
     resetForm()
     setCreateError('')
-    setSetupError('')
     setIsCreating(false)
-    setIsStartingGame(false)
   }
 
   const handleCreateGame = async () => {
@@ -109,12 +116,16 @@ function App() {
           ...player,
           name: player.name.trim(),
         })),
+        lifecycle: {
+          phase: STARTED_PHASE,
+        },
+        startedAt: timestamp,
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
       }
       const createdGame = await createGame(newGame)
-      openSetup(createdGame)
+      openPlay(createdGame)
       resetForm()
     } catch (error) {
       setCreateError('We could not create that game yet. Please try again.')
@@ -125,26 +136,6 @@ function App() {
 
   const handleAddPlayer = () => {
     addPlayer()
-  }
-
-  const handleStartGame = async (gameToStart) => {
-    const game = gameToStart || activeGame
-    if (!game) {
-      return
-    }
-    setSetupError('')
-    setIsStartingGame(true)
-    try {
-      const savedGame = await updateGame(game.id, {
-        ...game,
-        lastUpdated: Date.now(),
-      })
-      openPlay(savedGame)
-    } catch (error) {
-      setSetupError('We could not save career choices yet. Please try again.')
-    } finally {
-      setIsStartingGame(false)
-    }
   }
 
   const handleDeleteRequest = (game) => {
@@ -195,9 +186,8 @@ function App() {
       return rest
     })
 
-    const hasPlayers = Array.isArray(game.players) && game.players.length > 0
-    const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
-    if (hasPendingCareerChoices) {
+    const lifecyclePhase = getLifecyclePhase(game)
+    if (lifecyclePhase === SETUP_IN_PROGRESS_PHASE) {
       openSetup(game)
       return
     }
@@ -243,7 +233,8 @@ function App() {
       return
     }
 
-    if (routeRequest.view === 'setup') {
+    const lifecyclePhase = getLifecyclePhase(targetGame)
+    if (routeRequest.view === 'setup' || lifecyclePhase === SETUP_IN_PROGRESS_PHASE) {
       openSetup(targetGame)
     } else {
       openPlay(targetGame)
@@ -275,7 +266,7 @@ function App() {
   }, [newGameId, view, isLoading])
 
   useEffect(() => {
-    if (view !== 'create' && view !== 'session' && !pendingDelete) {
+    if (view !== 'create' && view !== 'setup' && view !== 'session' && !pendingDelete) {
       return
     }
 
@@ -346,7 +337,7 @@ function App() {
     />
   )
 
-  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete)
+  const isModalOpen = view === 'create' || view === 'setup' || view === 'session' || Boolean(pendingDelete)
 
   return (
     <PageShell isBlurred={isModalOpen} modals={modals}>
@@ -372,15 +363,6 @@ function App() {
             )}
           </GameListSection>
         </>
-      ) : null}
-      {view === 'setup' ? (
-        <StartNewGamePage
-          game={activeGame}
-          onStart={handleStartGame}
-          onBack={closeAll}
-          isStarting={isStartingGame}
-          startError={setupError}
-        />
       ) : null}
       {view === 'play' ? (
         <PlayGamePage game={activeGame} onHome={closeAll} />
