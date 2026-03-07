@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const ModalBackdrop = ({ onBackdropClick, children }) => {
+const ModalBackdrop = ({ onBackdropClick, children, className = '', labelledBy }) => {
   const overlayRef = useRef(null)
 
   useEffect(() => {
@@ -10,7 +10,7 @@ const ModalBackdrop = ({ onBackdropClick, children }) => {
     }
 
     const focusableSelector =
-      'button,[href],input,select,textarea,[tabindex]:not([tabindex=\"-1\"])'
+      'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
     const getFocusable = () =>
       Array.from(overlay.querySelectorAll(focusableSelector)).filter(
         (element) => !element.hasAttribute('disabled'),
@@ -47,9 +47,10 @@ const ModalBackdrop = ({ onBackdropClick, children }) => {
   return (
     <div
       ref={overlayRef}
-      className="modal-overlay"
+      className={`modal-overlay ${className}`.trim()}
       role="dialog"
       aria-modal="true"
+      aria-labelledby={labelledBy}
       onClick={onBackdropClick}
     >
       {children}
