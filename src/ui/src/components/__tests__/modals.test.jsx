@@ -6,6 +6,7 @@ import CreateGameModal from '../modals/CreateGameModal'
 import ResumeGameModal from '../modals/ResumeGameModal'
 import DeleteGameModal from '../modals/DeleteGameModal'
 import ModalManager from '../modals/ModalManager'
+import { DEFAULT_PLAYER_AVATAR_KEY } from '../../data/playerAvatars'
 import { createGame, createPlayer } from '../../test/testUtils'
 
 describe('Modal components', () => {
@@ -39,7 +40,7 @@ describe('Modal components', () => {
         players={[]}
         minPlayers={1}
         maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
+        draftPlayer={{ name: '', avatar: DEFAULT_PLAYER_AVATAR_KEY }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
         arePlayersValid={false}
@@ -56,24 +57,24 @@ describe('Modal components', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('CreateGameModal renders fields and hides game type options', () => {
+  it('CreateGameModal renders the six-step wizard shell', () => {
     render(
       <CreateGameModal
         isOpen
         onBackdropClick={vi.fn()}
         onCancel={vi.fn()}
         onSubmit={vi.fn()}
-        gameName="Test"
+        gameName="Choices Matter"
         onGameNameChange={vi.fn()}
         onGameNameBlur={vi.fn()}
         gameNameTouched={false}
         isGameNameValid
         isGameNameTooLong={false}
         maxGameNameLength={60}
-        players={[createPlayer({ id: 'p1' })]}
+        players={[]}
         minPlayers={1}
         maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
+        draftPlayer={{ name: '', avatar: DEFAULT_PLAYER_AVATAR_KEY }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
         arePlayersValid
@@ -87,9 +88,11 @@ describe('Modal components', () => {
       />,
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
+    expect(screen.getByText('New Game Setup')).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
+    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
     expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 
   it('ResumeGameModal renders results mode', () => {
@@ -147,7 +150,7 @@ describe('Modal components', () => {
           players: [],
           minPlayers: 1,
           maxPlayerNameLength: 24,
-          draftPlayer: { name: '', avatar: 'monkey-face' },
+          draftPlayer: { name: '', avatar: DEFAULT_PLAYER_AVATAR_KEY },
           draftTouched: { name: false },
           draftErrors: { name: '' },
           arePlayersValid: false,
@@ -163,5 +166,39 @@ describe('Modal components', () => {
     )
 
     expect(screen.getByText('Remove “Pending Delete”?')).toBeInTheDocument()
+  })
+
+  it('uses mapped legacy avatars in shared helpers', () => {
+    render(
+      <CreateGameModal
+        isOpen
+        onBackdropClick={vi.fn()}
+        onCancel={vi.fn()}
+        onSubmit={vi.fn()}
+        gameName="Legacy"
+        onGameNameChange={vi.fn()}
+        onGameNameBlur={vi.fn()}
+        gameNameTouched={false}
+        isGameNameValid
+        isGameNameTooLong={false}
+        maxGameNameLength={60}
+        players={[createPlayer({ id: 'p1', avatar: 'panda' })]}
+        minPlayers={1}
+        maxPlayerNameLength={24}
+        draftPlayer={{ name: '', avatar: 'monkey-face' }}
+        draftTouched={{ name: false }}
+        draftErrors={{ name: '' }}
+        arePlayersValid
+        onAddPlayer={vi.fn()}
+        onRemovePlayer={vi.fn()}
+        onDraftNameChange={vi.fn()}
+        onDraftBlur={vi.fn()}
+        onDraftAvatarCycle={vi.fn()}
+        createError=""
+        isCreating={false}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 })
