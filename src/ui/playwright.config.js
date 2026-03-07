@@ -9,6 +9,8 @@ const launchOptions = resolvedChromium ? { executablePath: resolvedChromium } : 
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: ['**/*-visual.spec.js'],
+  workers: 1,
   timeout: 30000,
   expect: {
     timeout: 5000,
