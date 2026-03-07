@@ -38,3 +38,5 @@ node_modules/
 # Local auth secret
 auth.json
 .DS_Store
+
+worktrees/
