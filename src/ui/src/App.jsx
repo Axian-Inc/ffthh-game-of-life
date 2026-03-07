@@ -92,20 +92,24 @@ function App() {
     setIsStartingGame(false)
   }
 
-  const handleCreateGame = async () => {
-    if (!isGameNameValid || !arePlayersValid) {
+  const handleCreateGame = async (wizardPayload) => {
+    const payloadName = wizardPayload?.name?.trim() || ''
+    const payloadPlayers = Array.isArray(wizardPayload?.players) ? wizardPayload.players : []
+    if (!payloadName || payloadPlayers.length === 0) {
       markAllTouched()
+      setCreateError('Complete the setup wizard before starting.')
       return
     }
+
     setIsCreating(true)
     setCreateError('')
 
     try {
       const timestamp = Date.now()
       const newGame = {
-        name: trimmedGameName,
+        name: payloadName,
         status: 'active',
-        players: players.map((player) => ({
+        players: payloadPlayers.map((player) => ({
           ...player,
           name: player.name.trim(),
         })),

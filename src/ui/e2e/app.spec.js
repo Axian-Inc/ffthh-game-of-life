@@ -11,25 +11,39 @@ test('create, persist on start, reload, and resume keeps full setup players', as
   })
 
   await page.getByRole('button', { name: 'New Game' }).click()
-  await page.locator('#game-name').fill('Choices Matter Final')
-  await page.getByPlaceholder('Player nickname').fill('Alex')
-  await page.getByRole('button', { name: 'Add Player' }).click()
-  await page.getByPlaceholder('Player nickname').fill('Jamie')
-  await page.getByRole('button', { name: 'Add Player' }).click()
+  await page.getByLabel('Game Name:').fill('Choices Matter Final')
+  await page.getByRole('button', { name: 'Next' }).click()
 
-  await page.getByRole('button', { name: /Start Game with 2 Players/i }).click()
+  await page.getByLabel('Player Name:').fill('Alex')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /San Francisco, CA/i }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /Degree Track/i }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /Software Engineer/i }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+
+  await page.getByRole('button', { name: '+ New Player' }).click()
+  await page.getByLabel('Player Name:').fill('Jamie')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /San Francisco, CA/i }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /Street Smart/i }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /Entrepreneur/i }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Start Game' }).click()
 
   await expect(page.getByRole('heading', { name: 'Choose a career path' })).toBeVisible()
 
   const countBeforeStart = await page.evaluate(() => JSON.parse(window.localStorage.getItem('ffthh-game-of-life.games') || '[]').length)
   expect(countBeforeStart).toBe(baselineGameCount)
 
-  await page.getByRole('button', { name: /Degree Track/i }).click()
   await page.getByRole('button', { name: /Creator Track/i }).click()
   await page.getByRole('button', { name: 'Start Game' }).click()
 
-  await expect(page.getByRole('heading', { name: 'Choices Matter Final' })).toBeVisible()
-  await page.getByRole('button', { name: 'Back to home' }).click()
+  await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
 
   await expect(page.getByRole('heading', { name: 'Choices Matter Final' })).toBeVisible()
 
@@ -37,8 +51,8 @@ test('create, persist on start, reload, and resume keeps full setup players', as
   await expect(page.getByRole('heading', { name: 'Choices Matter Final' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Resume' }).first().click()
-  await expect(page.getByRole('heading', { name: 'Choices Matter Final' })).toBeVisible()
-  await page.getByRole('button', { name: 'Back to home' }).click()
+  await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
 
   const savedGame = await page.evaluate(() => {
     const games = JSON.parse(window.localStorage.getItem('ffthh-game-of-life.games') || '[]')
