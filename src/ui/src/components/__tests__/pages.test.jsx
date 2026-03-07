@@ -1,10 +1,17 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { vi } from 'vitest'
+import { afterEach, vi } from 'vitest'
+import App from '../../App'
 import StartNewGamePage from '../pages/StartNewGamePage'
 import PlayGamePage from '../pages/PlayGamePage'
 import WelcomeToLifePage from '../pages/WelcomeToLifePage'
+import { GAME_STORAGE_KEY } from '../../services/gameStorage'
 import { createGame, createPlayer } from '../../test/testUtils'
+
+afterEach(() => {
+  window.localStorage.clear()
+  window.history.replaceState({}, '', '/')
+})
 
 describe('Page components', () => {
   it('renders career options per player and starts game', async () => {
@@ -45,14 +52,20 @@ describe('Page components', () => {
     expect(onHome).toHaveBeenCalledTimes(1)
   })
 
-  it('renders WelcomeToLifePage content', () => {
-    render(<WelcomeToLifePage game={createGame({ name: 'Career Quest' })} onBegin={vi.fn()} />)
+  it('renders WelcomeToLifePage content sections in order with quote block', () => {
+    const { container } = render(<WelcomeToLifePage game={createGame({ name: 'Career Quest' })} onBegin={vi.fn()} />)
 
     expect(screen.getByText('Career Quest')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Welcome to Life!' })).toBeInTheDocument()
-    expect(screen.getByText('Start with purpose')).toBeInTheDocument()
-    expect(screen.getByText('Build your path')).toBeInTheDocument()
-    expect(screen.getByText('Play your story')).toBeInTheDocument()
+
+    const sectionHeadings = within(container).getAllByRole('heading', { level: 3 })
+    expect(sectionHeadings.map((heading) => heading.textContent)).toEqual([
+      'Start with purpose',
+      'Build your path',
+      'Play your story',
+    ])
+
+    expect(screen.getByText(/Life is what happens between your plans/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: "Let's Begin!" })).toBeInTheDocument()
   })
 
@@ -87,5 +100,23 @@ describe('Page components', () => {
         ],
       }),
     )
+  })
+
+  it('routes lifecycle.phase=started to welcome screen instead of setup wizard', async () => {
+    const game = createGame({
+      id: 'started-1',
+      name: 'Started Session',
+      lifecycle: { phase: 'started' },
+      players: [createPlayer({ id: 'p1', name: 'Riley', careerTrack: '' })],
+      resumable: true,
+    })
+    window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([game]))
+    window.history.replaceState({}, '', `/games/${game.id}/careers`)
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { level: 2, name: 'Welcome to Life!' })).toBeInTheDocument()
+    expect(screen.getByText('Started Session')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'New Game Setup' })).not.toBeInTheDocument()
   })
 })
