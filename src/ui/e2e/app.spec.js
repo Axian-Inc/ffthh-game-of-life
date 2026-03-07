@@ -13,11 +13,12 @@ test('create flow persists on Start Game and keeps both players after reload/res
 
   await page.getByRole('button', { name: 'New Game' }).click()
   await page.locator('#game-name').fill('Automation Save Contract')
+  await page.getByRole('button', { name: 'Next' }).click()
   await page.getByPlaceholder('Player nickname').fill('Alex')
-  await page.getByRole('button', { name: 'Add Player' }).click()
-  await page.getByPlaceholder('Player nickname').fill('Blake')
-  await page.getByRole('button', { name: 'Add Player' }).click()
-  await page.getByRole('button', { name: /Start Game with 2 Players/ }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
 
   const gameCountBeforeStart = await page.evaluate(() => {
     const raw = window.localStorage.getItem('ffthh-game-of-life.games')
@@ -25,6 +26,21 @@ test('create flow persists on Start Game and keeps both players after reload/res
     return Array.isArray(games) ? games.length : 0
   })
   expect(gameCountBeforeStart).toBe(initialGameCount)
+
+  await page.getByRole('button', { name: '+ New Player' }).click()
+  await page.getByPlaceholder('Player nickname').fill('Blake')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByRole('button', { name: /Start Game with 2 Players/ }).click()
+
+  const gameCountAfterWizardSubmit = await page.evaluate(() => {
+    const raw = window.localStorage.getItem('ffthh-game-of-life.games')
+    const games = raw ? JSON.parse(raw) : []
+    return Array.isArray(games) ? games.length : 0
+  })
+  expect(gameCountAfterWizardSubmit).toBe(initialGameCount)
 
   await expect(page.getByRole('heading', { name: 'Choose a career path' })).toBeVisible()
   await page.getByRole('button', { name: /Degree Track/i }).click()
@@ -48,8 +64,9 @@ test('create flow persists on Start Game and keeps both players after reload/res
   expect(savedGame.players[1].careerTrack).toBeTruthy()
   expect(savedGame.currentStep).toBe(0)
 
-  await expect(page.getByRole('heading', { name: 'Automation Save Contract' })).toBeVisible()
-  await page.getByRole('button', { name: 'Back to home' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Welcome to Life!' })).toBeVisible()
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
+  await expect(page).toHaveURL('/')
 
   const gameCard = page.locator('.game-card', {
     has: page.getByRole('heading', { name: 'Automation Save Contract' }),
@@ -65,8 +82,9 @@ test('create flow persists on Start Game and keeps both players after reload/res
   await expect(gameCardAfterReload.getByText('2 players')).toBeVisible()
 
   await gameCardAfterReload.getByRole('button', { name: 'Resume' }).click()
-  await expect(page.getByRole('heading', { name: 'Automation Save Contract' })).toBeVisible()
-  await page.getByRole('button', { name: 'Back to home' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Welcome to Life!' })).toBeVisible()
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
+  await expect(page).toHaveURL('/')
 
   await page.getByRole('button', { name: 'Delete Automation Save Contract' }).click()
   await page.getByRole('button', { name: 'Delete game' }).click()
