@@ -187,67 +187,75 @@ describe('Wave 1 setup and persistence contract', () => {
 })
 
 describe('New game setup flow UI', () => {
-  it('disables Step 1 next until game name is valid', async () => {
-    const user = userEvent.setup()
-    const onGameNameChange = vi.fn()
-    const props = buildProps({
-      onGameNameChange,
-      isGameNameValid: false,
-      gameName: '',
-    })
-
-    const { rerender } = render(<CreateGameModal {...props} />)
-
-    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
-
-    const nameInput = screen.getByLabelText('Game Name:')
-    await user.type(nameInput, 'Alpha')
-    expect(onGameNameChange).toHaveBeenCalled()
-
-    rerender(
-      <CreateGameModal
-        {...props}
-        isGameNameValid
-        gameName="Alpha"
-      />,
-    )
-
-    expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled()
-  })
-
-  it('submits Step 6 payload with editable game title', async () => {
+  it('covers wizard step gating, card counts, summary, player loop, and final payload', async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn()
     render(
       <CreateGameModal
         {...buildProps({
-          gameName: 'Initial Name',
-          isGameNameValid: true,
+          gameName: '',
+          isGameNameValid: false,
           onSubmit,
         })}
       />,
     )
 
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
+
+    const gameNameInput = screen.getByLabelText('Game Name:')
+    await user.type(gameNameInput, 'Edited Name')
+    expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled()
+
     await user.click(screen.getByRole('button', { name: 'Next' }))
+    expect(screen.getByText('Step 2 of 6')).toBeInTheDocument()
+
+    const personaGroup = screen.getByRole('radiogroup', { name: 'Choose your digital persona' })
+    expect(personaGroup).toBeInTheDocument()
+    await user.click(screen.getByRole('radio', { name: 'Snake' }))
+    expect(screen.getByRole('radio', { name: 'Snake' })).toHaveAttribute('aria-checked', 'true')
+
     await user.type(screen.getByPlaceholderText('Player nickname'), 'Riley')
     await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.getByText('Step 3 of 6')).toBeInTheDocument()
+    expect(screen.getByTestId('wizard-step-3').querySelectorAll('.wizard-rail-card')).toHaveLength(3)
+    await user.click(screen.getByRole('button', { name: /Sunset Bay/i }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.getByText('Step 4 of 6')).toBeInTheDocument()
+    expect(screen.getByTestId('wizard-step-4').querySelectorAll('.wizard-rail-card')).toHaveLength(3)
+    await user.click(screen.getByRole('button', { name: /Trades Track/i }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.getByText('Step 5 of 6')).toBeInTheDocument()
+    expect(screen.getByTestId('wizard-step-5').querySelectorAll('.wizard-job-card')).toHaveLength(3)
+    await user.click(screen.getByRole('button', { name: /Electrician/i }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
 
     expect(screen.getByText('Step 6 of 6')).toBeInTheDocument()
-    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
-
-    const gameNameInput = screen.getByLabelText('Game Name:')
-    await user.clear(gameNameInput)
-    await user.type(gameNameInput, 'Edited Name')
+    expect(screen.getByText('Riley')).toBeInTheDocument()
+    const firstPlayerSummary = screen.getByText('Riley').closest('article')
+    expect(firstPlayerSummary).toHaveTextContent('City: Sunset Bay')
+    expect(firstPlayerSummary).toHaveTextContent('Education: Trades Track')
+    expect(firstPlayerSummary).toHaveTextContent('Job: Electrician')
+    expect(screen.getByRole('button', { name: /Start Game with 1 Player/ })).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: '+ New Player' }))
+    expect(screen.getByText('Step 2 of 6')).toBeInTheDocument()
+
     await user.type(screen.getByPlaceholderText('Player nickname'), 'Jordan')
+    await user.click(screen.getByRole('radio', { name: 'Fox' }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: /Maple Heights/i }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: /Creator Track/i }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: /Content Creator/i }))
     await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.getByText('Riley')).toBeInTheDocument()
+    expect(screen.getByText('Jordan')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Start Game with 2 Players/ })).toBeEnabled()
 
     await user.click(screen.getByRole('button', { name: /Start Game with 2 Players/ }))
 
@@ -255,22 +263,24 @@ describe('New game setup flow UI', () => {
     expect(onSubmit).toHaveBeenCalledWith({
       name: 'Edited Name',
       players: [
-        expect.objectContaining({
+        {
           id: 'player-1',
           name: 'Riley',
-          cityId: expect.any(String),
-          educationTrackId: expect.any(String),
-          jobId: expect.any(String),
-          careerTrack: expect.any(String),
-        }),
-        expect.objectContaining({
+          avatar: 'snake',
+          cityId: 'sunset-bay',
+          educationTrackId: 'trades-track',
+          jobId: 'electrician',
+          careerTrack: 'Trades Track',
+        },
+        {
           id: 'player-2',
           name: 'Jordan',
-          cityId: expect.any(String),
-          educationTrackId: expect.any(String),
-          jobId: expect.any(String),
-          careerTrack: expect.any(String),
-        }),
+          avatar: 'fox',
+          cityId: 'maple-heights',
+          educationTrackId: 'creator-track',
+          jobId: 'content-creator',
+          careerTrack: 'Creator Track',
+        },
       ],
     })
   })
