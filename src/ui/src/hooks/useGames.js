@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createGameStorage } from '../services/gameStorage'
+import { createGameStorage, normalizeGameRecord } from '../services/gameStorage'
 
 const useGames = () => {
   const storage = useMemo(() => createGameStorage(), [])
@@ -14,7 +14,7 @@ const useGames = () => {
 
     try {
       const loadedGames = await storage.listGames()
-      setGames(loadedGames)
+      setGames(loadedGames.map(normalizeGameRecord))
     } catch (error) {
       setFetchError('Unable to load games. Check your connection and try again.')
     } finally {
@@ -27,7 +27,7 @@ const useGames = () => {
   }, [])
 
   const createGame = async (game) => {
-    const createdGame = await storage.createGame(game)
+    const createdGame = normalizeGameRecord(await storage.createGame(game))
     setGames((current) => [createdGame, ...current])
     setNewGameId(createdGame.id)
     return createdGame
@@ -39,7 +39,7 @@ const useGames = () => {
   }
 
   const updateGame = async (gameId, updates) => {
-    const updatedGame = await storage.updateGame(gameId, updates)
+    const updatedGame = normalizeGameRecord(await storage.updateGame(gameId, updates))
     setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
     return updatedGame
   }

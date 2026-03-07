@@ -2,12 +2,72 @@ import { seedGames } from '../data/seedGames'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 
-const normalizeGame = (game) => ({
-  ...game,
-  id: String(game.id),
-})
+const SETUP_PHASE = 'setup-in-progress'
+const STARTED_PHASE = 'started'
 
-const normalizeGames = (games) => games.map(normalizeGame)
+const normalizeNumber = (value, fallback = 0) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+  return fallback
+}
+
+const normalizePlayer = (player = {}) => {
+  const avatar = player.avatar ?? player.gravitar ?? player.gravatar ?? null
+  return {
+    ...player,
+    id: player.id == null ? undefined : String(player.id),
+    avatar,
+    gravitar: avatar,
+    cityId: player.cityId ?? null,
+    educationTrackId: player.educationTrackId ?? null,
+    jobId: player.jobId ?? null,
+    annualSalary: normalizeNumber(player.annualSalary),
+    monthlyIncome: normalizeNumber(player.monthlyIncome),
+    cash: normalizeNumber(player.cash),
+    debt: normalizeNumber(player.debt),
+    assets: normalizeNumber(player.assets),
+    investments: normalizeNumber(player.investments),
+    netWorth: normalizeNumber(player.netWorth),
+  }
+}
+
+const inferLifecyclePhase = (game, players) => {
+  if (game.lifecycle?.phase) {
+    return game.lifecycle.phase
+  }
+  if (game.startedAt != null) {
+    return STARTED_PHASE
+  }
+  const hasPlayers = players.length > 0
+  const hasSetupSelections = hasPlayers && players.every((player) => player.jobId || player.careerTrack)
+  return hasSetupSelections ? STARTED_PHASE : SETUP_PHASE
+}
+
+export const normalizeGameRecord = (game = {}) => {
+  const players = Array.isArray(game.players) ? game.players.map(normalizePlayer) : []
+  const lifecyclePhase = inferLifecyclePhase(game, players)
+  const startedAtFallback = game.lastUpdated ?? game.createdAt ?? 0
+  const startedAt = lifecyclePhase === STARTED_PHASE ? normalizeNumber(game.startedAt, startedAtFallback) : null
+  return {
+    ...game,
+    id: game.id == null ? '' : String(game.id),
+    players,
+    lifecycle: {
+      ...game.lifecycle,
+      phase: lifecyclePhase,
+    },
+    startedAt,
+  }
+}
+
+const normalizeGames = (games) => games.map(normalizeGameRecord)
 
 const parseJson = (value) => {
   if (!value) {
@@ -67,7 +127,7 @@ const createLocalStorage = () => ({
   listGames: async () => loadLocalGames(),
   createGame: async (game) => {
     const games = loadLocalGames()
-    const createdGame = normalizeGame({
+    const createdGame = normalizeGameRecord({
       ...game,
       id: game.id ? String(game.id) : generateId(),
     })
@@ -88,7 +148,7 @@ const createLocalStorage = () => ({
       throw new Error('Game not found')
     }
 
-    const merged = normalizeGame({
+    const merged = normalizeGameRecord({
       ...existing,
       ...updates,
       id: normalizedId,
@@ -128,7 +188,7 @@ const createApiStorage = (baseUrl) => ({
       method: 'POST',
       body: JSON.stringify({ game }),
     })
-    const created = data?.game ? normalizeGame(data.game) : normalizeGame({ ...game, id: generateId() })
+    const created = data?.game ? normalizeGameRecord(data.game) : normalizeGameRecord({ ...game, id: generateId() })
     return created
   },
   deleteGame: async (gameId) => {
@@ -139,7 +199,7 @@ const createApiStorage = (baseUrl) => ({
       method: 'PUT',
       body: JSON.stringify({ game: updates }),
     })
-    return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+    return data?.game ? normalizeGameRecord(data.game) : normalizeGameRecord({ ...updates, id: String(gameId) })
   },
 })
 

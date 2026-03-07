@@ -4,6 +4,9 @@ const crypto = require('crypto')
 const dynamo = new AWS.DynamoDB.DocumentClient()
 const tableName = process.env.TABLE_NAME
 
+const SETUP_PHASE = 'setup-in-progress'
+const STARTED_PHASE = 'started'
+
 const jsonResponse = (statusCode, body) => ({
   statusCode,
   headers: {
@@ -26,13 +29,75 @@ const parseBody = (event) => {
   }
 }
 
+const normalizeNumber = (value, fallback = 0) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+  return fallback
+}
+
+const normalizePlayer = (player = {}) => {
+  const avatar = player.avatar ?? player.gravitar ?? player.gravatar ?? null
+  return {
+    ...player,
+    id: player.id == null ? undefined : String(player.id),
+    avatar,
+    gravitar: avatar,
+    cityId: player.cityId ?? null,
+    educationTrackId: player.educationTrackId ?? null,
+    jobId: player.jobId ?? null,
+    annualSalary: normalizeNumber(player.annualSalary),
+    monthlyIncome: normalizeNumber(player.monthlyIncome),
+    cash: normalizeNumber(player.cash),
+    debt: normalizeNumber(player.debt),
+    assets: normalizeNumber(player.assets),
+    investments: normalizeNumber(player.investments),
+    netWorth: normalizeNumber(player.netWorth),
+  }
+}
+
+const inferLifecyclePhase = (game, players) => {
+  if (game.lifecycle && game.lifecycle.phase) {
+    return game.lifecycle.phase
+  }
+  if (game.startedAt != null) {
+    return STARTED_PHASE
+  }
+  const hasPlayers = players.length > 0
+  const hasSetupSelections = hasPlayers && players.every((player) => player.jobId || player.careerTrack)
+  return hasSetupSelections ? STARTED_PHASE : SETUP_PHASE
+}
+
+const normalizeGame = (game = {}) => {
+  const players = Array.isArray(game.players) ? game.players.map(normalizePlayer) : []
+  const lifecyclePhase = inferLifecyclePhase(game, players)
+  const startedAtFallback = game.lastUpdated ?? game.createdAt ?? 0
+  const startedAt = lifecyclePhase === STARTED_PHASE ? normalizeNumber(game.startedAt, startedAtFallback) : null
+  return {
+    ...game,
+    id: game.id == null ? '' : String(game.id),
+    players,
+    lifecycle: {
+      ...(game.lifecycle || {}),
+      phase: lifecyclePhase,
+    },
+    startedAt,
+  }
+}
+
 const listGames = async () => {
   const result = await dynamo
     .scan({
       TableName: tableName,
     })
     .promise()
-  const items = Array.isArray(result.Items) ? result.Items : []
+  const items = Array.isArray(result.Items) ? result.Items.map(normalizeGame) : []
   return jsonResponse(200, { games: items })
 }
 
@@ -42,7 +107,7 @@ const createGame = async (event) => {
     return jsonResponse(400, { message: 'Missing game payload.' })
   }
 
-  const game = { ...body.game }
+  const game = normalizeGame(body.game)
   if (!game.id) {
     game.id = crypto.randomUUID()
   }
@@ -80,10 +145,10 @@ const updateGame = async (event, gameId) => {
     return jsonResponse(400, { message: 'Missing game payload.' })
   }
 
-  const game = {
+  const game = normalizeGame({
     ...body.game,
     id: gameId,
-  }
+  })
 
   await dynamo
     .put({
