@@ -29,4 +29,9 @@ describe('Layout components', () => {
     expect(screen.getByText('Your Games')).toBeInTheDocument()
     expect(screen.getByLabelText('2 games')).toBeInTheDocument()
   })
+
+  it('Hero renders the game hub eyebrow copy', () => {
+    render(<Hero onCreate={vi.fn()} />)
+    expect(screen.getByText('Game Hub')).toBeInTheDocument()
+  })
 })

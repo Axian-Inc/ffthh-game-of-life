@@ -16,12 +16,12 @@ const GameGrid = ({
   <ul className="game-items">
     {isLoading
       ? Array.from({ length: 4 }).map((_, index) => (
-          <li key={`skeleton-${index}`}>
+          <li className="game-item" key={`skeleton-${index}`}>
             <GameSkeletonCard />
           </li>
         ))
       : games.map((game) => (
-          <li key={game.id}>
+          <li className="game-item" key={game.id}>
             <GameCard
               game={game}
               now={now}

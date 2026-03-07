@@ -20,7 +20,8 @@ describe('Game components', () => {
 
   it('renders StatusPill', () => {
     render(<StatusPill status="active" />)
-    expect(screen.getByText('active')).toBeInTheDocument()
+    expect(screen.getByText('ACTIVE')).toBeInTheDocument()
+    expect(screen.getByLabelText('Status: active')).toBeInTheDocument()
   })
 
   it('renders AvatarRow with overflow', () => {
@@ -128,5 +129,25 @@ describe('Game components', () => {
       />,
     )
     expect(screen.getAllByRole('listitem')).toHaveLength(4)
+  })
+
+  it('renders game rows as a single list column', () => {
+    render(
+      <GameGrid
+        games={[createGame({ id: 'game-1' }), createGame({ id: 'game-2', name: 'Choices Matter' })]}
+        isLoading={false}
+        now={Date.now()}
+        onResume={vi.fn()}
+        onViewResults={vi.fn()}
+        onDelete={vi.fn()}
+        resumeErrors={{}}
+        deleteErrors={{}}
+        newGameId={null}
+        newGameCardRef={null}
+      />,
+    )
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+    expect(screen.getAllByText('Resume')).toHaveLength(2)
   })
 })

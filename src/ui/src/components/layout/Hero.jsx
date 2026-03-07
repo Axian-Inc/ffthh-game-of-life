@@ -7,12 +7,13 @@ const Hero = ({ onCreate, buttonRef }) => (
       <Sparkles aria-hidden="true" />
     </div>
     <div className="hero-copy">
-      <p className="eyebrow">Game of Life</p>
+      <p className="eyebrow">Game Hub</p>
       <h1>Game of LIFE</h1>
       <p className="tagline">
-        Start and career and see how your life unfolds in this easy, fun, and exciting simulation of this game we call life! 
+        Start and career and see how your life unfolds in this easy, fun, and exciting simulation
+        of this game we call life!
       </p>
-      <PrimaryButton onClick={onCreate} ref={buttonRef}>
+      <PrimaryButton className="hero-cta" onClick={onCreate} ref={buttonRef}>
         New Game
       </PrimaryButton>
     </div>
