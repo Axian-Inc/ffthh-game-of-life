@@ -4,7 +4,7 @@ export const buildNameCounts = (players) => {
   const counts = {}
 
   players.forEach((player) => {
-    const name = player.name.trim().toLowerCase()
+    const name = (player?.name || '').trim().toLowerCase()
     if (!name) {
       return
     }
@@ -16,7 +16,7 @@ export const buildNameCounts = (players) => {
 
 export const getPlayerErrors = ({ player, nameCounts, maxPlayerNameLength }) => {
   const errors = { name: '' }
-  const trimmedName = player.name.trim()
+  const trimmedName = (player?.name || '').trim()
   if (!trimmedName) {
     errors.name = 'Nickname is required.'
   }

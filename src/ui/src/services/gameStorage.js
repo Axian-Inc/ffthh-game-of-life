@@ -1,10 +1,24 @@
 import { seedGames } from '../data/seedGames'
 
-const STORAGE_KEY = 'ffthh-game-of-life.games'
+export const GAME_STORAGE_KEY = 'ffthh-game-of-life.games'
+
+const normalizePlayer = (player) => ({
+  ...player,
+  id: player?.id ? String(player.id) : '',
+  name: player?.name || '',
+  avatar: player?.avatar || '',
+  cityId: player?.cityId || '',
+  educationTrackId: player?.educationTrackId || '',
+  jobId: player?.jobId || '',
+  careerTrack: player?.careerTrack || '',
+})
 
 const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
+  name: game?.name || '',
+  players: Array.isArray(game?.players) ? game.players.map(normalizePlayer) : [],
+  currentStep: Number.isInteger(game?.currentStep) ? game.currentStep : 0,
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)
@@ -50,17 +64,17 @@ const getApiBaseUrl = () => {
 }
 
 const loadLocalGames = () => {
-  const stored = parseJson(window.localStorage.getItem(STORAGE_KEY))
+  const stored = parseJson(window.localStorage.getItem(GAME_STORAGE_KEY))
   if (Array.isArray(stored) && stored.length > 0) {
     return normalizeGames(stored)
   }
   const seeded = normalizeGames(seedGames())
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+  window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(seeded))
   return seeded
 }
 
 const saveLocalGames = (games) => {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(games))
+  window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(games))
 }
 
 const createLocalStorage = () => ({
