@@ -6,7 +6,7 @@ import CreateGameModal from '../modals/CreateGameModal'
 import ResumeGameModal from '../modals/ResumeGameModal'
 import DeleteGameModal from '../modals/DeleteGameModal'
 import ModalManager from '../modals/ModalManager'
-import { createGame, createPlayer } from '../../test/testUtils'
+import { createGame } from '../../test/testUtils'
 
 describe('Modal components', () => {
   it('ModalBackdrop triggers backdrop clicks', async () => {
@@ -39,7 +39,7 @@ describe('Modal components', () => {
         players={[]}
         minPlayers={1}
         maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
+        draftPlayer={{ name: '', avatar: 'octopus' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
         arePlayersValid={false}
@@ -50,33 +50,33 @@ describe('Modal components', () => {
         onDraftAvatarCycle={vi.fn()}
         createError=""
         isCreating={false}
-      />,
+      />, 
     )
 
     expect(container.firstChild).toBeNull()
   })
 
-  it('CreateGameModal renders fields and hides game type options', () => {
+  it('CreateGameModal renders wizard step 1 and Next is disabled when game name is invalid', () => {
     render(
       <CreateGameModal
         isOpen
         onBackdropClick={vi.fn()}
         onCancel={vi.fn()}
         onSubmit={vi.fn()}
-        gameName="Test"
+        gameName=""
         onGameNameChange={vi.fn()}
         onGameNameBlur={vi.fn()}
         gameNameTouched={false}
-        isGameNameValid
+        isGameNameValid={false}
         isGameNameTooLong={false}
         maxGameNameLength={60}
-        players={[createPlayer({ id: 'p1' })]}
+        players={[]}
         minPlayers={1}
         maxPlayerNameLength={24}
-        draftPlayer={{ name: '', avatar: 'monkey-face' }}
+        draftPlayer={{ name: '', avatar: 'octopus' }}
         draftTouched={{ name: false }}
         draftErrors={{ name: '' }}
-        arePlayersValid
+        arePlayersValid={false}
         onAddPlayer={vi.fn()}
         onRemovePlayer={vi.fn()}
         onDraftNameChange={vi.fn()}
@@ -84,12 +84,12 @@ describe('Modal components', () => {
         onDraftAvatarCycle={vi.fn()}
         createError=""
         isCreating={false}
-      />,
+      />, 
     )
 
-    expect(screen.getByText('New Game')).toBeInTheDocument()
-    expect(screen.queryByText('Game type')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Start Game with/ })).toBeInTheDocument()
+    expect(screen.getByText('New Game Setup')).toBeInTheDocument()
+    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 
   it('ResumeGameModal renders results mode', () => {
@@ -101,7 +101,7 @@ describe('Modal components', () => {
         mode="results"
         onBackdropClick={vi.fn()}
         onClose={vi.fn()}
-      />,
+      />, 
     )
 
     expect(screen.getByText('Game Results')).toBeInTheDocument()
@@ -117,7 +117,7 @@ describe('Modal components', () => {
         onBackdropClick={vi.fn()}
         onCancel={vi.fn()}
         onConfirm={vi.fn()}
-      />,
+      />, 
     )
     expect(screen.getByText('Delete Game')).toBeInTheDocument()
     expect(screen.getByText('Remove “Delete Me”?')).toBeInTheDocument()
@@ -147,7 +147,7 @@ describe('Modal components', () => {
           players: [],
           minPlayers: 1,
           maxPlayerNameLength: 24,
-          draftPlayer: { name: '', avatar: 'monkey-face' },
+          draftPlayer: { name: '', avatar: 'octopus' },
           draftTouched: { name: false },
           draftErrors: { name: '' },
           arePlayersValid: false,
@@ -159,7 +159,7 @@ describe('Modal components', () => {
           createError: '',
           isCreating: false,
         }}
-      />,
+      />, 
     )
 
     expect(screen.getByText('Remove “Pending Delete”?')).toBeInTheDocument()

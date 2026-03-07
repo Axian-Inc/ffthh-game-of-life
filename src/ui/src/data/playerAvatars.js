@@ -1,13 +1,18 @@
 import bat from 'openmoji/color/svg/1F987.svg'
 import blowfish from 'openmoji/color/svg/1F421.svg'
+import catFace from 'openmoji/color/svg/1F431.svg'
 import crab from 'openmoji/color/svg/1F980.svg'
 import crocodile from 'openmoji/color/svg/1F40A.svg'
 import dolphin from 'openmoji/color/svg/1F42C.svg'
 import dragon from 'openmoji/color/svg/1F409.svg'
 import dragonFace from 'openmoji/color/svg/1F432.svg'
+import fox from 'openmoji/color/svg/1F98A.svg'
+import gorilla from 'openmoji/color/svg/1F98D.svg'
 import jellyfish from 'openmoji/color/svg/1FABC.svg'
+import lion from 'openmoji/color/svg/1F981.svg'
 import lizard from 'openmoji/color/svg/1F98E.svg'
 import lobster from 'openmoji/color/svg/1F99E.svg'
+import monkeyFace from 'openmoji/color/svg/1F435.svg'
 import octopus from 'openmoji/color/svg/1F419.svg'
 import sauropod from 'openmoji/color/svg/1F995.svg'
 import scorpion from 'openmoji/color/svg/1F982.svg'
@@ -40,6 +45,11 @@ export const PLAYER_AVATAR_OPTIONS = [
   { key: 'dolphin', label: 'Dolphin', src: dolphin },
   { key: 'blowfish', label: 'Blowfish', src: blowfish },
   { key: 'jellyfish', label: 'Jellyfish', src: jellyfish },
+  { key: 'monkey-face', label: 'Monkey Face', src: monkeyFace },
+  { key: 'gorilla', label: 'Gorilla', src: gorilla },
+  { key: 'fox', label: 'Fox', src: fox },
+  { key: 'cat-face', label: 'Cat Face', src: catFace },
+  { key: 'lion', label: 'Lion', src: lion },
 ]
 
 export const DEFAULT_PLAYER_AVATAR_KEY = PLAYER_AVATAR_OPTIONS[0].key
