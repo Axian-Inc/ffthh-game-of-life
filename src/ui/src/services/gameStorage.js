@@ -1,6 +1,7 @@
 import { seedGames } from '../data/seedGames'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
+const SETUP_DRAFTS_KEY = 'ffthh-game-of-life.setup-drafts'
 
 const normalizeGame = (game) => ({
   ...game,
@@ -63,39 +64,73 @@ const saveLocalGames = (games) => {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(games))
 }
 
+const loadSetupDrafts = () => {
+  const stored = parseJson(window.localStorage.getItem(SETUP_DRAFTS_KEY))
+  if (!Array.isArray(stored)) {
+    return []
+  }
+  return normalizeGames(stored)
+}
+
+const saveSetupDrafts = (drafts) => {
+  window.localStorage.setItem(SETUP_DRAFTS_KEY, JSON.stringify(drafts))
+}
+
 const createLocalStorage = () => ({
   listGames: async () => loadLocalGames(),
   createGame: async (game) => {
-    const games = loadLocalGames()
-    const createdGame = normalizeGame({
+    const drafts = loadSetupDrafts()
+    const createdDraft = normalizeGame({
       ...game,
       id: game.id ? String(game.id) : generateId(),
+      isDraft: true,
     })
-    const updated = [createdGame, ...games]
-    saveLocalGames(updated)
-    return createdGame
+    const updatedDrafts = [createdDraft, ...drafts]
+    saveSetupDrafts(updatedDrafts)
+    return createdDraft
   },
   deleteGame: async (gameId) => {
+    const normalizedId = String(gameId)
     const games = loadLocalGames()
-    const updated = games.filter((game) => game.id !== String(gameId))
+    const updated = games.filter((game) => game.id !== normalizedId)
     saveLocalGames(updated)
+    const drafts = loadSetupDrafts()
+    const updatedDrafts = drafts.filter((draft) => draft.id !== normalizedId)
+    saveSetupDrafts(updatedDrafts)
   },
   updateGame: async (gameId, updates) => {
     const normalizedId = String(gameId)
     const games = loadLocalGames()
     const existing = games.find((game) => game.id === normalizedId)
-    if (!existing) {
+
+    if (existing) {
+      const merged = normalizeGame({
+        ...existing,
+        ...updates,
+        id: normalizedId,
+      })
+      const updated = games.map((game) => (game.id === normalizedId ? merged : game))
+      saveLocalGames(updated)
+      return merged
+    }
+
+    const drafts = loadSetupDrafts()
+    const existingDraft = drafts.find((draft) => draft.id === normalizedId)
+    if (!existingDraft) {
       throw new Error('Game not found')
     }
 
-    const merged = normalizeGame({
-      ...existing,
+    const finalized = normalizeGame({
+      ...existingDraft,
       ...updates,
       id: normalizedId,
+      isDraft: false,
     })
-    const updated = games.map((game) => (game.id === normalizedId ? merged : game))
-    saveLocalGames(updated)
-    return merged
+    const updatedDrafts = drafts.filter((draft) => draft.id !== normalizedId)
+    saveSetupDrafts(updatedDrafts)
+    const nextGames = [finalized, ...games]
+    saveLocalGames(nextGames)
+    return finalized
   },
 })
 

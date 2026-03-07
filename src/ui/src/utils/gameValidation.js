@@ -1,5 +1,28 @@
 export const createDefaultPlayers = () => []
 
+export const DEFAULT_CITY_ID = 'city-balanced'
+export const DEFAULT_EDUCATION_TRACK_ID = 'education-street-smart'
+export const DEFAULT_JOB_ID = 'job-entry-generalist'
+
+export const createDefaultDraftPlayer = (overrides = {}) => ({
+  name: '',
+  avatar: '',
+  cityId: DEFAULT_CITY_ID,
+  educationTrackId: DEFAULT_EDUCATION_TRACK_ID,
+  jobId: DEFAULT_JOB_ID,
+  ...overrides,
+})
+
+export const normalizeCommittedPlayer = (player) => ({
+  id: String(player.id),
+  name: (player.name || '').trim(),
+  avatar: player.avatar || '',
+  cityId: player.cityId || DEFAULT_CITY_ID,
+  educationTrackId: player.educationTrackId || DEFAULT_EDUCATION_TRACK_ID,
+  jobId: player.jobId || DEFAULT_JOB_ID,
+  careerTrack: player.careerTrack || null,
+})
+
 export const buildNameCounts = (players) => {
   const counts = {}
 
