@@ -29,6 +29,12 @@ const STEP_TITLES = {
 
 const MAX_STEPS = 6
 
+const isSelectionComplete = (selection = {}) =>
+  Boolean(selection.cityId && selection.educationTrackId && selection.jobId)
+
+const getFirstIncompletePlayerId = (players, playerSelections) =>
+  players.find((player) => !isSelectionComplete(playerSelections[player.id]))?.id || null
+
 const getAvatarAdvanceCount = ({ currentAvatarKey, targetAvatarKey, unavailableValues }) => {
   if (!targetAvatarKey || currentAvatarKey === targetAvatarKey) {
     return 0
@@ -113,6 +119,20 @@ const NewGameWizard = ({
     })
   }, [players])
 
+  useEffect(() => {
+    if (step !== 6) {
+      return
+    }
+
+    const nextPlayerId = getFirstIncompletePlayerId(players, playerSelections)
+    if (!nextPlayerId) {
+      return
+    }
+
+    setEditingPlayerId(nextPlayerId)
+    setStep(3)
+  }, [step, players, playerSelections])
+
   const activePlayer = players.find((player) => player.id === editingPlayerId) || players[0] || null
   const activeSelection = activePlayer ? playerSelections[activePlayer.id] || {} : {}
 
@@ -133,10 +153,7 @@ const NewGameWizard = ({
   const canStart =
     isGameNameValid &&
     players.length >= 2 &&
-    players.every((player) => {
-      const selection = playerSelections[player.id] || {}
-      return Boolean(selection.cityId && selection.educationTrackId && selection.jobId)
-    })
+    players.every((player) => isSelectionComplete(playerSelections[player.id]))
 
   const goToPreviousStep = () => setStep((current) => Math.max(1, current - 1))
 
@@ -196,6 +213,34 @@ const NewGameWizard = ({
     onSubmit(payload)
   }
 
+  const handlePlayerSetupStart = () => {
+    const selectedPlayer = players.find((player) => player.id === editingPlayerId) || null
+    const nextPlayerId =
+      selectedPlayer && !isSelectionComplete(playerSelections[selectedPlayer.id])
+        ? selectedPlayer.id
+        : getFirstIncompletePlayerId(players, playerSelections)
+
+    if (!nextPlayerId) {
+      setStep(6)
+      return
+    }
+
+    setEditingPlayerId(nextPlayerId)
+    setStep(3)
+  }
+
+  const handleJobStepNext = () => {
+    const nextPlayerId = getFirstIncompletePlayerId(players, playerSelections)
+
+    if (!nextPlayerId) {
+      setStep(6)
+      return
+    }
+
+    setEditingPlayerId(nextPlayerId)
+    setStep(3)
+  }
+
   const subtitle = `Step ${step} of ${MAX_STEPS}`
 
   return (
@@ -238,7 +283,7 @@ const NewGameWizard = ({
             onAddPlayer={onAddPlayer}
             onRemovePlayer={onRemovePlayer}
             onBack={goToPreviousStep}
-            onNext={() => setStep(3)}
+            onNext={handlePlayerSetupStart}
           />
         ) : null}
 
@@ -271,7 +316,7 @@ const NewGameWizard = ({
             activePlayerName={activePlayer?.name}
             onSelect={(jobId) => updateSelection('jobId', jobId)}
             onBack={goToPreviousStep}
-            onNext={() => setStep(6)}
+            onNext={handleJobStepNext}
           />
         ) : null}
 

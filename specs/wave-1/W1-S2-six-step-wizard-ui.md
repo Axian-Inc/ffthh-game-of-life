@@ -67,6 +67,7 @@ Out of scope:
 2. Subtitle: `Step 2 of 6`
 3. `Player Name:` and `Choose Your Digital Persona:` labels are mandatory
 4. Persona grid stays 5x5 and icon-only
+5. `Next` transitions into Steps 3-5 for the selected incomplete committed player, not directly to summary
 
 ## Step 3 (`3.Life.PickCity.png`)
 1. Subtitle: `Step 3 of 6`
@@ -82,12 +83,14 @@ Out of scope:
 3. Wizard title text must be dark, not white
 4. Footer `Back` and `Next` buttons must be on the same desktop row
 5. Add at least `16px` between the job title block and the `Income` section
+6. Pressing `Next` must advance to the next incomplete committed player’s Step 3 when one exists; only the last completed player may advance to Step 6
 
 ## Step 6 (`6.Life.NewGameSummary.png`)
 1. Subtitle: `Step 6 of 6`
 2. Keep the wide summary sheet anatomy from the reference
 3. Add an inline editable `Game Name:` field in the summary header
 4. Footer actions remain `+ New Player` and `Start Game`
+5. Step 6 must only be reachable after every committed player has city, education track, and job selections
 
 # Reject Conditions
 Block merge if:
@@ -121,4 +124,5 @@ The wizard must not mutate parent arrays or saved game objects before final subm
 1. All 6 desktop wizard steps render correctly and match their contracts.
 2. Step 5 title color and footer layout are explicitly verified.
 3. Step 6 shows the editable title field and uses it as the final submit name.
-4. Desktop visual tests for all 6 steps pass locally.
+4. Multi-player setup routes through each committed player before showing Step 6.
+5. Desktop visual tests for all 6 steps pass locally.

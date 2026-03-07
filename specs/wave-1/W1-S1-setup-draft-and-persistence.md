@@ -67,6 +67,7 @@ Rules:
 3. The game title edited on Step 6 overwrites the earlier Step 1 title and becomes the saved `game.name`.
 4. Player names must stay unique within the current draft.
 5. Saving must preserve every committed player, not just the last one.
+6. After players are committed in Step 2, the wizard must walk each committed player through city, education track, and job selection before Step 6 can be completed.
 
 # Save/Resume Contract
 1. Saved games must contain the final `name` and every committed player with all Wave 1 setup fields.
@@ -85,4 +86,5 @@ Block merge if any of these occur:
 1. A two-player desktop create flow persists both configured players with city, track, job, and career data.
 2. Editing the title on Step 6 changes the saved game title shown on the landing page.
 3. Reload and resume preserve the saved title and both players.
-4. The Wave 1 happy-path Playwright test passes in the dev container.
+4. The wizard routes incomplete committed players back through setup instead of allowing Step 6 to strand the flow with a disabled `Start Game`.
+5. The Wave 1 happy-path Playwright test passes in the dev container.

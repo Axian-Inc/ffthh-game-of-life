@@ -109,7 +109,7 @@
 6.9 Turn logs must separate intended outcomes from unintended outcomes.
 
 ## 7. Career and City Systems
-7.1 Players must select a starting career during setup and may revisit career choice using explicit actions.
+7.1 Players must select a starting career during setup and may revisit career choice using explicit actions. Shared setup must guide each committed player through required pre-game choices before the game can start.
 
 7.2 Careers must define at least: id, label, start cash, start debt, weekly income model, stability level, risk modifiers, and switch cost.
 
@@ -180,7 +180,7 @@ TBD, slicing and wave planning for agents to happen later.
 ## 12. Assumptions and Defaults
 12.1 Platform default is a digital web implementation with cloud persistence.
 
-12.2 v1 defaults must be 2-6 players, each player picks a location (US City), profession (pick from the Track [School, Trades, Street-Trained]) which affects starting money.
+12.2 v1 defaults must be 2-6 players, each player picks a location (US City), profession (pick from the Track [School, Trades, Street-Trained]) which affects starting money. The setup flow must complete those required choices one committed player at a time until all players are configured.
 
 12.3 Advisor personas for wealth, physical health, and mental health are deferred beyond v1 but should remain enabled by retained event and action history data.
 

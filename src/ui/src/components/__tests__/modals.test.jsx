@@ -92,6 +92,57 @@ describe('Modal components', () => {
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
   })
 
+  it('CreateGameModal routes each committed player through setup before summary', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <CreateGameModal
+        isOpen
+        onBackdropClick={vi.fn()}
+        onCancel={vi.fn()}
+        onSubmit={vi.fn()}
+        gameName="Family Night"
+        onGameNameChange={vi.fn()}
+        onGameNameBlur={vi.fn()}
+        gameNameTouched={false}
+        isGameNameValid
+        isGameNameTooLong={false}
+        maxGameNameLength={60}
+        players={[
+          createPlayer({ id: 'p1', name: 'Alex', avatar: 'fox' }),
+          createPlayer({ id: 'p2', name: 'Sam', avatar: 'panda' }),
+        ]}
+        minPlayers={2}
+        maxPlayerNameLength={24}
+        draftPlayer={{ name: '', avatar: 'monkey-face' }}
+        draftTouched={{ name: false }}
+        draftErrors={{ name: '' }}
+        arePlayersValid
+        onAddPlayer={vi.fn()}
+        onRemovePlayer={vi.fn()}
+        onDraftNameChange={vi.fn()}
+        onDraftBlur={vi.fn()}
+        onDraftAvatarCycle={vi.fn()}
+        createError=""
+        isCreating={false}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.getByText('Configuring: Alex')).toBeInTheDocument()
+    await user.click(screen.getByRole('radio', { name: 'San Francisco, CA' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('radio', { name: 'Degree Track' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('radio', { name: 'Software Engineer' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.getByText('Configuring: Sam')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'New Game - Summary' })).not.toBeInTheDocument()
+  })
+
   it('ResumeGameModal renders results mode', () => {
     const game = createGame({ id: 'game-2', name: 'Results Game' })
     render(

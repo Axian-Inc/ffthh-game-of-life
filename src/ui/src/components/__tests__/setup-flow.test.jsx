@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { render, renderHook, act, waitFor, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import App from '../../App'
 import useCreateGameForm from '../../hooks/useCreateGameForm'
 import useGames from '../../hooks/useGames'
 
@@ -50,6 +52,10 @@ vi.mock('../../services/gameStorage', () => ({
 }))
 
 describe('Wave 1 setup draft and persistence contract', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
   it('stores player setup fields and enforces unique names in the draft', () => {
     const { result } = renderHook(() => useCreateGameForm())
 
@@ -144,5 +150,31 @@ describe('Wave 1 setup draft and persistence contract', () => {
         ],
       }),
     )
+  })
+
+  it('routes the next committed player through setup before showing summary', async () => {
+    const user = userEvent.setup()
+
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'New Game' }))
+    await user.type(screen.getByRole('textbox', { name: 'Game Name:' }), 'Family Night')
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    await user.type(screen.getByRole('textbox', { name: 'Player Name:' }), 'Alex')
+    await user.click(screen.getByRole('button', { name: '+ Add Player' }))
+    await user.type(screen.getByRole('textbox', { name: 'Player Name:' }), 'Sam')
+    await user.click(screen.getByRole('button', { name: '+ Add Player' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    await user.click(screen.getByRole('radio', { name: 'San Francisco, CA' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('radio', { name: 'Degree Track' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await user.click(screen.getByRole('radio', { name: 'Software Engineer' }))
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(screen.queryByRole('heading', { name: 'New Game - Summary' })).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Austin, TX' })).toBeInTheDocument()
   })
 })

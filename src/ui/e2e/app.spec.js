@@ -6,6 +6,7 @@ test('create, start, reload, resume, and delete a two-player game', async ({ pag
   await page.reload()
 
   await page.getByRole('button', { name: 'New Game' }).click()
+  await expect(page.getByRole('heading', { name: 'New Game Setup' })).toBeVisible()
   await page.locator('#wizard-game-name').fill('Automation Draft')
   await page.getByRole('button', { name: 'Next' }).click()
 
@@ -29,9 +30,6 @@ test('create, start, reload, resume, and delete a two-player game', async ({ pag
   await page.getByRole('radio', { name: 'Software Engineer' }).click()
   await page.getByRole('button', { name: 'Next' }).click()
 
-  await page.getByRole('button', { name: '+ New Player' }).click()
-  await page.getByRole('button', { name: 'Alex', exact: true }).click()
-  await page.getByRole('button', { name: 'Next' }).click()
   await page.getByRole('radio', { name: 'Austin, TX' }).click()
   await page.getByRole('button', { name: 'Next' }).click()
   await page.getByRole('radio', { name: 'Trades Track' }).click()
@@ -39,6 +37,7 @@ test('create, start, reload, resume, and delete a two-player game', async ({ pag
   await page.getByRole('radio', { name: 'Electrician' }).click()
   await page.getByRole('button', { name: 'Next' }).click()
 
+  await expect(page.getByRole('heading', { name: 'New Game - Summary' })).toBeVisible()
   await page.locator('#wizard-summary-game-name').fill('Final Family Night')
   await page.getByRole('button', { name: 'Start Game' }).click()
 
