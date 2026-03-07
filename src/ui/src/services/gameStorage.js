@@ -2,10 +2,39 @@ import { seedGames } from '../data/seedGames'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 
-const normalizeGame = (game) => ({
-  ...game,
-  id: String(game.id),
-})
+const normalizePlayer = (player = {}) => {
+  const annualSalary = Number.isFinite(player.annualSalary) ? player.annualSalary : 0
+  const monthlyIncome = Number.isFinite(player.monthlyIncome) ? player.monthlyIncome : annualSalary / 12
+
+  return {
+    id: String(player.id || (player.name || 'player').trim().toLowerCase().replace(/\s+/g, '-') || 'player'),
+    name: player.name || 'Player',
+    avatar: player.avatar || 'octopus',
+    cityId: player.cityId || '',
+    educationTrackId: player.educationTrackId || '',
+    jobId: player.jobId || '',
+    annualSalary,
+    monthlyIncome,
+    cash: Number.isFinite(player.cash) ? player.cash : 0,
+    debt: Number.isFinite(player.debt) ? player.debt : 0,
+    assets: Number.isFinite(player.assets) ? player.assets : 0,
+    investments: Number.isFinite(player.investments) ? player.investments : 0,
+    netWorth: Number.isFinite(player.netWorth) ? player.netWorth : 0,
+  }
+}
+
+const normalizeGame = (game) => {
+  const lifecyclePhase = game?.lifecycle?.phase || 'started'
+  return {
+    ...game,
+    id: String(game.id),
+    lifecycle: {
+      phase: lifecyclePhase,
+    },
+    startedAt: game.startedAt || (lifecyclePhase === 'started' ? game.createdAt || Date.now() : null),
+    players: Array.isArray(game.players) ? game.players.map(normalizePlayer) : [],
+  }
+}
 
 const normalizeGames = (games) => games.map(normalizeGame)
 

@@ -27,10 +27,18 @@ const useGames = () => {
   }, [])
 
   const createGame = async (game) => {
-    const createdGame = await storage.createGame(game)
-    setGames((current) => [createdGame, ...current])
-    setNewGameId(createdGame.id)
-    return createdGame
+    const createdGame = await storage.createGame({
+      ...game,
+      lifecycle: game.lifecycle || { phase: 'setup-in-progress' },
+      startedAt: game.startedAt || null,
+    })
+    const finalizedGame = await storage.updateGame(createdGame.id, {
+      ...game,
+      id: createdGame.id,
+    })
+    setGames((current) => [finalizedGame, ...current.filter((existing) => existing.id !== finalizedGame.id)])
+    setNewGameId(finalizedGame.id)
+    return finalizedGame
   }
 
   const deleteGame = async (gameId) => {

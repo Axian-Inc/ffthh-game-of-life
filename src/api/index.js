@@ -26,6 +26,32 @@ const parseBody = (event) => {
   }
 }
 
+const normalizePlayer = (player = {}) => ({
+  id: String(player.id || ''),
+  name: player.name || 'Player',
+  avatar: player.avatar || 'octopus',
+  cityId: player.cityId || '',
+  educationTrackId: player.educationTrackId || '',
+  jobId: player.jobId || '',
+  annualSalary: Number.isFinite(player.annualSalary) ? player.annualSalary : 0,
+  monthlyIncome: Number.isFinite(player.monthlyIncome) ? player.monthlyIncome : 0,
+  cash: Number.isFinite(player.cash) ? player.cash : 0,
+  debt: Number.isFinite(player.debt) ? player.debt : 0,
+  assets: Number.isFinite(player.assets) ? player.assets : 0,
+  investments: Number.isFinite(player.investments) ? player.investments : 0,
+  netWorth: Number.isFinite(player.netWorth) ? player.netWorth : 0,
+})
+
+const normalizeGame = (game = {}) => ({
+  ...game,
+  id: String(game.id || ''),
+  lifecycle: {
+    phase: game?.lifecycle?.phase || 'started',
+  },
+  startedAt: game.startedAt || null,
+  players: Array.isArray(game.players) ? game.players.map(normalizePlayer) : [],
+})
+
 const listGames = async () => {
   const result = await dynamo
     .scan({
@@ -42,7 +68,7 @@ const createGame = async (event) => {
     return jsonResponse(400, { message: 'Missing game payload.' })
   }
 
-  const game = { ...body.game }
+  const game = normalizeGame({ ...body.game })
   if (!game.id) {
     game.id = crypto.randomUUID()
   }
@@ -80,10 +106,10 @@ const updateGame = async (event, gameId) => {
     return jsonResponse(400, { message: 'Missing game payload.' })
   }
 
-  const game = {
+  const game = normalizeGame({
     ...body.game,
     id: gameId,
-  }
+  })
 
   await dynamo
     .put({
