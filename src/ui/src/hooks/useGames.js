@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createGameStorage } from '../services/gameStorage'
 
+const isDraftGame = (game) => Boolean(game?.draft) || String(game?.id || '').startsWith('draft-')
+
 const useGames = () => {
   const storage = useMemo(() => createGameStorage(), [])
   const [games, setGames] = useState([])
@@ -28,8 +30,10 @@ const useGames = () => {
 
   const createGame = async (game) => {
     const createdGame = await storage.createGame(game)
-    setGames((current) => [createdGame, ...current])
-    setNewGameId(createdGame.id)
+    if (!isDraftGame(createdGame)) {
+      setGames((current) => [createdGame, ...current])
+      setNewGameId(createdGame.id)
+    }
     return createdGame
   }
 
@@ -40,7 +44,18 @@ const useGames = () => {
 
   const updateGame = async (gameId, updates) => {
     const updatedGame = await storage.updateGame(gameId, updates)
-    setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
+    let inserted = false
+    setGames((current) => {
+      const hasGame = current.some((game) => game.id === updatedGame.id)
+      if (!hasGame) {
+        inserted = true
+        return [updatedGame, ...current]
+      }
+      return current.map((game) => (game.id === updatedGame.id ? updatedGame : game))
+    })
+    if (inserted) {
+      setNewGameId(updatedGame.id)
+    }
     return updatedGame
   }
 

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import StartNewGamePage from '../pages/StartNewGamePage'
 import PlayGamePage from '../pages/PlayGamePage'
+import WelcomeToLifePage from '../pages/WelcomeToLifePage'
 import { createGame, createPlayer } from '../../test/testUtils'
 
 describe('Page components', () => {
@@ -32,16 +33,30 @@ describe('Page components', () => {
     )
   })
 
-  it('renders PlayGamePage and handles navigation', async () => {
+  it('renders welcome page content and handles navigation', async () => {
     const user = userEvent.setup()
     const onHome = vi.fn()
 
     render(<PlayGamePage game={createGame({ name: 'Play It' })} onHome={onHome} />)
 
-    expect(screen.getByText('Play Game')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Back to home' }))
+    expect(screen.getByRole('heading', { level: 2, name: 'Welcome to Life!' })).toBeInTheDocument()
+    expect(screen.queryByText('Game board coming soon.')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
 
     expect(onHome).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders WelcomeToLifePage standalone', async () => {
+    const user = userEvent.setup()
+    const onBegin = vi.fn()
+
+    render(<WelcomeToLifePage onBegin={onBegin} />)
+
+    expect(screen.getByText('A Month at a Time')).toBeInTheDocument()
+    expect(screen.getByText('Choices Matter')).toBeInTheDocument()
+    expect(screen.getByText('Life Happens')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+    expect(onBegin).toHaveBeenCalledTimes(1)
   })
 
   it('resumes career selection from the next player without a choice', async () => {

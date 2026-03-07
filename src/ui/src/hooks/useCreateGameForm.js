@@ -7,21 +7,28 @@ import {
 } from '../data/playerAvatars'
 
 const DEFAULT_PLAYER_ID = 1
+const DEFAULT_STEP = 1
+
+const createDefaultDraftPlayer = () => ({
+  name: '',
+  avatar: DEFAULT_PLAYER_AVATAR_KEY,
+  cityId: '',
+  educationTrackId: '',
+  jobId: '',
+})
 
 const useCreateGameForm = () => {
   const [gameName, setGameName] = useState('')
   const [gameNameTouched, setGameNameTouched] = useState(false)
   const [players, setPlayers] = useState(createDefaultPlayers)
   const [nextPlayerId, setNextPlayerId] = useState(DEFAULT_PLAYER_ID)
-  const [draftPlayer, setDraftPlayer] = useState({
-    name: '',
-    avatar: DEFAULT_PLAYER_AVATAR_KEY,
-  })
+  const [draftPlayer, setDraftPlayer] = useState(createDefaultDraftPlayer)
   const [draftTouched, setDraftTouched] = useState({ name: false })
+  const [currentStep, setCurrentStep] = useState(DEFAULT_STEP)
 
   const maxGameNameLength = 60
   const maxPlayerNameLength = 24
-  const minPlayers = 1
+  const minPlayers = 2
 
   const trimmedGameName = gameName.trim()
   const isGameNameTooLong = trimmedGameName.length > maxGameNameLength
@@ -59,7 +66,7 @@ const useCreateGameForm = () => {
 
   const resetDraft = (keepAvatar = true) => {
     setDraftPlayer((current) => ({
-      name: '',
+      ...createDefaultDraftPlayer(),
       avatar: keepAvatar ? current.avatar : DEFAULT_PLAYER_AVATAR_KEY,
     }))
     setDraftTouched({ name: false })
@@ -71,6 +78,7 @@ const useCreateGameForm = () => {
     setPlayers(createDefaultPlayers())
     setNextPlayerId(DEFAULT_PLAYER_ID)
     resetDraft(false)
+    setCurrentStep(DEFAULT_STEP)
   }
 
   const markAllTouched = () => {
@@ -91,9 +99,13 @@ const useCreateGameForm = () => {
     const nextPlayers = [
       ...players,
       {
-        id: nextPlayerId,
+        id: `player-${nextPlayerId}`,
         name: trimmedName,
         avatar: draftPlayer.avatar,
+        cityId: draftPlayer.cityId || '',
+        educationTrackId: draftPlayer.educationTrackId || '',
+        jobId: draftPlayer.jobId || '',
+        careerTrack: '',
       },
     ]
     setPlayers(nextPlayers)
@@ -112,6 +124,10 @@ const useCreateGameForm = () => {
 
   const updateDraftName = (value) => {
     setDraftPlayer((current) => ({ ...current, name: value }))
+  }
+
+  const updateDraftField = (field, value) => {
+    setDraftPlayer((current) => ({ ...current, [field]: value }))
   }
 
   const cycleDraftAvatar = () => {
@@ -139,10 +155,13 @@ const useCreateGameForm = () => {
     isGameNameValid,
     arePlayersValid,
     resetForm,
+    currentStep,
+    setCurrentStep,
     markAllTouched,
     addPlayer,
     removePlayer,
     updateDraftName,
+    updateDraftField,
     markDraftTouched,
     cycleDraftAvatar,
   }
