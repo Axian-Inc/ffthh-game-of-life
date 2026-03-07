@@ -1,0 +1,277 @@
+.new-game-wizard {
+  width: min(980px, 92vw);
+  background: #fffdf5;
+  border: 1px solid rgba(39, 45, 62, 0.12);
+  border-radius: 30px;
+  padding: 28px 34px 24px;
+  box-shadow: 0 26px 60px rgba(39, 45, 62, 0.2);
+  color: #272d3e;
+}
+
+.new-game-wizard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.new-game-wizard-title {
+  margin: 0;
+  color: #272d3e;
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.new-game-wizard-subtitle {
+  margin: 6px 0 0;
+  color: #667086;
+  font-weight: 600;
+}
+
+.wizard-step-body {
+  margin-top: 18px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.wizard-step-1 {
+  justify-content: center;
+}
+
+.wizard-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(520px, 100%);
+}
+
+.wizard-label {
+  color: #272d3e;
+  font-weight: 700;
+}
+
+.wizard-field input,
+.wizard-summary-name input {
+  border: 1px solid rgba(39, 45, 62, 0.18);
+  border-radius: 999px;
+  padding: 12px 16px;
+  font: inherit;
+  color: #272d3e;
+  background: #ffffff;
+}
+
+.wizard-field input:focus-visible,
+.wizard-summary-name input:focus-visible {
+  outline: 3px solid rgba(92, 198, 212, 0.32);
+  outline-offset: 1px;
+}
+
+.wizard-field input[aria-invalid='true'],
+.wizard-summary-name input[aria-invalid='true'] {
+  border-color: #cc3344;
+}
+
+.wizard-persona-section {
+  width: 100%;
+}
+
+.wizard-persona-section .wizard-label {
+  margin: 0 0 8px;
+  display: block;
+}
+
+.wizard-persona-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.wizard-avatar-option {
+  border: 1px solid rgba(39, 45, 62, 0.16);
+  border-radius: 16px;
+  background: #ffffff;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+}
+
+.wizard-avatar-option-selected {
+  border-color: #44a5e8;
+  box-shadow: 0 0 0 2px rgba(68, 165, 232, 0.25);
+}
+
+.wizard-card-rail {
+  width: calc(100% + 120px);
+  margin: 8px -60px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.wizard-rail-card {
+  text-align: left;
+  border: 1px solid rgba(39, 45, 62, 0.14);
+  border-radius: 20px;
+  padding: 16px;
+  background: #ffffff;
+  color: #272d3e;
+}
+
+.wizard-rail-card h3 {
+  margin: 0;
+  color: #272d3e;
+  font-size: 1.08rem;
+}
+
+.wizard-rail-card p {
+  margin: 8px 0 0;
+  color: #485067;
+  font-size: 0.95rem;
+}
+
+.wizard-card-tagline {
+  color: #667086;
+  font-weight: 700;
+}
+
+.wizard-rail-card-selected {
+  border-color: #44a5e8;
+  box-shadow: 0 0 0 2px rgba(68, 165, 232, 0.24);
+}
+
+.wizard-job-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.wizard-job-art {
+  height: 88px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.wizard-job-art span {
+  font-size: 2rem;
+}
+
+.wizard-job-title-block {
+  margin-top: 12px;
+}
+
+.wizard-job-title-block p {
+  margin-top: 4px;
+  color: #667086;
+}
+
+.wizard-job-card-income {
+  margin-top: 16px;
+}
+
+.wizard-job-card-income strong {
+  display: block;
+  color: #272d3e;
+}
+
+.wizard-step-6 {
+  width: 100%;
+}
+
+.wizard-summary-sheet {
+  width: calc(100% + 120px);
+  margin: 8px -60px 0;
+  background: #ffffff;
+  border: 1px solid rgba(39, 45, 62, 0.14);
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.wizard-summary-name {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.wizard-summary-name span {
+  font-weight: 700;
+}
+
+.wizard-summary-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.wizard-summary-row {
+  border: 1px solid rgba(39, 45, 62, 0.12);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.wizard-summary-row h3 {
+  margin: 0;
+  color: #272d3e;
+}
+
+.wizard-summary-row p {
+  margin: 6px 0 0;
+  font-size: 0.92rem;
+}
+
+.wizard-footer {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wizard-footer-centered {
+  justify-content: center;
+}
+
+.wizard-footer-step-5 {
+  flex-wrap: nowrap;
+}
+
+.wizard-footer-summary {
+  justify-content: center;
+}
+
+.wizard-button {
+  border: 0;
+  border-radius: 999px;
+  min-height: 42px;
+  padding: 0 22px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.wizard-button:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
+.wizard-button-primary {
+  color: #ffffff;
+  background: linear-gradient(90deg, #5cc6d4 0%, #44a5e8 45%, #a377e5 100%);
+}
+
+.wizard-button-secondary {
+  color: #272d3e;
+  background: #eef2f8;
+}
+
+@media (max-width: 1000px) {
+  .wizard-card-rail,
+  .wizard-summary-sheet {
+    width: 100%;
+    margin: 8px 0 0;
+  }
+}
