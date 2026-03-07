@@ -849,6 +849,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  align-items: center;
 }
 
 .start-game-header,
@@ -865,139 +866,202 @@ h1 {
   color: var(--text-1);
 }
 
-.player-career-list {
+.setup-shell,
+.welcome-panel {
+  width: min(100%, 960px);
+  background: rgba(255, 253, 245, 0.92);
+  border: 1px solid rgba(39, 45, 62, 0.08);
+  border-radius: 32px;
+  box-shadow: 0 24px 60px rgba(39, 45, 62, 0.12);
+  padding: clamp(28px, 4vw, 44px);
+}
+
+.setup-shell {
   display: grid;
   gap: var(--space-6);
 }
 
-.player-career-card {
+.setup-panel {
   background: var(--surface);
-  border-radius: var(--radius-card);
+  border-radius: 28px;
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-card);
-  padding: var(--space-6);
+  padding: clamp(24px, 4vw, 36px);
   display: grid;
   gap: var(--space-5);
 }
 
-.player-career-card-active {
-  border-color: rgba(57, 99, 212, 0.45);
-}
-
-.player-career-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.player-career-title h3 {
+.setup-helper {
   margin: 0;
-  font-size: 1.4rem;
-  color: var(--text-1);
-}
-
-.player-career-subtitle {
-  margin: 0;
-  color: var(--text-2);
   font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brand-blue);
 }
 
-.player-career-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-icon);
-  background: rgba(92, 198, 212, 0.18);
+.wizard-section {
   display: grid;
-  place-items: center;
-  font-size: 1.5rem;
+  gap: var(--space-5);
 }
 
-.career-grid {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.career-card {
-  appearance: none;
-  text-align: left;
-  cursor: pointer;
-  background: var(--surface-2);
-  border-radius: var(--radius-panel);
-  padding: var(--space-4);
-  border: 1px solid rgba(39, 45, 62, 0.08);
-  display: grid;
-  gap: var(--space-3);
-}
-
-.career-card:hover {
-  border-color: rgba(57, 99, 212, 0.45);
-}
-
-.career-card:disabled {
-  cursor: not-allowed;
-  opacity: 0.72;
-}
-
-.career-card-selected {
-  border-color: var(--brand-blue);
-  box-shadow: 0 0 0 2px rgba(57, 99, 212, 0.15);
-}
-
-.career-card-degree-track {
-  background: rgba(61, 133, 198, 0.12);
-  border: 2px solid rgba(61, 133, 198, 0.42);
-}
-
-.career-card-trades-track {
-  background: rgba(32, 130, 109, 0.12);
-  border: 2px solid rgba(32, 130, 109, 0.42);
-}
-
-.career-card-creator-track {
-  background: rgba(199, 126, 42, 0.12);
-  border: 2px solid rgba(199, 126, 42, 0.42);
-}
-
-.career-card-ai-operator-track {
-  background: rgba(99, 110, 137, 0.14);
-  border: 2px solid rgba(99, 110, 137, 0.42);
-}
-
-.career-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.career-card-header h4 {
-  margin: 0;
-  font-size: 1.05rem;
+.field-label {
+  font-size: 0.95rem;
+  font-weight: 800;
   color: var(--text-1);
+}
+
+.avatar-choice-card {
+  appearance: none;
+  border: 1px solid rgba(39, 45, 62, 0.12);
+  background: linear-gradient(180deg, rgba(92, 198, 212, 0.12), rgba(163, 119, 229, 0.08));
+  border-radius: 24px;
+  padding: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-}
-
-.career-track-icon {
-  width: 2.2em;
-  height: 2.2em;
-  flex-shrink: 0;
-}
-
-.career-choice-lines {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: var(--space-2);
-  color: var(--text-2);
-  font-size: 0.9rem;
-}
-
-.career-choice-lines strong {
+  gap: 16px;
+  font-weight: 700;
   color: var(--text-1);
+  width: fit-content;
+  cursor: pointer;
+}
+
+.avatar-choice-preview {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.option-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.option-card {
+  appearance: none;
+  border: 1px solid rgba(39, 45, 62, 0.08);
+  background: var(--surface-2);
+  border-radius: 24px;
+  padding: 22px;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-1);
+  min-height: 210px;
+}
+
+.option-card-selected,
+.option-card:hover {
+  border-color: rgba(68, 165, 232, 0.52);
+  box-shadow: 0 0 0 3px rgba(68, 165, 232, 0.12);
+}
+
+.option-card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: rgba(92, 198, 212, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.option-card-icon img {
+  width: 42px;
+  height: 42px;
+}
+
+.option-card-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.option-card-meta {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--brand-blue);
+}
+
+.option-card-detail,
+.option-card-income {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.summary-panel {
+  gap: var(--space-4);
+}
+
+.summary-name-field {
+  max-width: 420px;
+}
+
+.summary-sheet {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(39, 45, 62, 0.08);
+  background: rgba(39, 45, 62, 0.08);
+}
+
+.summary-row {
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(100px, 0.8fr)) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 20px;
+}
+
+.summary-player {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.summary-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(92, 198, 212, 0.14);
+}
+
+.summary-primary,
+.summary-secondary,
+.summary-label,
+.summary-value {
+  margin: 0;
+}
+
+.summary-primary,
+.summary-value {
+  color: var(--text-1);
+  font-weight: 800;
+}
+
+.summary-secondary,
+.summary-label {
+  color: var(--text-2);
+  font-size: 0.88rem;
+}
+
+.summary-detail-group {
+  display: grid;
+  gap: 4px;
+}
+
+.summary-remove {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--brand-blue);
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .start-game-actions,
@@ -1005,23 +1069,57 @@ h1 {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
+  justify-content: center;
 }
 
-.play-game-panel {
-  background: var(--surface);
-  border-radius: var(--radius-card);
-  border: 1px solid var(--border-soft);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-6);
+.welcome-panel {
+  max-width: 720px;
+  justify-items: center;
+  gap: 24px;
+  text-align: left;
 }
 
-.play-game-placeholder {
-  border: 2px dashed var(--border-dashed);
-  border-radius: var(--radius-panel);
-  padding: var(--space-6);
-  text-align: center;
+.welcome-logo {
+  width: 92px;
+  height: 92px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: white;
+  background: var(--grad-primary);
+  box-shadow: 0 18px 36px rgba(68, 165, 232, 0.22);
+}
+
+.welcome-copy {
+  width: min(100%, 520px);
+  display: grid;
+  gap: 22px;
+}
+
+.welcome-copy h3 {
+  margin: 0 0 8px;
+  color: var(--text-1);
+}
+
+.welcome-copy p {
+  margin: 0;
+  color: var(--text-1);
+}
+
+.welcome-quote {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(39, 45, 62, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.welcome-quote footer {
+  margin-top: 8px;
   color: var(--text-2);
-  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 720px) {
@@ -1037,8 +1135,12 @@ h1 {
     width: 100%;
   }
 
-  .player-career-card {
-    padding: var(--space-5);
+  .option-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .start-game-actions,

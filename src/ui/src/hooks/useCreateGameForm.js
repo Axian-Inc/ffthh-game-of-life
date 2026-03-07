@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { buildNameCounts, createDefaultPlayers, getPlayerErrors } from '../utils/gameValidation'
+import { buildNameCounts, createDefaultPlayers, getPlayerErrors, isConfiguredPlayerValid } from '../utils/gameValidation'
 import {
   DEFAULT_PLAYER_AVATAR_KEY,
   getNextAvailablePlayerAvatarKey,
@@ -7,21 +7,45 @@ import {
 } from '../data/playerAvatars'
 
 const DEFAULT_PLAYER_ID = 1
+const FIRST_STEP = 1
+const LAST_STEP = 6
+
+const createEmptyDraftPlayer = (avatar = DEFAULT_PLAYER_AVATAR_KEY) => ({
+  name: '',
+  avatar,
+  cityId: '',
+  educationTrackId: '',
+  jobId: '',
+})
+
+const createInitialDraft = () => ({
+  name: '',
+  players: createDefaultPlayers(),
+  draftPlayer: createEmptyDraftPlayer(),
+  currentStep: FIRST_STEP,
+})
+
+const clampStep = (step) => Math.min(Math.max(step, FIRST_STEP), LAST_STEP)
 
 const useCreateGameForm = () => {
-  const [gameName, setGameName] = useState('')
+  const [draft, setDraft] = useState(createInitialDraft)
   const [gameNameTouched, setGameNameTouched] = useState(false)
-  const [players, setPlayers] = useState(createDefaultPlayers)
   const [nextPlayerId, setNextPlayerId] = useState(DEFAULT_PLAYER_ID)
-  const [draftPlayer, setDraftPlayer] = useState({
-    name: '',
-    avatar: DEFAULT_PLAYER_AVATAR_KEY,
+  const [draftTouched, setDraftTouched] = useState({
+    name: false,
+    cityId: false,
+    educationTrackId: false,
+    jobId: false,
   })
-  const [draftTouched, setDraftTouched] = useState({ name: false })
 
   const maxGameNameLength = 60
   const maxPlayerNameLength = 24
-  const minPlayers = 1
+  const minPlayers = 2
+
+  const gameName = draft.name
+  const players = draft.players
+  const draftPlayer = draft.draftPlayer
+  const currentStep = draft.currentStep
 
   const trimmedGameName = gameName.trim()
   const isGameNameTooLong = trimmedGameName.length > maxGameNameLength
@@ -40,7 +64,7 @@ const useCreateGameForm = () => {
         nameCounts: playerCounts.nameCounts,
         maxPlayerNameLength,
       })
-      return !errors.name
+      return !errors.name && isConfiguredPlayerValid(player, { maxPlayerNameLength })
     })
 
   const draftCounts = useMemo(() => {
@@ -55,35 +79,115 @@ const useCreateGameForm = () => {
     nameCounts: draftCounts.nameCounts,
     maxPlayerNameLength,
   })
-  const isDraftValid = !draftErrors.name
+
+  const isDraftIdentityValid = !draftErrors.name
+  const isDraftPlayerConfigured = Boolean(
+    isDraftIdentityValid &&
+      draftPlayer.cityId &&
+      draftPlayer.educationTrackId &&
+      draftPlayer.jobId,
+  )
 
   const resetDraft = (keepAvatar = true) => {
-    setDraftPlayer((current) => ({
-      name: '',
-      avatar: keepAvatar ? current.avatar : DEFAULT_PLAYER_AVATAR_KEY,
+    setDraft((current) => ({
+      ...current,
+      draftPlayer: createEmptyDraftPlayer(
+        keepAvatar ? current.draftPlayer.avatar : DEFAULT_PLAYER_AVATAR_KEY,
+      ),
     }))
-    setDraftTouched({ name: false })
+    setDraftTouched({
+      name: false,
+      cityId: false,
+      educationTrackId: false,
+      jobId: false,
+    })
   }
 
   const resetForm = () => {
-    setGameName('')
+    setDraft(createInitialDraft())
     setGameNameTouched(false)
-    setPlayers(createDefaultPlayers())
     setNextPlayerId(DEFAULT_PLAYER_ID)
-    resetDraft(false)
+    setDraftTouched({
+      name: false,
+      cityId: false,
+      educationTrackId: false,
+      jobId: false,
+    })
   }
 
   const markAllTouched = () => {
     setGameNameTouched(true)
+    setDraftTouched({
+      name: true,
+      cityId: true,
+      educationTrackId: true,
+      jobId: true,
+    })
   }
 
   const markDraftTouched = (field) => {
     setDraftTouched((current) => ({ ...current, [field]: true }))
   }
 
-  const addPlayer = () => {
-    if (!isDraftValid) {
-      setDraftTouched({ name: true })
+  const setGameName = (value) => {
+    setDraft((current) => ({ ...current, name: value }))
+  }
+
+  const setCurrentStep = (step) => {
+    setDraft((current) => ({ ...current, currentStep: clampStep(step) }))
+  }
+
+  const goToNextStep = () => {
+    setCurrentStep(currentStep + 1)
+  }
+
+  const goToPreviousStep = () => {
+    setCurrentStep(currentStep - 1)
+  }
+
+  const removePlayer = (playerId) => {
+    setDraft((current) => ({
+      ...current,
+      players: current.players.filter((player) => player.id !== playerId),
+    }))
+  }
+
+  const updateDraftName = (value) => {
+    setDraft((current) => ({
+      ...current,
+      draftPlayer: { ...current.draftPlayer, name: value },
+    }))
+  }
+
+  const updateDraftPlayerField = (field, value) => {
+    setDraft((current) => ({
+      ...current,
+      draftPlayer: { ...current.draftPlayer, [field]: value },
+    }))
+  }
+
+  const cycleDraftAvatar = () => {
+    const unavailableAvatarValues = players.map((player) => player.avatar)
+    setDraft((current) => ({
+      ...current,
+      draftPlayer: {
+        ...current.draftPlayer,
+        avatar: getNextAvailablePlayerAvatarKey(
+          getNextPlayerAvatarKey(current.draftPlayer.avatar),
+          unavailableAvatarValues,
+        ),
+      },
+    }))
+  }
+
+  const addPlayer = ({ careerTrack }) => {
+    if (!isDraftPlayerConfigured) {
+      setDraftTouched({
+        name: true,
+        cityId: true,
+        educationTrackId: true,
+        jobId: true,
+      })
       return false
     }
 
@@ -91,38 +195,45 @@ const useCreateGameForm = () => {
     const nextPlayers = [
       ...players,
       {
-        id: nextPlayerId,
+        id: `player-${nextPlayerId}`,
         name: trimmedName,
         avatar: draftPlayer.avatar,
+        cityId: draftPlayer.cityId,
+        educationTrackId: draftPlayer.educationTrackId,
+        jobId: draftPlayer.jobId,
+        careerTrack,
       },
     ]
-    setPlayers(nextPlayers)
-    setDraftPlayer((current) => ({
-      name: '',
-      avatar: getNextAvailablePlayerAvatarKey(current.avatar, nextPlayers.map((player) => player.avatar)),
+
+    setDraft((current) => ({
+      ...current,
+      players: nextPlayers,
+      draftPlayer: createEmptyDraftPlayer(
+        getNextAvailablePlayerAvatarKey(
+          current.draftPlayer.avatar,
+          nextPlayers.map((player) => player.avatar),
+        ),
+      ),
+      currentStep: LAST_STEP,
     }))
-    setDraftTouched({ name: false })
-    setNextPlayerId((current) => current + 1)
+    setDraftTouched({
+      name: false,
+      cityId: false,
+      educationTrackId: false,
+      jobId: false,
+    })
+    setNextPlayerId((value) => value + 1)
     return true
   }
 
-  const removePlayer = (playerId) => {
-    setPlayers((current) => current.filter((player) => player.id !== playerId))
-  }
-
-  const updateDraftName = (value) => {
-    setDraftPlayer((current) => ({ ...current, name: value }))
-  }
-
-  const cycleDraftAvatar = () => {
-    const unavailableAvatarValues = players.map((player) => player.avatar)
-    setDraftPlayer((current) => ({
-      ...current,
-      avatar: getNextAvailablePlayerAvatarKey(getNextPlayerAvatarKey(current.avatar), unavailableAvatarValues),
-    }))
+  const startNewPlayer = () => {
+    resetDraft(true)
+    setCurrentStep(2)
   }
 
   return {
+    draft,
+    currentStep,
     gameName,
     setGameName,
     gameNameTouched,
@@ -138,13 +249,20 @@ const useCreateGameForm = () => {
     isGameNameTooLong,
     isGameNameValid,
     arePlayersValid,
+    isDraftIdentityValid,
+    isDraftPlayerConfigured,
     resetForm,
     markAllTouched,
     addPlayer,
     removePlayer,
     updateDraftName,
+    updateDraftPlayerField,
     markDraftTouched,
     cycleDraftAvatar,
+    setCurrentStep,
+    goToNextStep,
+    goToPreviousStep,
+    startNewPlayer,
   }
 }
 

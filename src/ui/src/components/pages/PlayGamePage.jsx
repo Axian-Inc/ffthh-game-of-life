@@ -1,5 +1,5 @@
 import WelcomeToLifePage from './WelcomeToLifePage'
 
-const PlayGamePage = ({ game, onHome }) => <WelcomeToLifePage game={game} onBegin={onHome} />
+const PlayGamePage = ({ onHome }) => <WelcomeToLifePage onBegin={onHome} />
 
 export default PlayGamePage
