@@ -19,6 +19,7 @@ const CreateGameModal = ({
   onAddPlayer,
   onDraftNameChange,
   onDraftBlur,
+  onDraftAvatarSelect,
   onDraftAvatarCycle,
   isCreating,
 }) => {
@@ -45,6 +46,7 @@ const CreateGameModal = ({
           onAddPlayer={onAddPlayer}
           onDraftNameChange={onDraftNameChange}
           onDraftBlur={onDraftBlur}
+          onDraftAvatarSelect={onDraftAvatarSelect}
           onDraftAvatarCycle={onDraftAvatarCycle}
           isCreating={isCreating}
         />

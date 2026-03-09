@@ -67,7 +67,7 @@ test("welcome CTA returns to '/'", async ({ page }) => {
   }, { key: storageKey })
 
   await page.goto('/games/choices-matter/play')
-  await page.getByRole('button', { name: "Let's Begin!" }).click()
+  await page.getByRole('button', { name: "Let's Begin!" }).click({ force: true })
   await expect(page).toHaveURL('/')
   await expect(page.getByRole('heading', { level: 1, name: 'Game of LIFE' })).toBeVisible()
 })

@@ -39,6 +39,7 @@ const ModalManager = ({
       onRemovePlayer={createGameProps.onRemovePlayer}
       onDraftNameChange={createGameProps.onDraftNameChange}
       onDraftBlur={createGameProps.onDraftBlur}
+      onDraftAvatarSelect={createGameProps.onDraftAvatarSelect}
       onDraftAvatarCycle={createGameProps.onDraftAvatarCycle}
       createError={createGameProps.createError}
       isCreating={createGameProps.isCreating}

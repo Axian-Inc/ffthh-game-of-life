@@ -5,7 +5,11 @@ const baseURL = 'http://127.0.0.1:4173'
 const systemChromium = '/usr/bin/chromium'
 const resolvedChromium =
   process.env.CHROME_BIN || (fs.existsSync(systemChromium) ? systemChromium : undefined)
-const launchOptions = resolvedChromium ? { executablePath: resolvedChromium } : {}
+const launchOptions = {
+  ...(resolvedChromium ? { executablePath: resolvedChromium } : {}),
+  // Chromium in this dev container can hang on screenshots without these flags.
+  args: ['--disable-gpu', '--disable-software-rasterizer', '--disable-dev-shm-usage', '--no-sandbox'],
+}
 
 export default defineConfig({
   testDir: './e2e',

@@ -339,6 +339,7 @@ function App() {
         onRemovePlayer: removePlayer,
         onDraftNameChange: (event) => updateDraftName(event.target.value),
         onDraftBlur: markDraftTouched,
+        onDraftAvatarSelect: (avatarKey) => updateDraftField('avatar', avatarKey),
         onDraftAvatarCycle: cycleDraftAvatar,
         createError,
         isCreating,

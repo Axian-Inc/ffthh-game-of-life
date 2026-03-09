@@ -52,6 +52,7 @@ const NewGameWizard = ({
   onAddPlayer,
   onDraftNameChange,
   onDraftBlur,
+  onDraftAvatarSelect,
   onDraftAvatarCycle,
   isCreating,
 }) => {
@@ -116,6 +117,11 @@ const NewGameWizard = ({
   const canStartGame = gameName.trim().length > 0 && isGameNameValid && mergedPlayers.length >= 2
 
   const applyDraftAvatar = (targetAvatarKey) => {
+    if (onDraftAvatarSelect) {
+      onDraftAvatarSelect(targetAvatarKey)
+      return
+    }
+
     const currentIndex = PLAYER_AVATAR_OPTIONS.findIndex((option) => option.key === normalizedDraftAvatar)
     const targetIndex = PLAYER_AVATAR_OPTIONS.findIndex((option) => option.key === targetAvatarKey)
     if (targetIndex < 0 || currentIndex < 0 || targetIndex === currentIndex) {
