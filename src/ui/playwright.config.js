@@ -9,6 +9,7 @@ const launchOptions = resolvedChromium ? { executablePath: resolvedChromium } : 
 
 export default defineConfig({
   testDir: './e2e',
+  snapshotPathTemplate: '{testDir}/__snapshots__/{arg}{ext}',
   timeout: 30000,
   expect: {
     timeout: 5000,

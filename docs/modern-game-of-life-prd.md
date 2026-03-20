@@ -13,7 +13,7 @@
 
 1.6 Purpose: This document defines the v1 product requirements for a digital family life-simulation game and is intended to be decision-ready for implementation planning.
 
-1.7 Intended audience: PM, Design, Engineering, QA, and agent implementers.
+1.7 Intended audience: PM, Design, Engineering, and QA.
 
 1.8 Thesis: The game must teach and reinforce that in life, there is "no free "lunch, meaning every decision has benefits, costs, risks, delayed effects, and cumulative consequences.
 
@@ -174,8 +174,8 @@
 
 10.10 The product must validate campaign completion and reflection flow without forcing a win-state ranking.
 
-## 11. Delivery Waves (Planning Only)
-TBD, slicing and wave planning for agents to happen later.
+## 11. Delivery Planning
+Implementation sequencing is managed through the normal product backlog and release planning process.
 
 ## 12. Assumptions and Defaults
 12.1 Platform default is a digital web implementation with cloud persistence.

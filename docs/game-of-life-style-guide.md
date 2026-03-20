@@ -1,6 +1,6 @@
-# Game of Life UI Style Guide (Wave 1 Desktop)
+# Game of Life UI Style Guide
 
-Audience: agents implementing the Wave 1 restart from `march_start`.
+Audience: contributors implementing or refining the current desktop UI.
 
 Normative references:
 
@@ -13,7 +13,7 @@ Normative references:
 - `docs/sample-images/7.Life.Start.png`
 
 ## 1. Global rules
-1. Wave 1 is desktop browser only.
+1. The current supported UI is desktop browser only.
 2. All Playwright visual baselines must run at `1280x720`.
 3. Fidelity means matching layout anatomy, spacing, typography hierarchy, button treatment, and copy hierarchy exactly.
 4. Browser chrome is not part of the screenshot contract.

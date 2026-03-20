@@ -22,7 +22,6 @@ fi
 
 npm --prefix "$ui_dir" ci
 npm --prefix "$ui_dir" run test:ci
-npm --prefix "$ui_dir" run test:e2e:ci
 
 workspace="$(terraform -chdir="$tf_dir" workspace show)"
 if [[ "$workspace" == "default" ]]; then

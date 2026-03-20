@@ -1,52 +1,45 @@
-# WARNING!
-DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion of it).
+# Modern Game of Life
 
-# Getting Started
-
-This repository is meant to be opened in a VS Code Dev Container volume rather than run directly on your host machine.
+Modern Game of Life is a web implementation of a Game of Life-inspired educational experience. The repository contains a React/Vite UI, an AWS-backed game storage API, and Terraform infrastructure for deployment.
 
 ## Prerequisites
 
-1. Docker
-1. VS Code
-1. VS Code Dev Containers extension
-1. OpenAI Codex account token
-1. AWS credentials for the L&D environment
+1. Node.js and npm
+2. Terraform `~> 1.10`
+3. AWS CLI configured for the target AWS account in `us-west-2`
 
-## First-Time Setup on Your Host Machine
+## Optional dev container
 
-1. Open a new VS Code window.
-1. Open the Command Palette and run `Dev Containers: Clone Repository in Container Volume`.
-   - Depending on your VS Code version, this may instead appear as `Dev Containers: Open Repository in Container Volume`.
-1. Select the `axian-inc/ffthh-game-of-life` repository.
-1. Select the `main` branch unless you have been told to use a different branch (many labs will have a starting branch like `march_start`).
+The repository includes a VS Code dev container with Terraform, AWS CLI, Node.js, Chromium, and Git LFS preinstalled for a consistent local environment.
 
-## First-Time Setup Inside the Dev Container
+## First-time setup
 
-1. Open a fresh terminal in the dev container.
-1. Run `codex` and complete the sign-in flow from inside the dev container.
-1. Run `aws configure` and enter your AWS access key details for the L&D environment.
-   - Set the default region to `us-west-2`.
-1. Create a new Git branch with your name in it.
-1. Change to the `terraform` directory and run `terraform init -reconfigure`.
-1. Run `terraform workspace new {your initials}` or, if it already exists, `terraform workspace select {your initials}`.
-   - Do not run Terraform in the `default` workspace.
-   - If you pulled recent backend changes and see a backend initialization error, re-run `terraform init -reconfigure` before creating or selecting a workspace.
-   - The Terraform setup is intended to give each workspace uniquely named resources so developers do not collide with each other.
+1. Configure AWS credentials with `aws configure`.
+2. Initialize Terraform:
+   `terraform -chdir=terraform init -reconfigure`
+3. Select or create a non-default Terraform workspace:
+   `terraform -chdir=terraform workspace new <name>`
+   or
+   `terraform -chdir=terraform workspace select <name>`
 
-## Start Developing
+Do not run Terraform in the `default` workspace.
 
-Run `codex --yolo` inside the dev container to get started.
+## Common commands
 
-The `--yolo` flag allows Codex to run without restrictions, which is why development must happen inside the container.
+1. Install UI dependencies:
+   `npm --prefix src/ui ci`
+2. Run UI unit tests:
+   `npm --prefix src/ui run test:ci`
+3. Run UI end-to-end tests:
+   `npm --prefix src/ui run test:e2e:ci`
+4. Run deployment preflight checks:
+   `scripts/check.sh`
+5. Deploy the application:
+   `scripts/deploy.sh`
 
-## Headless browser testing
+## Documentation
 
-The dev container includes Chromium + chromedriver + Xvfb for running headless UI tests locally.
-`CHROME_BIN` is set to `/usr/bin/chromium`.
-
-Playwright E2E tests: `npm --prefix src/ui run test:e2e` (CI: `npm --prefix src/ui run test:e2e:ci`).
-
-# Architecture
-
-See `ARCHITECTURE.md` for system design and data flow.
+- Product requirements: `docs/modern-game-of-life-prd.md`
+- Architecture: `docs/ARCHITECTURE.md`
+- UI style guide: `docs/game-of-life-style-guide.md`
+- Script usage: `scripts/README.md`

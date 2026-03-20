@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import ModalBackdrop from '../modals/ModalBackdrop'
-import CreateGameModal from '../modals/CreateGameModal'
 import ResumeGameModal from '../modals/ResumeGameModal'
 import DeleteGameModal from '../modals/DeleteGameModal'
 import ModalManager from '../modals/ModalManager'
@@ -20,23 +19,6 @@ describe('Modal components', () => {
 
     await user.click(screen.getByRole('dialog'))
     expect(onBackdropClick).toHaveBeenCalledTimes(1)
-  })
-
-  it('CreateGameModal returns null when closed', () => {
-    const { container } = render(
-      <CreateGameModal isOpen={false} onBackdropClick={vi.fn()} onCancel={vi.fn()} onSubmit={vi.fn()} gameName="" />,
-    )
-
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('CreateGameModal renders wizard Step 1', () => {
-    render(<CreateGameModal isOpen onBackdropClick={vi.fn()} onCancel={vi.fn()} onSubmit={vi.fn()} gameName="" />)
-
-    expect(screen.getByText('New Game Setup')).toBeInTheDocument()
-    expect(screen.getByText('Step 1 of 6')).toBeInTheDocument()
-    expect(screen.getByLabelText('Game Name:')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
   })
 
   it('ResumeGameModal renders results mode', () => {

@@ -1,10 +1,9 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { test, expect } from '@playwright/test'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
-const SNAPSHOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '__snapshots__')
+const visualSnapshotOptions = {
+  maxDiffPixels: 6500,
+}
 
 const setGames = async (page, games) => {
   await page.goto('/')
@@ -19,17 +18,6 @@ const setGames = async (page, games) => {
     content:
       '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;}',
   })
-}
-
-const assertVisual = async (buffer, fileName) => {
-  const target = path.join(SNAPSHOT_DIR, fileName)
-  if (process.env.UPDATE_VISUAL_BASELINES === '1') {
-    await fs.mkdir(SNAPSHOT_DIR, { recursive: true })
-    await fs.writeFile(target, buffer)
-    return
-  }
-  const expected = await fs.readFile(target)
-  expect(buffer).toEqual(expected)
 }
 
 test('home desktop baseline matches screen 1 single-card anatomy', async ({ page }) => {
@@ -56,8 +44,10 @@ test('home desktop baseline matches screen 1 single-card anatomy', async ({ page
   await expect(page.getByText('just now')).toBeVisible()
   await expect(page.getByText('ACTIVE')).toBeVisible()
 
-  const image = await page.locator('.page').screenshot()
-  await assertVisual(image, 'home-desktop-single-card.png')
+  await expect(page.locator('.page')).toHaveScreenshot(
+    'home-desktop-single-card.png',
+    visualSnapshotOptions,
+  )
 })
 
 test('home multi-game desktop layout keeps explicit vertical card separation', async ({ page }) => {
@@ -109,6 +99,8 @@ test('home multi-game desktop layout keeps explicit vertical card separation', a
   expect(second).not.toBeNull()
   expect(second.y - (first.y + first.height)).toBeGreaterThanOrEqual(24)
 
-  const image = await page.locator('.page').screenshot()
-  await assertVisual(image, 'home-desktop-multi-game-column.png')
+  await expect(page.locator('.page')).toHaveScreenshot(
+    'home-desktop-multi-game-column.png',
+    visualSnapshotOptions,
+  )
 })

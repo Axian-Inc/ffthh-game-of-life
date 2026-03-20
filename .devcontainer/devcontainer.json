@@ -1,5 +1,5 @@
 {
-  "name": "Python + Terraform + AWS + Codex",
+  "name": "Modern Game of Life Dev Environment",
 
   // Base image: Python, git, zsh, common build tools, non-root `vscode` user
   // https://mcr.microsoft.com/devcontainers/python
@@ -16,17 +16,14 @@
     // Git (image already includes git, but this keeps it explicit/up-to-date)
     "ghcr.io/devcontainers/features/git:1": {},
 
-    // GitHub CLI for PR creation from Codex agents
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-
-    // Node.js for Codex CLI (installed via npm)
+    // Node.js for UI development and tests
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
     }
   },
 
   // Commands to run after the container is created
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y chromium chromium-driver xvfb git-lfs && git lfs install --skip-repo && npm install -g @openai/codex",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y chromium chromium-driver xvfb git-lfs && git lfs install --skip-repo",
 
   // Environment inside the container
   "remoteEnv": {
