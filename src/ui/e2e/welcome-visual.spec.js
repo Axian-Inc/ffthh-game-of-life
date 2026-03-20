@@ -43,6 +43,9 @@ test('direct /games/:id/play route opens Welcome and does not show placeholder b
   await expect(page.getByRole('button', { name: "Let's Begin!" })).toBeVisible()
   await expect(page.getByText('Game board coming soon.')).toHaveCount(0)
   await expect(page.getByText('placeholder content for the play experience')).toHaveCount(0)
+  await expect
+    .poll(() => page.evaluate(() => window.life.status().entrySource))
+    .toBe('route')
 
   await expect(page.locator('.page')).toHaveScreenshot(
     'welcome-desktop-baseline.png',
@@ -70,6 +73,9 @@ test('resume lands on Welcome and Let\'s Begin routes back to home', async ({ pa
   await page.getByRole('button', { name: 'Resume' }).click()
   await expect(page).toHaveURL(/\/games\/resume-route\/play$/)
   await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
+  await expect
+    .poll(() => page.evaluate(() => window.life.status().entrySource))
+    .toBe('resume')
 
   await page.getByRole('button', { name: "Let's Begin!" }).click()
   await expect(page).toHaveURL('/')

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import './App.css'
 import PageShell from './components/layout/PageShell'
 import Hero from './components/layout/Hero'
@@ -9,6 +9,7 @@ import ModalManager from './components/modals/ModalManager'
 import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
+import { getGameStorageDebugSnapshot } from './services/gameStorage'
 
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
@@ -33,11 +34,20 @@ const buildAppRoute = (view, activeGame) => {
   return '/'
 }
 
+const toJsonSafe = (value, fallback = null) => {
+  if (value == null) {
+    return fallback
+  }
+  return JSON.parse(JSON.stringify(value))
+}
+
 function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [entrySource, setEntrySource] = useState('none')
+  const [wizardDraft, setWizardDraft] = useState(null)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
@@ -46,17 +56,27 @@ function App() {
   const { view, activeGame, activeGameMode, pendingDelete } = state
   const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
   const previousViewRef = useRef(view)
+  const clearDebugState = useCallback(() => {
+    setEntrySource('none')
+    setWizardDraft(null)
+  }, [])
 
   const handleCreateClick = () => {
     openCreate()
     setCreateError('')
+    clearDebugState()
   }
 
   const handleBackClick = () => {
     closeAll()
     setCreateError('')
     setIsCreating(false)
+    clearDebugState()
   }
+
+  const handleWizardStatusChange = useCallback((nextStatus) => {
+    setWizardDraft(nextStatus ? toJsonSafe(nextStatus) : null)
+  }, [])
 
   const handleCreateGame = async (wizardPayload) => {
     const payloadName = wizardPayload?.name?.trim() || ''
@@ -83,6 +103,8 @@ function App() {
         resumable: true,
       }
       const createdGame = await createGame(newGame)
+      setEntrySource('create')
+      setWizardDraft(null)
       openPlay(createdGame)
     } catch {
       setCreateError('We could not create that game yet. Please try again.')
@@ -109,17 +131,20 @@ function App() {
     try {
       await deleteGame(pendingDelete.id)
       closeAll()
+      clearDebugState()
     } catch {
       setDeleteErrors((current) => ({
         ...current,
         [pendingDelete.id]: 'We could not delete that game yet. Please try again.',
       }))
       closeAll()
+      clearDebugState()
     }
   }
 
   const handleDeleteCancel = () => {
     closeAll()
+    clearDebugState()
   }
 
   const handleResumeGame = (game) => {
@@ -139,6 +164,8 @@ function App() {
       return rest
     })
 
+    setEntrySource('resume')
+    setWizardDraft(null)
     openPlay(game)
   }
 
@@ -163,6 +190,7 @@ function App() {
 
     if (routeRequest.view === 'home') {
       closeAll()
+      clearDebugState()
       setRouteRequest(null)
       setHasHydratedRoute(true)
       return
@@ -175,16 +203,19 @@ function App() {
     const targetGame = games.find((game) => game.id === routeRequest.gameId)
     if (!targetGame) {
       closeAll()
+      clearDebugState()
       setRouteRequest(null)
       setHasHydratedRoute(true)
       return
     }
 
+    setEntrySource('route')
+    setWizardDraft(null)
     openPlay(targetGame)
 
     setRouteRequest(null)
     setHasHydratedRoute(true)
-  }, [routeRequest, isLoading, games, closeAll, openPlay])
+  }, [routeRequest, isLoading, games, closeAll, openPlay, clearDebugState])
 
   useEffect(() => {
     if (!hasHydratedRoute) {
@@ -232,6 +263,39 @@ function App() {
     previousViewRef.current = view
   }, [view])
 
+  const getLifeStatus = useCallback(() => {
+    const { storageMode, storageKey, allGames } = getGameStorageDebugSnapshot(games)
+    const activeGameId = activeGame?.id ? String(activeGame.id) : null
+    const persistedGame = activeGameId ? allGames.find((game) => game.id === activeGameId) || null : null
+
+    return toJsonSafe({
+      view,
+      activeGameMode,
+      entrySource,
+      activeGameId,
+      activeGame,
+      persistedGame,
+      storageMode,
+      storageKey,
+      allGames,
+      wizardDraft,
+    }, {})
+  }, [view, activeGameMode, entrySource, activeGame, games, wizardDraft])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    window.life = {
+      status: getLifeStatus,
+    }
+
+    return () => {
+      delete window.life
+    }
+  }, [getLifeStatus])
+
   const handleBackdropClick = (event) => {
     if (isCreating) {
       return
@@ -256,6 +320,7 @@ function App() {
         onSubmit: handleCreateGame,
         submitError: createError,
         isSubmitting: isCreating,
+        onStatusChange: handleWizardStatusChange,
       }}
     />
   )
@@ -288,7 +353,7 @@ function App() {
         </>
       ) : null}
       {view === 'play' ? (
-        <WelcomeToLifePage game={activeGame} onBegin={closeAll} />
+        <WelcomeToLifePage game={activeGame} onBegin={handleBackClick} />
       ) : null}
     </PageShell>
   )

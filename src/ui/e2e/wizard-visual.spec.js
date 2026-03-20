@@ -11,7 +11,14 @@ const disableAnimations = async (page) => {
   })
 }
 
+const setStableRandom = async (page) => {
+  await page.addInitScript(() => {
+    Math.random = () => 0
+  })
+}
+
 const buildSinglePlayerSummary = async (page) => {
+  await setStableRandom(page)
   await page.goto('/')
   await page.getByRole('button', { name: 'New Game' }).click()
   await page.getByRole('textbox', { name: 'Game name' }).fill('Game Name')
@@ -28,12 +35,14 @@ const buildSinglePlayerSummary = async (page) => {
 }
 
 test('new game modal matches the game-name step baseline', async ({ page }) => {
+  await setStableRandom(page)
   await page.goto('/')
   await disableAnimations(page)
   await page.getByRole('button', { name: 'New Game' }).click()
 
   await expect(page.getByRole('heading', { name: 'Name Your Game' })).toBeVisible()
-  await expect(page.getByRole('button', { name: /^Next/i })).toBeDisabled()
+  await expect(page.getByRole('textbox', { name: 'Game name' })).toHaveValue('Family Game Night')
+  await expect(page.getByRole('button', { name: /^Next/i })).toBeEnabled()
 
   await expect(page).toHaveScreenshot('wizard-game-name-modal.png', visualSnapshotOptions)
 })

@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, X } from 'lucide-react'
 import { PLAYER_AVATAR_OPTIONS } from '../../data/playerAvatars'
+import { getRandomGameName, getRandomPlayerName } from '../../data/starterText'
 import {
   WIZARD_CAREER_BY_ID,
   WIZARD_PROGRESS_SEGMENTS,
@@ -19,13 +20,20 @@ const MAX_GAME_NAME_LENGTH = 60
 const MAX_PLAYER_NAME_LENGTH = 24
 const MIN_PLAYERS_TO_START = 2
 
-const createPlayerDraft = () => ({
-  name: '',
-  avatar: '',
-  cityId: '',
-  educationTrackId: '',
-  jobId: '',
-})
+const createPlayerDraft = (existingPlayers = [], reservedNames = []) => {
+  const starterName = getRandomPlayerName([...existingPlayers.map((player) => player.name), ...reservedNames])
+
+  return {
+    starterName,
+    player: {
+      name: starterName,
+      avatar: '',
+      cityId: '',
+      educationTrackId: '',
+      jobId: '',
+    },
+  }
+}
 
 const buildPlayerId = (index) => `player-${index + 1}`
 
@@ -58,7 +66,7 @@ const getStepTitle = (currentStep, playerNumber) => {
     return 'Choose a City'
   }
   if (currentStep === 4) {
-    return 'Career Track'
+    return 'Education Track'
   }
   if (currentStep === 5) {
     return 'Pick a Career'
@@ -66,11 +74,19 @@ const getStepTitle = (currentStep, playerNumber) => {
   return 'Ready to Play'
 }
 
-const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = false }) => {
+const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = false, onStatusChange }) => {
   const [currentStep, setCurrentStep] = useState(1)
-  const [gameName, setGameName] = useState('')
+  const [gameName, setGameName] = useState(() => getRandomGameName())
   const [players, setPlayers] = useState([])
-  const [draftPlayer, setDraftPlayer] = useState(createPlayerDraft())
+  const [playerDraftState, setPlayerDraftState] = useState(() => {
+    const initialDraft = createPlayerDraft()
+    return {
+      draftPlayer: initialDraft.player,
+      usedStarterNames: [initialDraft.starterName],
+    }
+  })
+
+  const draftPlayer = playerDraftState.draftPlayer
 
   const trimmedGameName = gameName.trim()
   const isGameNameValid = trimmedGameName.length > 0
@@ -93,6 +109,40 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
   const playerNumber = players.length + 1
   const showBackButton = currentStep >= 2 && currentStep <= 5
   const showProgress = currentStep <= WIZARD_PROGRESS_SEGMENTS
+
+  const updateDraftPlayer = (updater) => {
+    setPlayerDraftState((current) => ({
+      ...current,
+      draftPlayer: typeof updater === 'function' ? updater(current.draftPlayer) : updater,
+    }))
+  }
+
+  const setFreshDraftPlayer = (existingPlayers = []) => {
+    setPlayerDraftState((current) => {
+      const nextDraft = createPlayerDraft(existingPlayers, current.usedStarterNames)
+      return {
+        draftPlayer: nextDraft.player,
+        usedStarterNames: [...current.usedStarterNames, nextDraft.starterName],
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (!onStatusChange) {
+      return undefined
+    }
+
+    onStatusChange({
+      currentStep,
+      gameName,
+      players,
+      draftPlayer,
+      canStartGame,
+      isSubmitting,
+    })
+
+    return () => onStatusChange(null)
+  }, [currentStep, gameName, players, draftPlayer, canStartGame, isSubmitting, onStatusChange])
 
   const handleBack = () => {
     if (!showBackButton) {
@@ -118,9 +168,10 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         jobId: draftPlayer.jobId,
         careerTrack: selectedTrack?.name || selectedCareer?.title || null,
       }
+      const nextPlayers = [...players, nextPlayer]
 
-      setPlayers((current) => [...current, nextPlayer])
-      setDraftPlayer(createPlayerDraft())
+      setPlayers(nextPlayers)
+      setFreshDraftPlayer(nextPlayers)
       setCurrentStep(6)
       return
     }
@@ -129,7 +180,6 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
   }
 
   const handleAddPlayer = () => {
-    setDraftPlayer(createPlayerDraft())
     setCurrentStep(2)
   }
 
@@ -187,9 +237,9 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         {currentStep === 2 ? (
           <NewGameWizardStep1Player
             playerName={draftPlayer.name}
-            onPlayerNameChange={(value) => setDraftPlayer((current) => ({ ...current, name: value }))}
+            onPlayerNameChange={(value) => updateDraftPlayer((current) => ({ ...current, name: value }))}
             selectedAvatar={draftPlayer.avatar}
-            onAvatarChange={(avatar) => setDraftPlayer((current) => ({ ...current, avatar }))}
+            onAvatarChange={(avatar) => updateDraftPlayer((current) => ({ ...current, avatar }))}
             avatarOptions={PLAYER_AVATAR_OPTIONS}
             maxPlayerNameLength={MAX_PLAYER_NAME_LENGTH}
             playerNameError={playerNameError}
@@ -201,7 +251,7 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         {currentStep === 3 ? (
           <NewGameWizardStep2City
             selectedCityId={draftPlayer.cityId}
-            onSelectCity={(cityId) => setDraftPlayer((current) => ({ ...current, cityId }))}
+            onSelectCity={(cityId) => updateDraftPlayer((current) => ({ ...current, cityId }))}
             onNext={handleNext}
             isNextDisabled={!canAdvance[3]}
           />
@@ -211,7 +261,7 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
           <NewGameWizardStep3Track
             selectedTrackId={draftPlayer.educationTrackId}
             onSelectTrack={(educationTrackId) =>
-              setDraftPlayer((current) => ({
+              updateDraftPlayer((current) => ({
                 ...current,
                 educationTrackId,
                 jobId: current.educationTrackId === educationTrackId ? current.jobId : '',
@@ -225,7 +275,7 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         {currentStep === 5 ? (
           <NewGameWizardStep4Job
             selectedJobId={draftPlayer.jobId}
-            onSelectJob={(jobId) => setDraftPlayer((current) => ({ ...current, jobId }))}
+            onSelectJob={(jobId) => updateDraftPlayer((current) => ({ ...current, jobId }))}
             careerOptions={careerOptions}
             onNext={handleNext}
             isNextDisabled={!canAdvance[5]}

@@ -1,6 +1,7 @@
 import { seedGames } from '../data/seedGames'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
+export const GAME_STORAGE_KEY = STORAGE_KEY
 
 const normalizeGame = (game) => ({
   ...game,
@@ -41,6 +42,8 @@ const getStorageMode = () => {
   return 'local'
 }
 
+export const getCurrentStorageMode = () => getStorageMode()
+
 const getApiBaseUrl = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL
   if (!baseUrl) {
@@ -57,6 +60,28 @@ const loadLocalGames = () => {
   const seeded = normalizeGames(seedGames())
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
   return seeded
+}
+
+export const readStoredGamesSnapshot = () => {
+  if (typeof window === 'undefined') {
+    return []
+  }
+  if (getStorageMode() !== 'local') {
+    return []
+  }
+  return loadLocalGames()
+}
+
+export const getGameStorageDebugSnapshot = (fallbackGames = []) => {
+  const storageMode = getStorageMode()
+  const allGames =
+    storageMode === 'local' ? readStoredGamesSnapshot() : normalizeGames(Array.isArray(fallbackGames) ? fallbackGames : [])
+
+  return {
+    storageMode,
+    storageKey: STORAGE_KEY,
+    allGames,
+  }
 }
 
 const saveLocalGames = (games) => {

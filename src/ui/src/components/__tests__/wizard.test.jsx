@@ -1,10 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 import NewGameWizard from '../forms/NewGameWizard'
 
 const buildPlayer = async (user, { nickname, avatar, city, track, career }) => {
-  await user.type(screen.getByRole('textbox', { name: 'Nickname' }), nickname)
+  const nicknameInput = screen.getByRole('textbox', { name: 'Nickname' })
+  await user.clear(nicknameInput)
+  await user.type(nicknameInput, nickname)
   await user.click(screen.getByRole('button', { name: avatar }))
   await user.click(screen.getByRole('button', { name: /Next/i }))
   await user.click(screen.getByRole('button', { name: new RegExp(city, 'i') }))
@@ -16,28 +18,43 @@ const buildPlayer = async (user, { nickname, avatar, city, track, career }) => {
 }
 
 describe('NewGameWizard', () => {
-  it('requires a game name before leaving the first step', async () => {
+  beforeEach(() => {
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('prefills the game name and lets the user edit it', async () => {
     const user = userEvent.setup()
     render(<NewGameWizard onCancel={vi.fn()} onSubmit={vi.fn()} />)
 
+    const gameNameInput = screen.getByRole('textbox', { name: 'Game name' })
     const nextButton = screen.getByRole('button', { name: /Next/i })
+    expect(gameNameInput).toHaveValue('Family Game Night')
+    expect(nextButton).toBeEnabled()
+
+    await user.clear(gameNameInput)
     expect(nextButton).toBeDisabled()
 
-    await user.type(screen.getByRole('textbox', { name: 'Game name' }), 'Family Game Night')
+    await user.type(gameNameInput, 'Road Trip Ruckus')
     expect(nextButton).toBeEnabled()
   })
 
-  it('requires nickname, avatar, and two players before start', async () => {
+  it('prefills player names, preserves edits, and uses the Education Track label', async () => {
     const user = userEvent.setup()
     render(<NewGameWizard onCancel={vi.fn()} onSubmit={vi.fn()} />)
 
-    await user.type(screen.getByRole('textbox', { name: 'Game name' }), 'Family Game Night')
     await user.click(screen.getByRole('button', { name: /Next/i }))
 
+    const nicknameInput = screen.getByRole('textbox', { name: 'Nickname' })
     const nextButton = screen.getByRole('button', { name: /Next/i })
+    expect(nicknameInput).toHaveValue('Avery')
     expect(nextButton).toBeDisabled()
 
-    await user.type(screen.getByRole('textbox', { name: 'Nickname' }), 'Ted')
+    await user.clear(nicknameInput)
+    await user.type(nicknameInput, 'Ted')
     expect(nextButton).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: 'Fox' }))
@@ -45,6 +62,15 @@ describe('NewGameWizard', () => {
 
     await user.click(nextButton)
     await user.click(screen.getByRole('button', { name: /Suburbia/i }))
+    await user.click(screen.getByRole('button', { name: /Next/i }))
+    expect(screen.getByRole('heading', { name: 'Education Track' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Self-Taught/i }))
+    await user.click(screen.getByRole('button', { name: /Next/i }))
+    await user.click(screen.getByRole('button', { name: 'Back' }))
+    await user.click(screen.getByRole('button', { name: 'Back' }))
+    await user.click(screen.getByRole('button', { name: 'Back' }))
+    expect(screen.getByRole('textbox', { name: 'Nickname' })).toHaveValue('Ted')
+    await user.click(screen.getByRole('button', { name: /Next/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
     await user.click(screen.getByRole('button', { name: /Self-Taught/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
@@ -57,6 +83,7 @@ describe('NewGameWizard', () => {
 
     await user.click(screen.getByRole('button', { name: /Add Player/i }))
     expect(screen.getByRole('heading', { name: 'Player 2' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Nickname' })).toHaveValue('Nova')
     expect(screen.getByRole('button', { name: /Next/i })).toBeDisabled()
   })
 
@@ -65,7 +92,9 @@ describe('NewGameWizard', () => {
     const onSubmit = vi.fn()
     render(<NewGameWizard onCancel={vi.fn()} onSubmit={onSubmit} />)
 
-    await user.type(screen.getByRole('textbox', { name: 'Game name' }), 'Weekend Plan')
+    const gameNameInput = screen.getByRole('textbox', { name: 'Game name' })
+    await user.clear(gameNameInput)
+    await user.type(gameNameInput, 'Weekend Plan')
     await user.click(screen.getByRole('button', { name: /Next/i }))
 
     await buildPlayer(user, {

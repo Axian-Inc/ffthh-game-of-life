@@ -20,6 +20,7 @@ const ModalManager = ({
       onSubmit={createGameProps.onSubmit}
       submitError={createGameProps.submitError}
       isSubmitting={createGameProps.isSubmitting}
+      onStatusChange={createGameProps.onStatusChange}
     />
     <ResumeGameModal
       isOpen={view === 'session'}

@@ -89,7 +89,7 @@ Shared shell rules:
 5. `Next` remains disabled until a city is selected.
 
 ### 4.4 Step 4: Education (`5.PickEdcuation.png`)
-1. Header title: `Career Track`
+1. Header title: `Education Track`
 2. Progress rail shows segments 1-4 active.
 3. Render three stacked cards: `Degree`, `Trades`, and `Self-Taught`.
 4. Each card includes an icon, short subtitle, and three explanatory modifier callouts.
@@ -121,6 +121,6 @@ Required anatomy:
 ## 6. Interaction rules
 1. Player nicknames must stay unique within the current setup.
 2. Avatar selection is required for every committed player.
-3. Adding a player from summary opens the next `Player N` step with a blank nickname and no avatar selected.
+3. Adding a player from summary opens the next `Player N` step with a fresh random nickname starter and no avatar selected.
 4. Changing education must clear any incompatible career selection.
 5. New games are persisted only when `Start Game` is pressed.
