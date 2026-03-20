@@ -51,6 +51,8 @@ describe('NewGameWizard', () => {
     await user.click(screen.getByRole('button', { name: /Content Creator/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
 
+    expect(screen.getByText('Game Name')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Family Game Night' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Start Game/i })).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: /Add Player/i }))

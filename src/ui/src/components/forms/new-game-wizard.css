@@ -263,16 +263,28 @@
 
 .wizard-summary-heading {
   text-align: center;
+  display: grid;
+  gap: 4px;
+}
+
+.wizard-summary-label {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(102, 113, 143, 0.92);
+  font-weight: 800;
 }
 
 .wizard-summary-heading h3 {
   margin: 0;
-  font-size: 1.15rem;
-  color: var(--text-2);
-  font-weight: 700;
+  font-size: 1.42rem;
+  line-height: 1.05;
+  color: var(--text-1);
+  font-weight: 900;
 }
 
-.wizard-summary-heading p {
+.wizard-summary-meta {
   margin: 2px 0 0;
   color: var(--text-2);
   font-weight: 700;

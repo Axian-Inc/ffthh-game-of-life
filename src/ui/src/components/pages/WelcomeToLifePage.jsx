@@ -2,7 +2,7 @@ import { Sparkles } from 'lucide-react'
 import PrimaryButton from '../ui/PrimaryButton'
 import './welcome-to-life.css'
 
-const WelcomeToLifePage = ({ game, onBegin }) => (
+const WelcomeToLifePage = ({ onBegin }) => (
   <section className="welcome-life-page">
     <div className="welcome-life-icon" aria-hidden="true">
       <Sparkles aria-hidden="true" />
@@ -40,7 +40,6 @@ const WelcomeToLifePage = ({ game, onBegin }) => (
         was and what decisions influenced it. Your choices determine how you adapt!
       </p>
     </section>
-    <p className="welcome-life-game-name">{game?.name || 'Your game'} is ready.</p>
     <PrimaryButton onClick={onBegin}>Let&apos;s Begin!</PrimaryButton>
   </section>
 )

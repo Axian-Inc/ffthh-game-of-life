@@ -208,7 +208,7 @@ function App() {
   }, [newGameId, view, isLoading, setNewGameId])
 
   useEffect(() => {
-    if (view !== 'create' && view !== 'session' && !pendingDelete) {
+    if (view !== 'session' && !pendingDelete) {
       return
     }
 

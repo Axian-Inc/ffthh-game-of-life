@@ -16,7 +16,6 @@ const ModalManager = ({
   <>
     <CreateGameModal
       isOpen={view === 'create'}
-      onBackdropClick={onBackdropClick}
       onCancel={onCloseAll}
       onSubmit={createGameProps.onSubmit}
       submitError={createGameProps.submitError}

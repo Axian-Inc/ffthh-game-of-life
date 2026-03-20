@@ -16,8 +16,9 @@ const NewGameWizardStep6Summary = ({
   <div className="wizard-step wizard-step-summary" data-step="6">
     <section className="wizard-summary-card" aria-label="New game summary">
       <div className="wizard-summary-heading">
+        <p className="wizard-summary-label">Game Name</p>
         <h3>{gameName}</h3>
-        <p>
+        <p className="wizard-summary-meta">
           {players.length} player{players.length === 1 ? '' : 's'}
         </p>
       </div>

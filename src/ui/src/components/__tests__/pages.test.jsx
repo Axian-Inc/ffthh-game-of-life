@@ -25,7 +25,6 @@ describe('Page components', () => {
     render(<WelcomeToLifePage game={createGame({ name: 'Choices Matter' })} onBegin={onBegin} />)
 
     expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
-    expect(screen.getByText('Choices Matter is ready.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: "Let's Begin!" })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
