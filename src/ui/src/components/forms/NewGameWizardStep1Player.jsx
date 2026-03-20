@@ -1,4 +1,6 @@
 import PlayerAvatar from '../ui/PlayerAvatar'
+import PrimaryButton from '../ui/PrimaryButton'
+import { ArrowRight } from 'lucide-react'
 
 const NewGameWizardStep1Player = ({
   playerName,
@@ -8,10 +10,18 @@ const NewGameWizardStep1Player = ({
   avatarOptions,
   maxPlayerNameLength,
   playerNameError,
-}) => (
-  <div className="wizard-step" data-step="2">
-    <label className="wizard-field" htmlFor="wizard-player-name-input">
-      <span className="wizard-field-label">Player Name:</span>
+  onNext,
+  isNextDisabled,
+}) => {
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !isNextDisabled) {
+      event.preventDefault()
+      onNext()
+    }
+  }
+
+  return (
+    <div className="wizard-step" data-step="2">
       <input
         id="wizard-player-name-input"
         className="wizard-text-input"
@@ -19,15 +29,15 @@ const NewGameWizardStep1Player = ({
         value={playerName}
         maxLength={maxPlayerNameLength}
         onChange={(event) => onPlayerNameChange(event.target.value)}
-        placeholder="Enter player name"
+        onKeyDown={handleKeyDown}
+        placeholder="Nickname"
         aria-invalid={Boolean(playerNameError)}
+        aria-label="Nickname"
+        data-autofocus="true"
       />
-    </label>
-    {playerNameError ? <p className="wizard-field-error">{playerNameError}</p> : null}
+      {playerNameError ? <p className="wizard-field-error">{playerNameError}</p> : null}
 
-    <div className="wizard-field-group">
-      <p className="wizard-field-label">Choose Your Digital Persona:</p>
-      <div className="wizard-avatar-grid" role="group" aria-label="Choose Your Digital Persona">
+      <div className="wizard-avatar-grid" role="group" aria-label="Choose avatar">
         {avatarOptions.map((option) => {
           const isSelected = option.key === selectedAvatar
           return (
@@ -44,8 +54,11 @@ const NewGameWizardStep1Player = ({
           )
         })}
       </div>
+      <PrimaryButton className="wizard-action-button" onClick={onNext} disabled={isNextDisabled}>
+        Next <ArrowRight aria-hidden="true" />
+      </PrimaryButton>
     </div>
-  </div>
-)
+  )
+}
 
 export default NewGameWizardStep1Player

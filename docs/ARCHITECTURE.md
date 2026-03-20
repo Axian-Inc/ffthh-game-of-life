@@ -46,6 +46,5 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
 
 ## UI flow
 +- Home: hero + game list.
-+- Create: modal to collect game + players.
-+- Setup: career options per player with Start Game CTA.
-+- Play: placeholder play page.
++- Create: modal-driven setup for game name, player identity, city, education, career, and summary.
++- Play: welcome page entry for both new games and resumes.

@@ -1,7 +1,22 @@
-const NewGameWizardStep1GameName = ({ gameName, onGameNameChange, maxGameNameLength, onNext, isNextDisabled }) => (
-  <div className="wizard-step wizard-step-game-name" data-step="1">
-    <label className="wizard-field" htmlFor="wizard-game-name-input">
-      <span className="wizard-field-label">Game Name:</span>
+import { ArrowRight } from 'lucide-react'
+import PrimaryButton from '../ui/PrimaryButton'
+
+const NewGameWizardStep1GameName = ({
+  gameName,
+  onGameNameChange,
+  maxGameNameLength,
+  onNext,
+  isNextDisabled,
+}) => {
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !isNextDisabled) {
+      event.preventDefault()
+      onNext()
+    }
+  }
+
+  return (
+    <div className="wizard-step wizard-step-game-name" data-step="1">
       <input
         id="wizard-game-name-input"
         className="wizard-text-input"
@@ -9,15 +24,16 @@ const NewGameWizardStep1GameName = ({ gameName, onGameNameChange, maxGameNameLen
         value={gameName}
         maxLength={maxGameNameLength}
         onChange={(event) => onGameNameChange(event.target.value)}
-        placeholder="Family Game Night"
+        onKeyDown={handleKeyDown}
+        placeholder="e.g. Family Game Night"
+        aria-label="Game name"
+        data-autofocus="true"
       />
-    </label>
-    <div className="wizard-center-actions">
-      <button type="button" className="primary-action wizard-pill" onClick={onNext} disabled={isNextDisabled}>
-        Next
-      </button>
+      <PrimaryButton className="wizard-action-button" onClick={onNext} disabled={isNextDisabled}>
+        Next <ArrowRight aria-hidden="true" />
+      </PrimaryButton>
     </div>
-  </div>
-)
+  )
+}
 
 export default NewGameWizardStep1GameName

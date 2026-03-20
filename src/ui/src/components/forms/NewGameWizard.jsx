@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react'
-import { DEFAULT_PLAYER_AVATAR_KEY, PLAYER_AVATAR_OPTIONS } from '../../data/playerAvatars'
-import { WIZARD_JOB_OPTIONS, WIZARD_STEP_META } from '../../data/wizardVisualCatalog'
+import { ArrowLeft, X } from 'lucide-react'
+import { PLAYER_AVATAR_OPTIONS } from '../../data/playerAvatars'
+import {
+  WIZARD_CAREER_BY_ID,
+  WIZARD_PROGRESS_SEGMENTS,
+  WIZARD_TRACK_BY_ID,
+  getCareerOptionsForTrack,
+} from '../../data/wizardVisualCatalog'
 import NewGameWizardStep1GameName from './NewGameWizardStep1GameName'
 import NewGameWizardStep1Player from './NewGameWizardStep1Player'
 import NewGameWizardStep2City from './NewGameWizardStep2City'
@@ -13,9 +19,9 @@ const MAX_GAME_NAME_LENGTH = 60
 const MAX_PLAYER_NAME_LENGTH = 24
 const MIN_PLAYERS_TO_START = 2
 
-const createPlayerDraft = (avatar = DEFAULT_PLAYER_AVATAR_KEY) => ({
+const createPlayerDraft = () => ({
   name: '',
-  avatar,
+  avatar: '',
   cityId: '',
   educationTrackId: '',
   jobId: '',
@@ -26,103 +32,95 @@ const buildPlayerId = (index) => `player-${index + 1}`
 const getNameError = (value, existingPlayers) => {
   const trimmed = value.trim()
   if (!trimmed) {
-    return 'Player name is required.'
+    return 'Nickname is required.'
   }
   if (trimmed.length > MAX_PLAYER_NAME_LENGTH) {
-    return `Name must be ${MAX_PLAYER_NAME_LENGTH} characters or fewer.`
+    return `Nickname must be ${MAX_PLAYER_NAME_LENGTH} characters or fewer.`
   }
 
   const normalized = trimmed.toLowerCase()
   const isDuplicate = existingPlayers.some((player) => player.name.trim().toLowerCase() === normalized)
   if (isDuplicate) {
-    return 'Player names must be unique.'
+    return 'Nicknames must be unique.'
   }
 
   return ''
 }
 
-const NewGameWizard = ({ initialGameName = '', onCancel, onSubmit }) => {
+const getStepTitle = (currentStep, playerNumber) => {
+  if (currentStep === 1) {
+    return 'Name Your Game'
+  }
+  if (currentStep === 2) {
+    return `Player ${playerNumber}`
+  }
+  if (currentStep === 3) {
+    return 'Choose a City'
+  }
+  if (currentStep === 4) {
+    return 'Career Track'
+  }
+  if (currentStep === 5) {
+    return 'Pick a Career'
+  }
+  return 'Ready to Play'
+}
+
+const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = false }) => {
   const [currentStep, setCurrentStep] = useState(1)
-  const [gameName, setGameName] = useState(initialGameName)
+  const [gameName, setGameName] = useState('')
   const [players, setPlayers] = useState([])
   const [draftPlayer, setDraftPlayer] = useState(createPlayerDraft())
 
   const trimmedGameName = gameName.trim()
   const isGameNameValid = trimmedGameName.length > 0
   const playerNameError = getNameError(draftPlayer.name, players)
-  const canAdvancePlayerStep = {
-    2: !playerNameError,
+  const isAvatarSelected = Boolean(draftPlayer.avatar)
+  const careerOptions = useMemo(
+    () => getCareerOptionsForTrack(draftPlayer.educationTrackId),
+    [draftPlayer.educationTrackId],
+  )
+
+  const canAdvance = {
+    1: isGameNameValid,
+    2: !playerNameError && isAvatarSelected,
     3: Boolean(draftPlayer.cityId),
     4: Boolean(draftPlayer.educationTrackId),
     5: Boolean(draftPlayer.jobId),
   }
 
   const canStartGame = isGameNameValid && players.length >= MIN_PLAYERS_TO_START
-
-  const selectedJob = useMemo(
-    () => WIZARD_JOB_OPTIONS.find((job) => job.id === draftPlayer.jobId) || null,
-    [draftPlayer.jobId],
-  )
-
-  const resetDraft = (playerCount = players.length) => {
-    const nextAvatar =
-      PLAYER_AVATAR_OPTIONS[playerCount % PLAYER_AVATAR_OPTIONS.length]?.key || DEFAULT_PLAYER_AVATAR_KEY
-    setDraftPlayer(createPlayerDraft(nextAvatar))
-  }
+  const playerNumber = players.length + 1
+  const showBackButton = currentStep >= 2 && currentStep <= 5
+  const showProgress = currentStep <= WIZARD_PROGRESS_SEGMENTS
 
   const handleBack = () => {
-    if (currentStep === 1) {
-      onCancel()
+    if (!showBackButton) {
       return
     }
-
-    if (currentStep === 6) {
-      if (players.length > 0) {
-        const cloned = [...players]
-        const lastPlayer = cloned.pop()
-        setPlayers(cloned)
-        setDraftPlayer({
-          name: lastPlayer.name,
-          avatar: lastPlayer.avatar,
-          cityId: lastPlayer.cityId,
-          educationTrackId: lastPlayer.educationTrackId,
-          jobId: lastPlayer.jobId,
-        })
-        setCurrentStep(5)
-        return
-      }
-      setCurrentStep(1)
-      return
-    }
-
-    setCurrentStep((step) => step - 1)
+    setCurrentStep((step) => Math.max(1, step - 1))
   }
 
   const handleNext = () => {
-    if (currentStep === 1) {
-      if (!isGameNameValid) {
-        return
-      }
-      setCurrentStep(2)
-      return
-    }
-
-    if (!canAdvancePlayerStep[currentStep]) {
+    if (!canAdvance[currentStep]) {
       return
     }
 
     if (currentStep === 5) {
-      const playerPayload = {
+      const selectedTrack = WIZARD_TRACK_BY_ID[draftPlayer.educationTrackId] || null
+      const selectedCareer = WIZARD_CAREER_BY_ID[draftPlayer.jobId] || null
+      const nextPlayer = {
         id: buildPlayerId(players.length),
         name: draftPlayer.name.trim(),
         avatar: draftPlayer.avatar,
         cityId: draftPlayer.cityId,
         educationTrackId: draftPlayer.educationTrackId,
         jobId: draftPlayer.jobId,
-        careerTrack: selectedJob?.careerTrack || draftPlayer.educationTrackId,
+        careerTrack: selectedTrack?.name || selectedCareer?.title || null,
       }
-      setPlayers((current) => [...current, playerPayload])
-      resetDraft(players.length + 1)
+
+      setPlayers((current) => [...current, nextPlayer])
+      setDraftPlayer(createPlayerDraft())
       setCurrentStep(6)
       return
     }
@@ -130,28 +128,49 @@ const NewGameWizard = ({ initialGameName = '', onCancel, onSubmit }) => {
     setCurrentStep((step) => step + 1)
   }
 
-  const handleAddNewPlayer = () => {
-    resetDraft()
+  const handleAddPlayer = () => {
+    setDraftPlayer(createPlayerDraft())
     setCurrentStep(2)
   }
 
-  const handleSubmit = () => {
-    if (!canStartGame) {
+  const handleSubmit = async () => {
+    if (!canStartGame || isSubmitting) {
       return
     }
-    onSubmit({
+
+    await onSubmit({
       name: trimmedGameName,
       players: players.map((player) => ({ ...player })),
     })
   }
 
-  const stepMeta = WIZARD_STEP_META[currentStep]
-
   return (
-    <section className="wizard-modal" aria-label="New game wizard">
+    <section className={`wizard-modal${currentStep === 6 ? ' is-summary' : ''}`} aria-label="New game wizard">
       <header className="wizard-header">
-        <h2 className="wizard-title">{stepMeta.title}</h2>
-        <p className="wizard-subtitle">{stepMeta.subtitle}</p>
+        <div className="wizard-header-row">
+          {showBackButton ? (
+            <button type="button" className="wizard-icon-button" onClick={handleBack} aria-label="Back">
+              <ArrowLeft aria-hidden="true" />
+            </button>
+          ) : (
+            <span className="wizard-icon-spacer" aria-hidden="true" />
+          )}
+          <h2 className="wizard-title">{getStepTitle(currentStep, playerNumber)}</h2>
+          <button type="button" className="wizard-icon-button" onClick={onCancel} aria-label="Close">
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        {showProgress ? (
+          <div className="wizard-progress" aria-label={`Progress step ${currentStep} of ${WIZARD_PROGRESS_SEGMENTS}`}>
+            {Array.from({ length: WIZARD_PROGRESS_SEGMENTS }, (_, index) => (
+              <span
+                key={`progress-${index + 1}`}
+                className={`wizard-progress-segment${index + 1 <= currentStep ? ' is-active' : ''}`}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+        ) : null}
       </header>
 
       <div className="wizard-body">
@@ -161,7 +180,7 @@ const NewGameWizard = ({ initialGameName = '', onCancel, onSubmit }) => {
             onGameNameChange={setGameName}
             maxGameNameLength={MAX_GAME_NAME_LENGTH}
             onNext={handleNext}
-            isNextDisabled={!isGameNameValid}
+            isNextDisabled={!canAdvance[1]}
           />
         ) : null}
 
@@ -174,6 +193,8 @@ const NewGameWizard = ({ initialGameName = '', onCancel, onSubmit }) => {
             avatarOptions={PLAYER_AVATAR_OPTIONS}
             maxPlayerNameLength={MAX_PLAYER_NAME_LENGTH}
             playerNameError={playerNameError}
+            onNext={handleNext}
+            isNextDisabled={!canAdvance[2]}
           />
         ) : null}
 
@@ -181,13 +202,23 @@ const NewGameWizard = ({ initialGameName = '', onCancel, onSubmit }) => {
           <NewGameWizardStep2City
             selectedCityId={draftPlayer.cityId}
             onSelectCity={(cityId) => setDraftPlayer((current) => ({ ...current, cityId }))}
+            onNext={handleNext}
+            isNextDisabled={!canAdvance[3]}
           />
         ) : null}
 
         {currentStep === 4 ? (
           <NewGameWizardStep3Track
             selectedTrackId={draftPlayer.educationTrackId}
-            onSelectTrack={(educationTrackId) => setDraftPlayer((current) => ({ ...current, educationTrackId }))}
+            onSelectTrack={(educationTrackId) =>
+              setDraftPlayer((current) => ({
+                ...current,
+                educationTrackId,
+                jobId: current.educationTrackId === educationTrackId ? current.jobId : '',
+              }))
+            }
+            onNext={handleNext}
+            isNextDisabled={!canAdvance[4]}
           />
         ) : null}
 
@@ -195,50 +226,24 @@ const NewGameWizard = ({ initialGameName = '', onCancel, onSubmit }) => {
           <NewGameWizardStep4Job
             selectedJobId={draftPlayer.jobId}
             onSelectJob={(jobId) => setDraftPlayer((current) => ({ ...current, jobId }))}
+            careerOptions={careerOptions}
+            onNext={handleNext}
+            isNextDisabled={!canAdvance[5]}
           />
         ) : null}
 
         {currentStep === 6 ? (
           <NewGameWizardStep6Summary
-            gameName={gameName}
-            onGameNameChange={setGameName}
-            maxGameNameLength={MAX_GAME_NAME_LENGTH}
+            gameName={trimmedGameName}
             players={players}
+            onAddPlayer={handleAddPlayer}
+            onStart={handleSubmit}
+            isStartDisabled={!canStartGame || isSubmitting}
+            isSubmitting={isSubmitting}
+            submitError={submitError}
           />
         ) : null}
       </div>
-
-      {currentStep >= 2 && currentStep <= 5 ? (
-        <footer className="wizard-footer wizard-footer-row">
-          <button type="button" className="secondary-action wizard-footer-button" onClick={handleBack}>
-            Back
-          </button>
-          <button
-            type="button"
-            className="primary-action wizard-footer-button"
-            onClick={handleNext}
-            disabled={!canAdvancePlayerStep[currentStep]}
-          >
-            Next
-          </button>
-        </footer>
-      ) : null}
-
-      {currentStep === 6 ? (
-        <footer className="wizard-footer wizard-footer-center">
-          <button type="button" className="secondary-action wizard-footer-button" onClick={handleAddNewPlayer}>
-            + New Player
-          </button>
-          <button
-            type="button"
-            className="primary-action wizard-footer-button"
-            onClick={handleSubmit}
-            disabled={!canStartGame}
-          >
-            Start Game
-          </button>
-        </footer>
-      ) : null}
     </section>
   )
 }

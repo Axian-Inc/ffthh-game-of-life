@@ -1,37 +1,38 @@
-import { WIZARD_JOB_ART_BY_ID } from '../../assets/wizard/art'
-import { WIZARD_JOB_OPTIONS } from '../../data/wizardVisualCatalog'
+import { ArrowRight } from 'lucide-react'
+import PrimaryButton from '../ui/PrimaryButton'
 
-const NewGameWizardStep4Job = ({ selectedJobId, onSelectJob }) => (
+const NewGameWizardStep4Job = ({ selectedJobId, onSelectJob, careerOptions, onNext, isNextDisabled }) => (
   <div className="wizard-step" data-step="5">
-    <div className="wizard-rail wizard-rail-cards wizard-job-rail">
-      {WIZARD_JOB_OPTIONS.map((job) => {
+    <div className="wizard-choice-list wizard-career-list">
+      {careerOptions.map((job) => {
         const isSelected = job.id === selectedJobId
         return (
           <button
             key={job.id}
             type="button"
-            className={`wizard-option-card wizard-job-card${isSelected ? ' is-selected' : ''}`}
+            className={`wizard-choice-card wizard-career-card${isSelected ? ' is-selected' : ''}`}
             onClick={() => onSelectJob(job.id)}
             aria-pressed={isSelected}
           >
-            <div className="wizard-job-art-wrap">
-              <img src={WIZARD_JOB_ART_BY_ID[job.id]} alt="" aria-hidden="true" />
-            </div>
-            <div className="wizard-job-title-block">
+            <div className="wizard-choice-title-row">
+              <span className="wizard-choice-icon" aria-hidden="true">
+                {job.icon}
+              </span>
               <h3>{job.title}</h3>
-              <p className="wizard-meta">Track: {job.careerTrack}</p>
             </div>
-            <div className="wizard-job-income-block">
-              <p>
-                <strong>Income</strong>
-              </p>
-              <p>{job.income}</p>
-              <p className="wizard-meta">{job.bonus}</p>
+            <div className="wizard-career-metrics">
+              <span>💰 {job.income}</span>
+              <span>🏦 {job.debt}</span>
+              <span>🎯 {job.activities}</span>
+              <span>❤️ {job.shorthand}</span>
             </div>
           </button>
         )
       })}
     </div>
+    <PrimaryButton className="wizard-action-button" onClick={onNext} disabled={isNextDisabled}>
+      Next <ArrowRight aria-hidden="true" />
+    </PrimaryButton>
   </div>
 )
 

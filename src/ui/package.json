@@ -10,8 +10,8 @@
     "test": "vitest",
     "test:ci": "vitest run",
     "preview": "vite preview",
-    "test:e2e": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium playwright test",
-    "test:e2e:ci": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN=/usr/bin/chromium VITE_STORAGE_MODE=local npm run build && playwright test"
+    "test:e2e": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' playwright test",
+    "test:e2e:ci": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 CHROME_BIN='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' VITE_STORAGE_MODE=local npm run build && playwright test"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",

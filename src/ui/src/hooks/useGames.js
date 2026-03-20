@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createGameStorage } from '../services/gameStorage'
 
 const useGames = () => {
@@ -7,33 +7,27 @@ const useGames = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState('')
   const [newGameId, setNewGameId] = useState(null)
-  const draftGameIdsRef = useRef(new Set())
 
-  const loadGames = async () => {
+  const loadGames = useCallback(async () => {
     setIsLoading(true)
     setFetchError('')
 
     try {
       const loadedGames = await storage.listGames()
       setGames(loadedGames)
-    } catch (error) {
+    } catch {
       setFetchError('Unable to load games. Check your connection and try again.')
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [storage])
 
   useEffect(() => {
     loadGames()
-  }, [])
+  }, [loadGames])
 
   const createGame = async (game) => {
     const createdGame = await storage.createGame(game)
-    if (createdGame?.isDraft) {
-      draftGameIdsRef.current.add(createdGame.id)
-      return createdGame
-    }
-
     setGames((current) => [createdGame, ...current])
     setNewGameId(createdGame.id)
     return createdGame
@@ -42,21 +36,11 @@ const useGames = () => {
   const deleteGame = async (gameId) => {
     await storage.deleteGame(gameId)
     const normalizedId = String(gameId)
-    draftGameIdsRef.current.delete(normalizedId)
     setGames((current) => current.filter((game) => game.id !== normalizedId))
   }
 
   const updateGame = async (gameId, updates) => {
-    const normalizedId = String(gameId)
-    const isDraftGame = draftGameIdsRef.current.has(normalizedId)
     const updatedGame = await storage.updateGame(gameId, updates)
-
-    if (isDraftGame) {
-      draftGameIdsRef.current.delete(normalizedId)
-      setGames((current) => [updatedGame, ...current.filter((game) => game.id !== updatedGame.id)])
-      setNewGameId(updatedGame.id)
-      return updatedGame
-    }
 
     setGames((current) => current.map((game) => (game.id === updatedGame.id ? updatedGame : game)))
     return updatedGame

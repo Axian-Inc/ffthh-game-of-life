@@ -2,9 +2,11 @@ import { defineConfig } from '@playwright/test'
 import fs from 'node:fs'
 
 const baseURL = 'http://127.0.0.1:4173'
+const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const systemChromium = '/usr/bin/chromium'
 const resolvedChromium =
-  process.env.CHROME_BIN || (fs.existsSync(systemChromium) ? systemChromium : undefined)
+  process.env.CHROME_BIN ||
+  (fs.existsSync(macChrome) ? macChrome : fs.existsSync(systemChromium) ? systemChromium : undefined)
 const launchOptions = resolvedChromium ? { executablePath: resolvedChromium } : {}
 
 export default defineConfig({

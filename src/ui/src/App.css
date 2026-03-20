@@ -3,8 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-7);
-  padding: 64px 6vw 96px;
-  max-width: 1200px;
+  padding: 58px 6vw 96px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
@@ -16,24 +16,24 @@
 }
 
 .layout.is-blurred {
-  filter: blur(2px) saturate(0.98);
+  filter: blur(7px) saturate(0.96);
 }
 
 .hero {
   display: grid;
-  gap: var(--space-5);
+  gap: 18px;
   justify-items: center;
   text-align: center;
 }
 
 .app-icon {
-  width: clamp(88px, 12vw, 128px);
+  width: clamp(88px, 11vw, 112px);
   aspect-ratio: 1;
-  border-radius: var(--radius-panel);
+  border-radius: 22px;
   background: var(--grad-primary);
   display: grid;
   place-items: center;
-  box-shadow: 0 16px 36px rgba(68, 165, 232, 0.2);
+  box-shadow: 0 18px 42px rgba(99, 172, 239, 0.24);
   color: #fff;
 }
 
@@ -44,12 +44,14 @@
 
 .hero-copy {
   display: grid;
-  gap: var(--space-3);
-  max-width: 640px;
+  gap: 14px;
+  max-width: 560px;
 }
 
 .hero .primary-action {
-  min-width: 280px;
+  min-width: 360px;
+  height: 58px;
+  justify-self: center;
 }
 
 .eyebrow {
@@ -62,15 +64,15 @@
 }
 
 h1 {
-  font-size: clamp(3.2rem, 8vw, 4rem);
+  font-size: clamp(3rem, 7vw, 4rem);
   font-weight: 800;
   margin: 0;
   color: var(--text-1);
 }
 
 .tagline {
-  font-size: 1.05rem;
-  line-height: 1.6;
+  font-size: 0.98rem;
+  line-height: 1.45;
   margin: 0;
   color: var(--text-2);
 }
@@ -95,7 +97,7 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 10px 24px rgba(68, 165, 232, 0.22);
+  box-shadow: 0 12px 28px rgba(99, 172, 239, 0.24);
 }
 
 .primary-action:hover {
@@ -164,11 +166,12 @@ h1 {
 
 .game-list {
   width: 100%;
-  padding: var(--space-6);
+  padding: 18px 18px 18px 20px;
   border-radius: var(--radius-card);
   background: var(--surface);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-soft);
+  min-height: 250px;
 }
 
 .game-list-header {
@@ -185,8 +188,8 @@ h1 {
 }
 
 .game-title-icon {
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-icon);
   background: rgba(92, 198, 212, 0.15);
   display: grid;
@@ -195,12 +198,12 @@ h1 {
 }
 
 .game-title-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
 }
 
 .game-list h2 {
-  font-size: 1.05rem;
+  font-size: 0.88rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 0;
@@ -208,12 +211,17 @@ h1 {
 }
 
 .game-count {
-  min-width: 44px;
-  padding: 0.35rem 0.8rem;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0.25rem 0.55rem;
   border-radius: 999px;
-  background: rgba(92, 198, 212, 0.18);
+  background: rgba(126, 217, 226, 0.18);
   color: var(--text-1);
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
 }
 
 .game-items {
@@ -222,17 +230,17 @@ h1 {
   padding: 0;
   display: grid;
   gap: 24px;
-  max-width: 620px;
+  max-width: 530px;
 }
 
 .game-card {
   background: var(--surface);
-  border-radius: var(--radius-panel);
+  border-radius: 18px;
   border: 1px solid var(--border-soft);
-  padding: var(--space-5);
+  padding: 16px 16px 14px;
   display: grid;
-  gap: var(--space-3);
-  box-shadow: 0 10px 24px rgba(39, 45, 62, 0.06);
+  gap: 12px;
+  box-shadow: 0 10px 24px rgba(47, 55, 80, 0.06);
 }
 
 .game-card:focus-visible {
@@ -267,7 +275,7 @@ h1 {
 
 .game-card h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-1);
   display: -webkit-box;
@@ -279,27 +287,28 @@ h1 {
 
 .game-card-meta {
   display: flex;
-  gap: var(--space-4);
-  font-size: 0.9rem;
+  gap: 12px;
+  font-size: 0.82rem;
   color: var(--text-2);
+  font-weight: 700;
 }
 
 .avatar-row {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .avatar {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(92, 198, 212, 0.12);
-  border: 1px solid rgba(92, 198, 212, 0.2);
+  background: rgba(126, 217, 226, 0.12);
+  border: 1px solid rgba(126, 217, 226, 0.22);
   color: var(--text-1);
   font-size: 0.75rem;
   font-weight: 700;
@@ -311,7 +320,8 @@ h1 {
 }
 
 .avatar .player-avatar-render {
-  font-size: 1rem;
+  width: 16px;
+  height: 16px;
 }
 
 .game-card-header {
@@ -322,11 +332,11 @@ h1 {
 }
 
 .status-pill {
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 0.35rem 0.65rem;
+  padding: 0.26rem 0.56rem;
   border-radius: 999px;
   background: rgba(39, 45, 62, 0.08);
   color: var(--text-2);
@@ -355,15 +365,15 @@ h1 {
 }
 
 .game-card-actions .primary-action {
-  height: 44px;
-  padding: 0 18px;
-  font-size: 0.9rem;
+  height: 34px;
+  padding: 0 16px;
+  font-size: 0.82rem;
   box-shadow: none;
 }
 
 .game-card-actions .secondary-action {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   display: grid;
   place-items: center;
@@ -406,8 +416,8 @@ h1 {
   position: fixed;
   inset: 0;
   background: var(--overlay);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: grid;
   place-items: center;
   padding: var(--space-6);

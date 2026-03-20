@@ -10,15 +10,21 @@ const ModalBackdrop = ({ onBackdropClick, children }) => {
     }
 
     const focusableSelector =
-      'button,[href],input,select,textarea,[tabindex]:not([tabindex=\"-1\"])'
+      'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
     const getFocusable = () =>
       Array.from(overlay.querySelectorAll(focusableSelector)).filter(
         (element) => !element.hasAttribute('disabled'),
       )
+    const getPreferredFocus = () => overlay.querySelector('[data-autofocus="true"]')
 
-    const focusable = getFocusable()
-    if (focusable.length) {
-      focusable[0].focus()
+    const preferredFocus = getPreferredFocus()
+    if (preferredFocus && !preferredFocus.hasAttribute('disabled')) {
+      preferredFocus.focus()
+    } else {
+      const focusable = getFocusable()
+      if (focusable.length) {
+        focusable[0].focus()
+      }
     }
 
     const handleKeyDown = (event) => {

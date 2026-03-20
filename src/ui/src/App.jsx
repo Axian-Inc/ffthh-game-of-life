@@ -6,10 +6,8 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
-import StartNewGamePage from './components/pages/StartNewGamePage'
 import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
-import useCreateGameForm from './hooks/useCreateGameForm'
 import useModalState from './hooks/useModalState'
 
 const parseAppRoute = (pathname) => {
@@ -23,15 +21,14 @@ const parseAppRoute = (pathname) => {
   }
 
   return {
-    view: match[2] === 'careers' ? 'setup' : 'play',
+    view: 'play',
     gameId: decodeURIComponent(match[1]),
   }
 }
 
 const buildAppRoute = (view, activeGame) => {
-  if ((view === 'setup' || view === 'play') && activeGame?.id) {
-    const suffix = view === 'setup' ? 'careers' : 'play'
-    return `/games/${encodeURIComponent(activeGame.id)}/${suffix}`
+  if (view === 'play' && activeGame?.id) {
+    return `/games/${encodeURIComponent(activeGame.id)}/play`
   }
   return '/'
 }
@@ -40,64 +37,32 @@ function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
-  const [setupError, setSetupError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
-  const [isStartingGame, setIsStartingGame] = useState(false)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
   const newGameButtonRef = useRef(null)
-  const { state, openCreate, openSession, openSetup, openPlay, openDelete, closeAll } = useModalState()
+  const { state, openCreate, openSession, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
-    useGames()
-  const {
-    gameName,
-    setGameName,
-    gameNameTouched,
-    setGameNameTouched,
-    players,
-    draftPlayer,
-    draftTouched,
-    draftErrors,
-    maxGameNameLength,
-    maxPlayerNameLength,
-    minPlayers,
-    trimmedGameName,
-    isGameNameTooLong,
-    isGameNameValid,
-    arePlayersValid,
-    resetForm,
-    markAllTouched,
-    addPlayer,
-    removePlayer,
-    updateDraftName,
-    markDraftTouched,
-    cycleDraftAvatar,
-  } = useCreateGameForm()
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
   const previousViewRef = useRef(view)
 
   const handleCreateClick = () => {
     openCreate()
-    setGameNameTouched(false)
     setCreateError('')
   }
 
   const handleBackClick = () => {
     closeAll()
-    resetForm()
     setCreateError('')
-    setSetupError('')
     setIsCreating(false)
-    setIsStartingGame(false)
   }
 
   const handleCreateGame = async (wizardPayload) => {
     const payloadName = wizardPayload?.name?.trim() || ''
     const payloadPlayers = Array.isArray(wizardPayload?.players) ? wizardPayload.players : []
-    if (!payloadName || payloadPlayers.length === 0) {
-      markAllTouched()
-      setCreateError('Complete the setup wizard before starting.')
+    if (!payloadName || payloadPlayers.length < 2) {
+      setCreateError('Add at least two players before starting.')
       return
     }
 
@@ -118,36 +83,11 @@ function App() {
         resumable: true,
       }
       const createdGame = await createGame(newGame)
-      openSetup(createdGame)
-      resetForm()
-    } catch (error) {
+      openPlay(createdGame)
+    } catch {
       setCreateError('We could not create that game yet. Please try again.')
     } finally {
       setIsCreating(false)
-    }
-  }
-
-  const handleAddPlayer = () => {
-    addPlayer()
-  }
-
-  const handleStartGame = async (gameToStart) => {
-    const game = gameToStart || activeGame
-    if (!game) {
-      return
-    }
-    setSetupError('')
-    setIsStartingGame(true)
-    try {
-      const savedGame = await updateGame(game.id, {
-        ...game,
-        lastUpdated: Date.now(),
-      })
-      openPlay(savedGame)
-    } catch (error) {
-      setSetupError('We could not save career choices yet. Please try again.')
-    } finally {
-      setIsStartingGame(false)
     }
   }
 
@@ -169,7 +109,7 @@ function App() {
     try {
       await deleteGame(pendingDelete.id)
       closeAll()
-    } catch (error) {
+    } catch {
       setDeleteErrors((current) => ({
         ...current,
         [pendingDelete.id]: 'We could not delete that game yet. Please try again.',
@@ -198,13 +138,6 @@ function App() {
       const { [game.id]: _, ...rest } = current
       return rest
     })
-
-    const hasPlayers = Array.isArray(game.players) && game.players.length > 0
-    const hasPendingCareerChoices = hasPlayers && game.players.some((player) => !player.careerTrack)
-    if (hasPendingCareerChoices) {
-      openSetup(game)
-      return
-    }
 
     openPlay(game)
   }
@@ -247,15 +180,11 @@ function App() {
       return
     }
 
-    if (routeRequest.view === 'setup') {
-      openSetup(targetGame)
-    } else {
-      openPlay(targetGame)
-    }
+    openPlay(targetGame)
 
     setRouteRequest(null)
     setHasHydratedRoute(true)
-  }, [routeRequest, isLoading, games, closeAll, openSetup, openPlay])
+  }, [routeRequest, isLoading, games, closeAll, openPlay])
 
   useEffect(() => {
     if (!hasHydratedRoute) {
@@ -276,7 +205,7 @@ function App() {
       newGameCardRef.current.focus()
       setNewGameId(null)
     }
-  }, [newGameId, view, isLoading])
+  }, [newGameId, view, isLoading, setNewGameId])
 
   useEffect(() => {
     if (view !== 'create' && view !== 'session' && !pendingDelete) {
@@ -294,7 +223,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [view, pendingDelete, isCreating])
+  }, [view, pendingDelete, isCreating, closeAll])
 
   useEffect(() => {
     if (previousViewRef.current === 'create' && view === 'home') {
@@ -325,27 +254,8 @@ function App() {
       onDeleteConfirm={handleDeleteConfirm}
       createGameProps={{
         onSubmit: handleCreateGame,
-        gameName,
-        onGameNameChange: (event) => setGameName(event.target.value),
-        onGameNameBlur: () => setGameNameTouched(true),
-        gameNameTouched,
-        isGameNameValid,
-        isGameNameTooLong,
-        maxGameNameLength,
-        players,
-        minPlayers,
-        maxPlayerNameLength,
-        draftPlayer,
-        draftTouched,
-        draftErrors,
-        arePlayersValid,
-        onAddPlayer: handleAddPlayer,
-        onRemovePlayer: removePlayer,
-        onDraftNameChange: (event) => updateDraftName(event.target.value),
-        onDraftBlur: markDraftTouched,
-        onDraftAvatarCycle: cycleDraftAvatar,
-        createError,
-        isCreating,
+        submitError: createError,
+        isSubmitting: isCreating,
       }}
     />
   )
@@ -376,15 +286,6 @@ function App() {
             )}
           </GameListSection>
         </>
-      ) : null}
-      {view === 'setup' ? (
-        <StartNewGamePage
-          game={activeGame}
-          onStart={handleStartGame}
-          onBack={closeAll}
-          isStarting={isStartingGame}
-          startError={setupError}
-        />
       ) : null}
       {view === 'play' ? (
         <WelcomeToLifePage game={activeGame} onBegin={closeAll} />

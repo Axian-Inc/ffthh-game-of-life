@@ -19,29 +19,8 @@ const ModalManager = ({
       onBackdropClick={onBackdropClick}
       onCancel={onCloseAll}
       onSubmit={createGameProps.onSubmit}
-      gameName={createGameProps.gameName}
-      onGameNameChange={createGameProps.onGameNameChange}
-      onGameNameBlur={createGameProps.onGameNameBlur}
-      gameNameTouched={createGameProps.gameNameTouched}
-      isGameNameValid={createGameProps.isGameNameValid}
-      isGameNameTooLong={createGameProps.isGameNameTooLong}
-      maxGameNameLength={createGameProps.maxGameNameLength}
-      onGameTypeChange={createGameProps.onGameTypeChange}
-      onScoringModeChange={createGameProps.onScoringModeChange}
-      players={createGameProps.players}
-      minPlayers={createGameProps.minPlayers}
-      maxPlayerNameLength={createGameProps.maxPlayerNameLength}
-      draftPlayer={createGameProps.draftPlayer}
-      draftTouched={createGameProps.draftTouched}
-      draftErrors={createGameProps.draftErrors}
-      arePlayersValid={createGameProps.arePlayersValid}
-      onAddPlayer={createGameProps.onAddPlayer}
-      onRemovePlayer={createGameProps.onRemovePlayer}
-      onDraftNameChange={createGameProps.onDraftNameChange}
-      onDraftBlur={createGameProps.onDraftBlur}
-      onDraftAvatarCycle={createGameProps.onDraftAvatarCycle}
-      createError={createGameProps.createError}
-      isCreating={createGameProps.isCreating}
+      submitError={createGameProps.submitError}
+      isSubmitting={createGameProps.isSubmitting}
     />
     <ResumeGameModal
       isOpen={view === 'session'}

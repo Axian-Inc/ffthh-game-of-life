@@ -1,8 +1,8 @@
 export const createDefaultPlayers = () => []
 
-export const DEFAULT_CITY_ID = 'city-balanced'
-export const DEFAULT_EDUCATION_TRACK_ID = 'education-street-smart'
-export const DEFAULT_JOB_ID = 'job-entry-generalist'
+export const DEFAULT_CITY_ID = 'suburbia'
+export const DEFAULT_EDUCATION_TRACK_ID = 'self-taught'
+export const DEFAULT_JOB_ID = 'content-creator'
 
 export const createDefaultDraftPlayer = (overrides = {}) => ({
   name: '',
@@ -38,7 +38,7 @@ export const buildNameCounts = (players) => {
 }
 
 export const getPlayerErrors = ({ player, nameCounts, maxPlayerNameLength }) => {
-  const errors = { name: '' }
+  const errors = { name: '', avatar: '' }
   const trimmedName = player.name.trim()
   if (!trimmedName) {
     errors.name = 'Nickname is required.'
@@ -48,6 +48,9 @@ export const getPlayerErrors = ({ player, nameCounts, maxPlayerNameLength }) => 
   }
   if (nameCounts[trimmedName.toLowerCase()] > 1) {
     errors.name = 'Names must be unique.'
+  }
+  if (!player.avatar) {
+    errors.avatar = 'Avatar is required.'
   }
   return errors
 }

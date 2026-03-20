@@ -10,7 +10,8 @@ const Hero = ({ onCreate, buttonRef }) => (
       <p className="eyebrow">GAME HUB</p>
       <h1>Game of LIFE</h1>
       <p className="tagline">
-        Start a new journey, make bold choices, and shape what your life story becomes.
+        Start a career and see how your life unfolds in this easy, fun, and exciting simulation of this
+        game we call life!
       </p>
       <PrimaryButton onClick={onCreate} ref={buttonRef}>
         New Game
