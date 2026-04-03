@@ -68,3 +68,10 @@ Lightweight, task-focused log for what changed, why, and where.
 - Paths: src/ui/src/utils/gameSimulation.js, src/ui/src/components/pages/PlayGamePage.jsx, src/ui/src/App.jsx, src/ui/src/App.css, src/ui/src/hooks/useModalState.js, src/ui/src/utils/__tests__/gameSimulation.test.js, src/ui/src/services/__tests__/gameStorage.test.js, src/ui/src/components/__tests__/pages.test.jsx, CHANGELOG.md, NOTES.md
 - Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build
 - Follow-ups: Consider persisting mid-turn phase transitions if resume should land directly on the exact pre-action screen instead of the current pass-control checkpoint after completed turns.
+
+## 2026-04-03
+- Task: Add a local Codex activity timeline.
+- Why: Give contributors a lightweight timeline of Codex session, prompt, and Bash activity without depending on external tooling.
+- What changed: Added repo-local Codex hook config, a shared JSONL logger, a simple timeline renderer, a shell wrapper in `scripts/timeline.sh`, and README/changelog notes for usage.
+- Paths: .codex/hooks.json, .codex/hooks/log_event.py, .codex/hooks/render_timeline.py, scripts/timeline.sh, .gitignore, README.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: scripts/timeline.sh -n 25
