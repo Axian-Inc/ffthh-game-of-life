@@ -171,6 +171,7 @@ data "aws_iam_policy_document" "games_api_policy" {
   statement {
     actions = [
       "dynamodb:DeleteItem",
+      "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:Scan",
     ]
@@ -255,6 +256,12 @@ resource "aws_apigatewayv2_route" "games_create" {
   target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
 }
 
+resource "aws_apigatewayv2_route" "games_get" {
+  api_id    = aws_apigatewayv2_api.games_api.id
+  route_key = "GET /games/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
+}
+
 resource "aws_apigatewayv2_route" "games_delete" {
   api_id    = aws_apigatewayv2_api.games_api.id
   route_key = "DELETE /games/{id}"
@@ -264,6 +271,12 @@ resource "aws_apigatewayv2_route" "games_delete" {
 resource "aws_apigatewayv2_route" "games_update" {
   api_id    = aws_apigatewayv2_api.games_api.id
   route_key = "PUT /games/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
+}
+
+resource "aws_apigatewayv2_route" "games_turn_advance" {
+  api_id    = aws_apigatewayv2_api.games_api.id
+  route_key = "POST /games/{id}/turns/advance"
   target    = "integrations/${aws_apigatewayv2_integration.games_api.id}"
 }
 

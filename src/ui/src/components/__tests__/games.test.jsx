@@ -35,7 +35,7 @@ describe('Game components', () => {
     const onResume = vi.fn()
     const onViewResults = vi.fn()
     const onDelete = vi.fn()
-    const game = createGame({ status: 'active' })
+    const game = createGame({ status: 'turn_ready' })
 
     render(
       <GameCardActions
@@ -91,7 +91,7 @@ describe('Game components', () => {
   it('renders GameCard with errors', () => {
     const game = createGame({
       players: [createPlayer({ name: 'Mira' })],
-      status: 'paused',
+      status: 'handoff',
       lastUpdated: 0,
     })
     render(

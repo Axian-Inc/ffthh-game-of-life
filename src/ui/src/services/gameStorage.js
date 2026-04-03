@@ -1,14 +1,12 @@
 import { seedGames } from '../data/seedGames'
+import { advanceTurnState, beginNextTurnState, normalizeGameState } from '../utils/turnEngine'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 export const GAME_STORAGE_KEY = STORAGE_KEY
 
-const normalizeGame = (game) => ({
-  ...game,
-  id: String(game.id),
-})
+const normalizeGame = (game) => normalizeGameState(game)
 
-const normalizeGames = (games) => games.map(normalizeGame)
+const normalizeGames = (games) => games.map((game) => normalizeGame(game))
 
 const parseJson = (value) => {
   if (!value) {
@@ -90,12 +88,19 @@ const saveLocalGames = (games) => {
 
 const createLocalStorage = () => ({
   listGames: async () => loadLocalGames(),
+  getGame: async (gameId) => {
+    const normalizedId = String(gameId)
+    const game = loadLocalGames().find((entry) => entry.id === normalizedId)
+    if (!game) {
+      throw new Error('Game not found')
+    }
+    return normalizeGame(game)
+  },
   createGame: async (game) => {
     const games = loadLocalGames()
     const createdGame = normalizeGame({
       ...game,
       id: game.id ? String(game.id) : generateId(),
-      isDraft: false,
     })
     saveLocalGames([createdGame, ...games])
     return createdGame
@@ -123,6 +128,34 @@ const createLocalStorage = () => ({
     }
     throw new Error('Game not found')
   },
+  advanceTurn: async (gameId, payload) => {
+    const normalizedId = String(gameId)
+    const games = loadLocalGames()
+    const existing = games.find((game) => game.id === normalizedId)
+
+    if (!existing) {
+      throw new Error('Game not found')
+    }
+
+    const result = advanceTurnState(existing, payload)
+    const updated = games.map((game) => (game.id === normalizedId ? result.game : game))
+    saveLocalGames(updated)
+    return result
+  },
+  beginNextTurn: async (gameId) => {
+    const normalizedId = String(gameId)
+    const games = loadLocalGames()
+    const existing = games.find((game) => game.id === normalizedId)
+
+    if (!existing) {
+      throw new Error('Game not found')
+    }
+
+    const updatedGame = beginNextTurnState(existing)
+    const updated = games.map((game) => (game.id === normalizedId ? updatedGame : game))
+    saveLocalGames(updated)
+    return updatedGame
+  },
 })
 
 const fetchJson = async (url, options = {}) => {
@@ -149,6 +182,13 @@ const createApiStorage = (baseUrl) => ({
     const games = Array.isArray(data?.games) ? data.games : []
     return normalizeGames(games)
   },
+  getGame: async (gameId) => {
+    const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`)
+    if (!data?.game) {
+      throw new Error('Game not found')
+    }
+    return normalizeGame(data.game)
+  },
   createGame: async (game) => {
     const data = await fetchJson(`${baseUrl}/games`, {
       method: 'POST',
@@ -166,6 +206,24 @@ const createApiStorage = (baseUrl) => ({
       body: JSON.stringify({ game: updates }),
     })
     return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+  },
+  advanceTurn: async (gameId, payload) => {
+    const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}/turns/advance`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+    return {
+      game: normalizeGame(data?.game),
+      turnResolution: data?.turnResolution ?? null,
+    }
+  },
+  beginNextTurn: async (gameId, game) => {
+    const nextGame = beginNextTurnState(game)
+    const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ game: nextGame }),
+    })
+    return data?.game ? normalizeGame(data.game) : nextGame
   },
 })
 

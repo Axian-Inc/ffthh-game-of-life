@@ -1,47 +1,55 @@
-export const seedGames = () => {
-  const now = Date.now()
+import { beginNextTurnState, createInitialGameState } from '../utils/turnEngine'
 
-  return [
-    {
-      id: 1,
-      name: 'Family Game Night',
-      status: 'active',
-      players: [
-        { name: 'Jules', avatar: 'monkey-face' },
-        { name: 'Seth', avatar: 'owl' },
-        { name: 'Ari', avatar: 'koala' },
-      ],
-      lastUpdated: now - 60 * 60 * 1000,
-      createdAt: now - 5 * 60 * 60 * 1000,
-      resumable: true,
-    },
-    {
-      id: 2,
+const buildPlayers = (players) =>
+  players.map((player, index) => ({
+    id: player.id ?? `player-${index + 1}`,
+    name: player.name,
+    avatar: player.avatar,
+    cityId: player.cityId,
+    educationTrackId: player.educationTrackId,
+    jobId: player.jobId,
+  }))
+
+export const seedGames = () => {
+  const active = createInitialGameState({
+    id: '1',
+    name: 'Family Game Night',
+    players: buildPlayers([
+      { name: 'Jules', avatar: 'monkey-face', cityId: 'suburbia', educationTrackId: 'degree', jobId: 'software-engineer' },
+      { name: 'Seth', avatar: 'owl', cityId: 'metro', educationTrackId: 'trades', jobId: 'electrician' },
+      { name: 'Ari', avatar: 'koala', cityId: 'small-town', educationTrackId: 'self-taught', jobId: 'content-creator' },
+    ]),
+  })
+
+  const paused = beginNextTurnState(
+    createInitialGameState({
+      id: '2',
       name: 'Weekend Tournament',
-      status: 'paused',
-      players: [
-        { name: 'Mira', avatar: 'tiger-face' },
-        { name: 'Quinn', avatar: 'fox' },
-        { name: 'Leo', avatar: 'panda' },
-        { name: 'Parker', avatar: 'gorilla' },
-        { name: 'Vera', avatar: 'frog' },
-        { name: 'Eli', avatar: 'penguin' },
-      ],
-      lastUpdated: now - 3 * 60 * 60 * 1000,
-      createdAt: now - 7 * 60 * 60 * 1000,
-      resumable: false,
-    },
-    {
-      id: 3,
-      name: 'Ultra-Long Experimental Universe Name That Keeps Going',
-      status: 'completed',
-      players: [
-        { name: 'Cora', avatar: 'penguin' },
-        { name: 'Rafi', avatar: 'dog-face' },
-      ],
-      lastUpdated: now - 24 * 60 * 60 * 1000,
-      createdAt: now - 2 * 24 * 60 * 60 * 1000,
-      resumable: false,
-    },
-  ]
+      players: buildPlayers([
+        { name: 'Mira', avatar: 'tiger-face', cityId: 'metro', educationTrackId: 'degree', jobId: 'registered-nurse' },
+        { name: 'Quinn', avatar: 'fox', cityId: 'suburbia', educationTrackId: 'trades', jobId: 'plumber' },
+        { name: 'Leo', avatar: 'panda', cityId: 'small-town', educationTrackId: 'self-taught', jobId: 'entrepreneur' },
+      ]),
+    }),
+  )
+  paused.status = 'handoff'
+  paused.pendingHandoff = {
+    fromPlayerId: paused.players[0].id,
+    toPlayerId: paused.players[1].id,
+    toPlayerName: paused.players[1].name,
+    month: paused.currentMonth,
+    readyAt: paused.lastUpdated,
+  }
+
+  const completed = createInitialGameState({
+    id: '3',
+    name: 'Completed Session',
+    players: buildPlayers([
+      { name: 'Cora', avatar: 'penguin', cityId: 'suburbia', educationTrackId: 'degree', jobId: 'financial-analyst' },
+      { name: 'Rafi', avatar: 'dog-face', cityId: 'small-town', educationTrackId: 'self-taught', jobId: 'musician' },
+    ]),
+  })
+  completed.status = 'completed'
+
+  return [active, paused, completed]
 }

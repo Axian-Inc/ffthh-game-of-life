@@ -8,14 +8,15 @@ const GameCardActions = ({
   onResume,
   onViewResults,
   onDelete,
-}) => (
-  <div className="game-card-actions">
-    <PrimaryButton
-      onClick={() => (game.status === 'completed' ? onViewResults(game) : onResume(game))}
-      disabled={isLoading || game.status === 'paused'}
-    >
-      {game.status === 'completed' ? 'View results' : 'Resume'}
-    </PrimaryButton>
+}) => {
+  return (
+    <div className="game-card-actions">
+      <PrimaryButton
+        onClick={() => (game.status === 'completed' ? onViewResults(game) : onResume(game))}
+        disabled={isLoading}
+      >
+        {game.status === 'completed' ? 'View results' : 'Resume'}
+      </PrimaryButton>
     <SecondaryButton
       onClick={() => onDelete(game)}
       aria-label={`Delete ${game.name}`}
@@ -23,7 +24,8 @@ const GameCardActions = ({
     >
       <Trash2 aria-hidden="true" />
     </SecondaryButton>
-  </div>
-)
+    </div>
+  )
+}
 
 export default GameCardActions

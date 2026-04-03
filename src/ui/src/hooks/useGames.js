@@ -33,6 +33,8 @@ const useGames = () => {
     return createdGame
   }
 
+  const getGame = async (gameId) => storage.getGame(gameId)
+
   const deleteGame = async (gameId) => {
     await storage.deleteGame(gameId)
     const normalizedId = String(gameId)
@@ -46,14 +48,29 @@ const useGames = () => {
     return updatedGame
   }
 
+  const advanceTurn = async (gameId, payload) => {
+    const result = await storage.advanceTurn(gameId, payload)
+    setGames((current) => current.map((game) => (game.id === result.game.id ? result.game : game)))
+    return result
+  }
+
+  const beginNextTurn = async (gameId, game) => {
+    const updatedGame = await storage.beginNextTurn(gameId, game)
+    setGames((current) => current.map((entry) => (entry.id === updatedGame.id ? updatedGame : entry)))
+    return updatedGame
+  }
+
   return {
     games,
     isLoading,
     fetchError,
     loadGames,
+    getGame,
     createGame,
     deleteGame,
     updateGame,
+    advanceTurn,
+    beginNextTurn,
     newGameId,
     setNewGameId,
   }

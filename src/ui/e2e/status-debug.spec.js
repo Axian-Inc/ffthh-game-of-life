@@ -83,19 +83,36 @@ test('window.life.status reports resumed game state from the home screen', async
   const game = {
     id: 'resume-debug',
     name: 'Resume Debug',
-    status: 'active',
+    status: 'turn_ready',
+    activePlayerIndex: 0,
+    currentMonth: 1,
+    version: 1,
+    randomSeed: 'seed-1',
     players: [
-      { id: 'player-1', name: 'Ari', avatar: 'panda' },
-      { id: 'player-2', name: 'Jo', avatar: 'fox' },
+      { id: 'player-1', name: 'Ari', avatar: 'panda', careerId: 'degree-track', cityId: 'suburbia', cash: 1000, debts: [], assets: [], netWorth: 1000, physicalHealth: 100, mentalHealth: 100, statusEffects: [], actionHistory: [] },
+      { id: 'player-2', name: 'Jo', avatar: 'fox', careerId: 'trades-track', cityId: 'metro', cash: 1000, debts: [], assets: [], netWorth: 1000, physicalHealth: 100, mentalHealth: 100, statusEffects: [], actionHistory: [] },
+    ],
+    availableActions: [
+      {
+        id: 'side-gig',
+        label: 'Side Gig',
+        description: 'Extra income now with some health tradeoff.',
+        preview: {
+          cash: [350, 550],
+          netWorth: [350, 550],
+          physicalHealth: [-2, -1],
+          mentalHealth: [-2, -1],
+          riskNotes: ['Can relieve cash pressure but increases fatigue.'],
+        },
+      },
     ],
     lastUpdated: now,
     createdAt: now,
-    resumable: true,
   }
 
   await setGames(page, [game])
   await page.getByRole('button', { name: 'Resume', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Ari's Turn/i })).toBeVisible()
 
   const status = await page.evaluate(() => window.life.status())
   expect(status.entrySource).toBe('resume')

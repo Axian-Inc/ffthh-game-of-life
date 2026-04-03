@@ -15,14 +15,14 @@
 
 1.7 Intended audience: PM, Design, Engineering, and QA.
 
-1.8 Thesis: The game must teach and reinforce that in life, there is "no free "lunch, meaning every decision has benefits, costs, risks, delayed effects, and cumulative consequences.
+1.8 Thesis: The game must teach and reinforce that in life, there is "no free lunch", meaning every decision has benefits, costs, risks, delayed effects, and cumulative consequences.
 
 1.9 Related UI guidance for the Game of Life home screen and new game modal is documented at `./docs/game-of-life-style-guide.md`.
 
 ## 2. Product Vision and Objectives
 2.1 The product must provide a modern, family-friendly, turn-based life simulation inspired by familiar life-path board games without copying protected branding or packaging.
 
-2.2 The game must teach children practical tradeoff thinking through concrete, repeated choices across money, physical, and emothional health. When in doubt as to whether a feature should be implemented (or how), ask "What are we trying to teach children ages 6-18?".
+2.2 The game must teach children practical tradeoff thinking through concrete, repeated choices across money, physical, and emotional health. When in doubt as to whether a feature should be implemented (or how), ask "What are we trying to teach children ages 6-18?".
 
 2.3 The experience should remind children that compounding effects, especially debt and neglected health, can materially change outcomes over time.
 
@@ -77,7 +77,7 @@
 
 5.8 v1 investment products must include stocks and bonds with distinct risk and return profiles.
 
-5.9 Debt can spiral when debt-to-income gets out of control. Players can declare bankrupcy with related consequences (bankrupcy to be implemented/refined later.).
+5.9 Debt can spiral when debt-to-income gets out of control. Players can declare bankruptcy with related consequences (bankruptcy to be implemented/refined later.).
 
 5.10 Bankruptcy must not eliminate a player and must trigger a temporary recovery mode with stricter constraints for a fixed period.
 
@@ -89,7 +89,7 @@
 
 5.15 Mental Health or Physical Health below 40 should create risks of "bad events" happening which could stop someone from working or participating in other activities (e.g. relational activities, physical activities, not able to relocate).
 
-5.16 The game must include life-stage events/progressions which are reasonable and contextual (e.g. being older carries physical health challenges, owning a house creates housing maintenance risks, owning stocks creates exposure, being married has mental health benefits and mutes the effect of certain events [like getting sick], having kids is a bit of a "J curve" in that it has a cost early on [financial, mental, physical] but pays dividens later).
+5.16 The game must include life-stage events/progressions which are reasonable and contextual (e.g. being older carries physical health challenges, owning a house creates housing maintenance risks, owning stocks creates exposure, being married has mental health benefits and mutes the effect of certain events [like getting sick], having kids is a bit of a "J curve" in that it has a cost early on [financial, mental, physical] but pays dividends later).
 
 ## 6. Action System Requirements
 6.1 v1 action catalog must include at minimum: Study or School, Job Training, Invest in Stocks, Invest in Bonds, Join Gym, Join Sports Team, Spend Time with Family or Friends, Buy Smartphone, Relocate City, Look for Love, Buy Home, Home Maintenance, Debt Paydown, Side Gig, and Career Switch.
@@ -186,20 +186,20 @@ Implementation sequencing is managed through the normal product backlog and rele
 
 12.4 Financial and health values in this product are gameplay abstractions and must not be presented as professional financial, legal, medical, or mental-health advice.
 
-## 13. Future Features (Not Currently implmented)
+## 13. Future Features (Not Currently implemented)
 13.1 Assets - Assets like home, cars, can be turned into cash, but require an action and with cost (e.g. depreciation, cost of sale). Hard assets can't be turned into cash without a penalty. TBD.
 
 13.2 Taxes - Are happening all the time. Your city, wage, and other decisions affect taxes. TBD.
 
-13.3 Expenses - Costs change based on where you live and how big you family is. TBD.
+13.3 Expenses - Costs change based on where you live and how big your family is. TBD.
 
-13.4 Bankrupcy - When debt to income ratio is out of control, players may declare bankrupcy (lose assets, reset debt). TBD.
+13.4 Bankruptcy - When debt to income ratio is out of control, players may declare bankruptcy (lose assets, reset debt). TBD.
 
 13.5 Advisors - To help with the learning, Advisors from various perspectives (e.g. Finance, Physical health, Mental health) weigh in on how to improve a facet of a player's life, and praise favorable actions/decisions. TBD.
 
 13.6 Economy - The economy is constantly changing. It can affect jobs (layoffs, wage reductions), limit wage and asset growth. The Economy is cyclical and affects player options/actions. TBD.
 
-13.7 Investing - Some assets grow faster than others. Some are more volitile. All need to be converted to cash to be used. TBD.
+13.7 Investing - Some assets grow faster than others. Some are more volatile. All need to be converted to cash to be used. TBD.
 
 13.8 Housing - Players can live in a house (goes up in value) but are exposed to unexpected costs and debt. TBD.
 
