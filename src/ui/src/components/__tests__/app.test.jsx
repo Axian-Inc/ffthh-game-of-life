@@ -11,6 +11,7 @@ const mockUseGamesState = {
   loadGames: vi.fn(),
   createGame: vi.fn(),
   deleteGame: vi.fn(),
+  updateGame: vi.fn(),
   newGameId: null,
   setNewGameId: vi.fn(),
 }
@@ -28,6 +29,7 @@ describe('App create flow', () => {
       loadGames: vi.fn(),
       createGame: vi.fn(),
       deleteGame: vi.fn(),
+      updateGame: vi.fn(),
       newGameId: null,
       setNewGameId: vi.fn(),
     })

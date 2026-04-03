@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Added playable turn-taking with monthly simulation, action selection, turn summaries, and pass-control flow.
 - Added post-create career selection and play placeholder pages for new games.
 - Added Playwright browser automation tests for manual and CI use.
 - Added deploy/check scripts, Makefile targets, and deploy runbook.

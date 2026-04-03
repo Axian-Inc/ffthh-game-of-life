@@ -60,3 +60,11 @@ Lightweight, task-focused log for what changed, why, and where.
 - What changed: Removed the deploy-time Playwright gate so `scripts/deploy.sh` now runs preflight checks, installs dependencies, runs UI unit tests, and proceeds with Terraform/build/publish steps without forcing the E2E suite.
 - Paths: scripts/deploy.sh, scripts/README.md, CHANGELOG.md, NOTES.md
 - Commands/runbooks: scripts/deploy.sh, npm --prefix src/ui run test:e2e:ci
+
+## 2026-04-03
+- Task: Add playable turn-taking flow.
+- Why: Move the game from setup-only persistence into a usable month-by-month play loop.
+- What changed: Added game-state initialization and deterministic turn simulation, replaced the play placeholder with a real turn UI and pass-control flow, persisted completed turns through the existing update path, and added unit coverage for simulation, play-page flow, and richer local storage updates.
+- Paths: src/ui/src/utils/gameSimulation.js, src/ui/src/components/pages/PlayGamePage.jsx, src/ui/src/App.jsx, src/ui/src/App.css, src/ui/src/hooks/useModalState.js, src/ui/src/utils/__tests__/gameSimulation.test.js, src/ui/src/services/__tests__/gameStorage.test.js, src/ui/src/components/__tests__/pages.test.jsx, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build
+- Follow-ups: Consider persisting mid-turn phase transitions if resume should land directly on the exact pre-action screen instead of the current pass-control checkpoint after completed turns.

@@ -2,6 +2,8 @@
 
 Modern Game of Life is a web implementation of a Game of Life-inspired educational experience. The repository contains a React/Vite UI, an AWS-backed game storage API, and Terraform infrastructure for deployment.
 
+The current UI supports the full onboarding flow, persistent save/resume, a welcome screen for each game, and a playable month-by-month turn loop with action selection, turn summaries, and pass-control between players.
+
 ## Prerequisites
 
 1. Node.js and npm

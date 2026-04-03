@@ -53,7 +53,7 @@ test('direct /games/:id/play route opens Welcome and does not show placeholder b
   )
 })
 
-test('resume lands on Welcome and Let\'s Begin routes back to home', async ({ page }) => {
+test('resume lands on Welcome and Let\'s Begin opens the turn screen', async ({ page }) => {
   const now = Date.now()
   await setGames(page, [
     {
@@ -78,6 +78,7 @@ test('resume lands on Welcome and Let\'s Begin routes back to home', async ({ pa
     .toBe('resume')
 
   await page.getByRole('button', { name: "Let's Begin!" }).click()
-  await expect(page).toHaveURL('/')
-  await expect(page.getByRole('heading', { name: 'Game of LIFE' })).toBeVisible()
+  await expect(page).toHaveURL(/\/games\/resume-route\/play$/)
+  await expect(page.getByText('Take a Turn')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Review actions' })).toBeVisible()
 })
