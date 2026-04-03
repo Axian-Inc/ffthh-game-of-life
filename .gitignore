@@ -34,6 +34,7 @@ override.tf.json
 # Node / tooling
 node_modules/
 .npm/
+.codex/activity-timeline.jsonl
 
 # Local auth secret
 auth.json

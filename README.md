@@ -2,6 +2,8 @@
 
 Modern Game of Life is a web implementation of a Game of Life-inspired educational experience. The repository contains a React/Vite UI, an AWS-backed game storage API, and Terraform infrastructure for deployment.
 
+The current UI supports the full onboarding flow, persistent save/resume, a welcome screen for each game, and a playable month-by-month turn loop with action selection, turn summaries, and pass-control between players.
+
 ## Prerequisites
 
 1. Node.js and npm
@@ -36,6 +38,14 @@ Do not run Terraform in the `default` workspace.
    `scripts/check.sh`
 5. Deploy the application:
    `scripts/deploy.sh`
+6. View recent Codex activity timeline entries:
+   `scripts/timeline.sh -n 25`
+
+## Codex hooks
+
+This repo includes a local Codex hook logger in `.codex/hooks.json`. When Codex hooks are enabled in your local CLI, it writes session, prompt, and Bash tool activity to `.codex/activity-timeline.jsonl`.
+
+Use `scripts/timeline.sh` to render recent entries in a readable form.
 
 ## Documentation
 

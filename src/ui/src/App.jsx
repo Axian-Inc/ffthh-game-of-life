@@ -6,10 +6,12 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
+import PlayGamePage from './components/pages/PlayGamePage'
 import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
+import { initializeGameState } from './utils/gameSimulation'
 
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
@@ -48,17 +50,20 @@ function App() {
   const [isCreating, setIsCreating] = useState(false)
   const [entrySource, setEntrySource] = useState('none')
   const [wizardDraft, setWizardDraft] = useState(null)
+  const [hasBegunPlay, setHasBegunPlay] = useState(false)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
   const newGameButtonRef = useRef(null)
-  const { state, openCreate, openSession, openPlay, openDelete, closeAll } = useModalState()
+  const { state, openCreate, openSession, openPlay, openDelete, updateActiveGame, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
+    useGames()
   const previousViewRef = useRef(view)
   const clearDebugState = useCallback(() => {
     setEntrySource('none')
     setWizardDraft(null)
+    setHasBegunPlay(false)
   }, [])
 
   const handleCreateClick = () => {
@@ -91,7 +96,7 @@ function App() {
 
     try {
       const timestamp = Date.now()
-      const newGame = {
+      const newGame = initializeGameState({
         name: payloadName,
         status: 'active',
         players: payloadPlayers.map((player) => ({
@@ -101,10 +106,11 @@ function App() {
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
-      }
+      })
       const createdGame = await createGame(newGame)
       setEntrySource('create')
       setWizardDraft(null)
+      setHasBegunPlay(false)
       openPlay(createdGame)
     } catch {
       setCreateError('We could not create that game yet. Please try again.')
@@ -166,7 +172,8 @@ function App() {
 
     setEntrySource('resume')
     setWizardDraft(null)
-    openPlay(game)
+    setHasBegunPlay(false)
+    openPlay(initializeGameState(game))
   }
 
   const handleViewResults = (game) => {
@@ -211,7 +218,8 @@ function App() {
 
     setEntrySource('route')
     setWizardDraft(null)
-    openPlay(targetGame)
+    setHasBegunPlay(false)
+    openPlay(initializeGameState(targetGame))
 
     setRouteRequest(null)
     setHasHydratedRoute(true)
@@ -305,6 +313,26 @@ function App() {
     }
   }
 
+  const handleBeginPlay = () => {
+    setHasBegunPlay(true)
+    if (activeGame?.phase === 'pass-control') {
+      updateActiveGame({
+        ...activeGame,
+        phase: 'pass-control',
+      })
+    }
+  }
+
+  const handleGameUpdate = async (nextGame) => {
+    if (!nextGame?.id) {
+      return null
+    }
+
+    const updated = await updateGame(nextGame.id, nextGame)
+    updateActiveGame(updated)
+    return updated
+  }
+
   const now = Date.now()
   const modals = (
     <ModalManager
@@ -353,7 +381,11 @@ function App() {
         </>
       ) : null}
       {view === 'play' ? (
-        <WelcomeToLifePage game={activeGame} onBegin={handleBackClick} />
+        hasBegunPlay ? (
+          <PlayGamePage game={activeGame} onHome={handleBackClick} onGameUpdate={handleGameUpdate} />
+        ) : (
+          <WelcomeToLifePage game={activeGame} onBegin={handleBeginPlay} />
+        )
       ) : null}
     </PageShell>
   )

@@ -118,9 +118,36 @@ Required anatomy:
 5. A wide centered `Let's Begin!` CTA at the bottom.
 6. `Start Game` and `Resume` both land here first.
 
-## 6. Interaction rules
+## 6. Play screens
+These screens extend the approved flow after the welcome page. They should preserve the same warm canvas, white surfaces, rounded corners, and teal-forward emphasis used elsewhere in the product.
+
+### 6.1 Turn start and action selection
+1. Keep the play route on a single page rather than introducing a new modal shell.
+2. Show the game title, current month number, active player, and seat position in the page header.
+3. Render seat order as compact player chips near the top so pass-control order remains visible.
+4. Show a player dashboard with cash, debt, net worth, physical health, and mental health in compact stat cards.
+5. Present the monthly phase order in a dedicated supporting panel: net worth, debt, health, event, action, summary.
+6. The action state starts with a concise explanation and a `Review actions` CTA, then expands into selectable action cards.
+7. Action cards use white or cream surfaces with a stronger teal selected outline; unavailable actions stay visible but muted with a reason.
+8. Relocation must reveal an inline city picker only when that action is selected.
+
+### 6.2 Turn summary
+1. The summary remains on the same page shell and should feel like a continuation of the month, not a separate route.
+2. Show the completed player name prominently with a `Turn Summary` eyebrow.
+3. Separate intended and unintended outcomes into distinct summary cards.
+4. Render phase-by-phase change cards with short explanations and compact delta readouts.
+5. The primary CTA is `Pass device`.
+
+### 6.3 Pass control
+1. Pass-control is explicit and must name the next player.
+2. The panel should be visually simpler than the summary, with one clear primary CTA: `Start next turn`.
+3. A secondary `Back to home` action may remain visible for pause/resume behavior.
+
+## 7. Interaction rules
 1. Player nicknames must stay unique within the current setup.
 2. Avatar selection is required for every committed player.
 3. Adding a player from summary opens the next `Player N` step with a fresh random nickname starter and no avatar selected.
 4. Changing education must clear any incompatible career selection.
 5. New games are persisted only when `Start Game` is pressed.
+6. Entering `/games/:id/play` lands on the welcome page first; `Let's Begin!` advances into the turn UI on the same route.
+7. Completing a turn should persist the updated game before showing pass-control.

@@ -27,6 +27,8 @@ const reducer = (state, action) => {
       }
     case 'OPEN_DELETE':
       return { ...state, pendingDelete: action.payload, view: 'home' }
+    case 'UPDATE_ACTIVE_GAME':
+      return { ...state, activeGame: action.payload }
     case 'CLOSE_ALL':
       return { ...state, view: 'home', activeGame: null, activeGameMode: 'resume', pendingDelete: null }
     default:
@@ -40,6 +42,7 @@ const useModalState = () => {
   const openSession = useCallback((game, mode) => dispatch({ type: 'OPEN_SESSION', payload: { game, mode } }), [])
   const openPlay = useCallback((game) => dispatch({ type: 'OPEN_PLAY', payload: { game } }), [])
   const openDelete = useCallback((game) => dispatch({ type: 'OPEN_DELETE', payload: game }), [])
+  const updateActiveGame = useCallback((game) => dispatch({ type: 'UPDATE_ACTIVE_GAME', payload: game }), [])
   const closeAll = useCallback(() => dispatch({ type: 'CLOSE_ALL' }), [])
 
   return {
@@ -48,6 +51,7 @@ const useModalState = () => {
     openSession,
     openPlay,
     openDelete,
+    updateActiveGame,
     closeAll,
   }
 }
