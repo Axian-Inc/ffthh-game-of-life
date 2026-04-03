@@ -87,7 +87,8 @@ test('resume lands on Welcome and Let\'s Begin opens the turn screen in-place', 
 
   await page.getByRole('button', { name: "Let's Begin!" }).click()
   await expect(page).toHaveURL(/\/games\/resume-route\/play$/)
-  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeVisible()
+  await expect(page.getByText("Ari's Turn")).toBeVisible()
   await expect
     .poll(() => page.evaluate(() => window.life.status().playScreen))
     .toBe('turn')

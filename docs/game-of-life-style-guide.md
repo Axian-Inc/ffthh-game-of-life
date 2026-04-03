@@ -122,15 +122,16 @@ Required anatomy:
 ## 6. Player Turn (`9.PlayerTurn.png`)
 Required anatomy:
 1. Keep the same warm off-white canvas and center a stacked play layout inside the desktop viewport.
-2. Center the title `Modern Game of Life - Turn 10` above the subtitle `Jack's Turn`.
-3. Render a horizontal four-player rail beneath the subtitle with left and right chevrons flanking the player tiles.
-4. Each player tile uses a portrait card above a centered player label.
-5. The active player tile uses a teal-to-purple outline glow; inactive tiles use pale-lilac surfaces with subtle borders.
-6. Place a large white status card beneath the rail with three equal columns separated by faint vertical dividers.
-7. The left column lists `Net Worth`, `Cash (Spendable)`, `Assets & Investments`, and `Debt` with large supporting icons and bold values.
-8. The middle column lists `Job`, `Income`, `Physical Health`, `Mental Health`, and `Location`, with physical and mental health shown as green fills on pale tracks.
-9. The right column groups modifier icons into `Choice Modifiers` and `Life Modifiers`, each with three labeled icons.
-10. Center three wide pill buttons under the card: `See History`, `Choose Action`, and `Pass`.
+2. Center the title above the subtitle; the reference screenshot shows `Modern Game of Life - Turn 10` and `Jack's Turn`, but implementation must substitute the persisted turn number and active player's name.
+3. Render a horizontal player rail beneath the subtitle with left and right chevrons flanking the player tiles.
+4. Render every player in the saved game in seat order; support `2-6` players in the same row by tightening spacing and tile size as player count grows.
+5. Each player tile uses the avatar chosen during setup above a centered player label.
+6. The active player tile uses a teal-to-purple outline glow; inactive tiles use pale-lilac surfaces with subtle borders.
+7. Place a large white status card beneath the rail with three equal columns separated by faint vertical dividers.
+8. The left column lists `Net Worth`, `Cash (Spendable)`, `Assets & Investments`, and `Debt` with large supporting icons and bold values.
+9. The middle column lists `Job`, `Income`, `Physical Health`, `Mental Health`, and `Location`, with physical and mental health shown as green fills on pale tracks.
+10. The right column groups modifier icons into `Choice Modifiers` and `Life Modifiers`, each with three labeled icons.
+11. Center three wide pill buttons under the card: `See History`, `Choose Action`, and `Pass`.
 
 Visual rules:
 1. The title uses dark navy text with a slightly tighter line height than the home hero.
@@ -144,6 +145,7 @@ Visual rules:
 9. Side action buttons use a dark slate gradient with white text.
 10. The center action button uses the bright teal-blue-purple gradient and carries the strongest shadow.
 11. Keep even spacing across the three bottom buttons and preserve the large whitespace halo around the card.
+12. The title must reflect the persisted `turnNumber`, and the subtitle must reflect the active player's name.
 
 ## 7. Interaction rules
 1. Player nicknames must stay unique within the current setup.
@@ -151,3 +153,4 @@ Visual rules:
 3. Adding a player from summary opens the next `Player N` step with a fresh random nickname starter and no avatar selected.
 4. Changing education must clear any incompatible career selection.
 5. New games are persisted only when `Start Game` is pressed.
+6. On the Take Turn screen, `Choose Action` advances to the next player in seat order; only after the last player acts does the next click increment the turn number and wrap to player `1`.

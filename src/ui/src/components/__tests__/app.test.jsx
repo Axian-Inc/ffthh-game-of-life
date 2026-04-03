@@ -11,6 +11,7 @@ const mockUseGamesState = {
   loadGames: vi.fn(),
   createGame: vi.fn(),
   deleteGame: vi.fn(),
+  updateGame: vi.fn(),
   newGameId: null,
   setNewGameId: vi.fn(),
 }
@@ -28,6 +29,7 @@ describe('App create flow', () => {
       loadGames: vi.fn(),
       createGame: vi.fn(),
       deleteGame: vi.fn(),
+      updateGame: vi.fn(),
       newGameId: null,
       setNewGameId: vi.fn(),
     })
@@ -66,8 +68,18 @@ describe('App create flow', () => {
         ...game,
         id: 'created-game',
       }
+      mockUseGamesState.games = [createdGame]
       window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([createdGame]))
       return createdGame
+    })
+    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => {
+      const updatedGame = {
+        ...updates,
+        id: gameId,
+      }
+      mockUseGamesState.games = [updatedGame]
+      window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([updatedGame]))
+      return updatedGame
     })
 
     render(<App />)
@@ -124,6 +136,8 @@ describe('App create flow', () => {
         entrySource: 'create',
         playScreen: 'welcome',
         activeGameId: 'created-game',
+        turnNumber: 1,
+        activePlayerIndex: 0,
         persistedGame: expect.objectContaining({
           id: 'created-game',
           name: 'Console Check',
@@ -141,10 +155,47 @@ describe('App create flow', () => {
         view: 'play',
         playScreen: 'turn',
         activeGameId: 'created-game',
+        turnNumber: 1,
+        activePlayerIndex: 0,
       }),
     )
 
-    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
+    expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+
+    await waitFor(() =>
+      expect(window.life.status()).toMatchObject({
+        playScreen: 'turn',
+        turnNumber: 1,
+        activePlayerIndex: 1,
+        persistedGame: expect.objectContaining({
+          turnNumber: 1,
+          activePlayerIndex: 1,
+        }),
+      }),
+    )
+
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
+    expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+
+    await waitFor(() =>
+      expect(window.life.status()).toMatchObject({
+        playScreen: 'turn',
+        turnNumber: 2,
+        activePlayerIndex: 0,
+        persistedGame: expect.objectContaining({
+          turnNumber: 2,
+          activePlayerIndex: 0,
+        }),
+      }),
+    )
+
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 2' })).toBeInTheDocument()
+    expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
   })
 
   it('reports resumed game state from window.life.status()', async () => {
@@ -153,6 +204,8 @@ describe('App create flow', () => {
       id: 'resume-route',
       name: 'Resume Ready',
       status: 'active',
+      turnNumber: 3,
+      activePlayerIndex: 1,
       players: [
         { id: 'player-1', name: 'Ari', avatar: 'fox' },
         { id: 'player-2', name: 'Jo', avatar: 'bear' },
@@ -163,6 +216,15 @@ describe('App create flow', () => {
     }
 
     mockUseGamesState.games = [resumedGame]
+    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => {
+      const updatedGame = {
+        ...updates,
+        id: gameId,
+      }
+      mockUseGamesState.games = [updatedGame]
+      window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([updatedGame]))
+      return updatedGame
+    })
     window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([resumedGame]))
 
     render(<App />)
@@ -174,6 +236,8 @@ describe('App create flow', () => {
       entrySource: 'resume',
       playScreen: 'welcome',
       activeGameId: 'resume-route',
+      turnNumber: 3,
+      activePlayerIndex: 1,
       persistedGame: expect.objectContaining({
         id: 'resume-route',
         name: 'Resume Ready',
@@ -182,13 +246,28 @@ describe('App create flow', () => {
 
     const persistedBefore = JSON.stringify(window.life.status().persistedGame)
     await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
-    expect(window.life.status()).toMatchObject({
-      view: 'play',
-      entrySource: 'resume',
-      playScreen: 'turn',
-      activeGameId: 'resume-route',
-    })
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
-    expect(JSON.stringify(window.life.status().persistedGame)).toBe(persistedBefore)
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 3' })).toBeInTheDocument()
+    expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+
+    await waitFor(() =>
+      expect(window.life.status()).toMatchObject({
+        view: 'play',
+        entrySource: 'resume',
+        playScreen: 'turn',
+        activeGameId: 'resume-route',
+        turnNumber: 4,
+        activePlayerIndex: 0,
+        persistedGame: expect.objectContaining({
+          turnNumber: 4,
+          activePlayerIndex: 0,
+        }),
+      }),
+    )
+
+    expect(JSON.stringify(window.life.status().persistedGame)).not.toBe(persistedBefore)
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeInTheDocument()
+    expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
   })
 })

@@ -73,19 +73,33 @@ test('window.life.status reports created game state after Start Game', async ({ 
   expect(status.entrySource).toBe('create')
   expect(status.playScreen).toBe('welcome')
   expect(status.activeGameId).toBeTruthy()
+  expect(status.turnNumber).toBe(1)
+  expect(status.activePlayerIndex).toBe(0)
   expect(status.activeGame.name).toBe('Console Check')
   expect(status.persistedGame.name).toBe('Console Check')
   expect(status.persistedGame.players).toHaveLength(2)
   expect(status.storageKey).toBe(STORAGE_KEY)
 
-  const persistedBefore = JSON.stringify(status.persistedGame)
   await page.getByRole('button', { name: "Let's Begin!" }).click()
-  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeVisible()
+  await expect(page.getByText("Ted's Turn")).toBeVisible()
   await page.getByRole('button', { name: 'Choose Action' }).click()
 
   status = await page.evaluate(() => window.life.status())
   expect(status.playScreen).toBe('turn')
-  expect(JSON.stringify(status.persistedGame)).toBe(persistedBefore)
+  expect(status.turnNumber).toBe(1)
+  expect(status.activePlayerIndex).toBe(1)
+  expect(status.persistedGame.turnNumber).toBe(1)
+  expect(status.persistedGame.activePlayerIndex).toBe(1)
+
+  await expect(page.getByText("Mia's Turn")).toBeVisible()
+  await page.getByRole('button', { name: 'Choose Action' }).click()
+
+  status = await page.evaluate(() => window.life.status())
+  expect(status.turnNumber).toBe(2)
+  expect(status.activePlayerIndex).toBe(0)
+  expect(status.persistedGame.turnNumber).toBe(2)
+  expect(status.persistedGame.activePlayerIndex).toBe(0)
 })
 
 test('window.life.status reports resumed game state from the home screen', async ({ page }) => {
@@ -94,6 +108,8 @@ test('window.life.status reports resumed game state from the home screen', async
     id: 'resume-debug',
     name: 'Resume Debug',
     status: 'active',
+    turnNumber: 4,
+    activePlayerIndex: 1,
     players: [
       { id: 'player-1', name: 'Ari', avatar: 'panda' },
       { id: 'player-2', name: 'Jo', avatar: 'fox' },
@@ -110,16 +126,21 @@ test('window.life.status reports resumed game state from the home screen', async
   let status = await page.evaluate(() => window.life.status())
   expect(status.entrySource).toBe('resume')
   expect(status.playScreen).toBe('welcome')
+  expect(status.turnNumber).toBe(4)
+  expect(status.activePlayerIndex).toBe(1)
   expect(status.activeGameId).toBe('resume-debug')
   expect(status.persistedGame.id).toBe('resume-debug')
   expect(status.persistedGame.players).toHaveLength(2)
 
-  const persistedBefore = JSON.stringify(status.persistedGame)
   await page.getByRole('button', { name: "Let's Begin!" }).click()
-  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
-  await page.getByRole('button', { name: 'Pass' }).click()
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeVisible()
+  await expect(page.getByText("Jo's Turn")).toBeVisible()
+  await page.getByRole('button', { name: 'Choose Action' }).click()
 
   status = await page.evaluate(() => window.life.status())
   expect(status.playScreen).toBe('turn')
-  expect(JSON.stringify(status.persistedGame)).toBe(persistedBefore)
+  expect(status.turnNumber).toBe(5)
+  expect(status.activePlayerIndex).toBe(0)
+  expect(status.persistedGame.turnNumber).toBe(5)
+  expect(status.persistedGame.activePlayerIndex).toBe(0)
 })

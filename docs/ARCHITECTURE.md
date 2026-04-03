@@ -15,7 +15,8 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
    - Local mode: `window.localStorage` with seeded defaults.
    - API mode: HTTP calls to `/games` and `/games/{id}`.
 2. UI creates/deletes games through the same adapter.
-3. In AWS, Lambda handles CRUD and writes to DynamoDB.
+3. In play mode, turn progression (`turnNumber`, `activePlayerIndex`) is updated on the saved game after each completed action advance.
+4. In AWS, Lambda handles CRUD and writes to DynamoDB.
 
 ## Environments
 - Local dev:

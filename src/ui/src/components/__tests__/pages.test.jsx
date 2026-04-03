@@ -6,14 +6,24 @@ import WelcomeToLifePage from '../pages/WelcomeToLifePage'
 import { createGame } from '../../test/testUtils'
 
 describe('Page components', () => {
-  it('renders PlayGamePage placeholder turn content', async () => {
+  it('renders PlayGamePage with live player turn content', async () => {
     const user = userEvent.setup()
     const onChooseAction = vi.fn()
+    const game = createGame({
+      players: [
+        { id: 'player-1', name: 'Ari', avatar: 'fox' },
+        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+      ],
+      turnNumber: 3,
+      activePlayerIndex: 1,
+    })
 
-    render(<PlayGamePage game={createGame({ name: 'Play It' })} onChooseAction={onChooseAction} />)
+    render(<PlayGamePage game={game} onChooseAction={onChooseAction} />)
 
-    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeInTheDocument()
-    expect(screen.getByText("Jack's Turn")).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 3' })).toBeInTheDocument()
+    expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
+    expect(screen.getByText('Ari')).toBeInTheDocument()
+    expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Choose Action' })).toBeInTheDocument()
 

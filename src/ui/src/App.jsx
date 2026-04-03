@@ -42,11 +42,29 @@ const toJsonSafe = (value, fallback = null) => {
   return JSON.parse(JSON.stringify(value))
 }
 
+const normalizeTurnNumber = (turnNumber) => {
+  if (!Number.isInteger(turnNumber) || turnNumber < 1) {
+    return 1
+  }
+  return turnNumber
+}
+
+const normalizeActivePlayerIndex = (activePlayerIndex, playerCount) => {
+  if (playerCount <= 0) {
+    return 0
+  }
+  if (!Number.isInteger(activePlayerIndex) || activePlayerIndex < 0) {
+    return 0
+  }
+  return activePlayerIndex % playerCount
+}
+
 function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [isAdvancingTurn, setIsAdvancingTurn] = useState(false)
   const [entrySource, setEntrySource] = useState('none')
   const [playScreen, setPlayScreen] = useState('welcome')
   const [wizardDraft, setWizardDraft] = useState(null)
@@ -56,8 +74,11 @@ function App() {
   const newGameButtonRef = useRef(null)
   const { state, openCreate, openSession, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
+    useGames()
   const previousViewRef = useRef(view)
+  const currentActiveGame =
+    activeGame?.id != null ? games.find((game) => game.id === String(activeGame.id)) || activeGame : activeGame
   const clearDebugState = useCallback(() => {
     setEntrySource('none')
     setWizardDraft(null)
@@ -102,6 +123,8 @@ function App() {
           ...player,
           name: player.name.trim(),
         })),
+        turnNumber: 1,
+        activePlayerIndex: 0,
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
@@ -180,6 +203,37 @@ function App() {
   }, [])
 
   const handlePlayPlaceholderAction = useCallback(() => {}, [])
+
+  const handleAdvanceTurn = useCallback(async () => {
+    if (isAdvancingTurn || !currentActiveGame) {
+      return
+    }
+
+    const players = Array.isArray(currentActiveGame.players) ? currentActiveGame.players : []
+    if (players.length === 0) {
+      return
+    }
+
+    const currentTurnNumber = normalizeTurnNumber(currentActiveGame.turnNumber)
+    const currentActivePlayerIndex = normalizeActivePlayerIndex(currentActiveGame.activePlayerIndex, players.length)
+    const nextPlayerIndex = (currentActivePlayerIndex + 1) % players.length
+    const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
+    const timestamp = Date.now()
+
+    setIsAdvancingTurn(true)
+
+    try {
+      const updatedGame = await updateGame(currentActiveGame.id, {
+        ...currentActiveGame,
+        turnNumber: nextTurnNumber,
+        activePlayerIndex: nextPlayerIndex,
+        lastUpdated: timestamp,
+      })
+      openPlay(updatedGame)
+    } finally {
+      setIsAdvancingTurn(false)
+    }
+  }, [isAdvancingTurn, currentActiveGame, updateGame, openPlay])
 
   const handleViewResults = (game) => {
     openSession(game, 'results')
@@ -286,8 +340,9 @@ function App() {
 
   const getLifeStatus = useCallback(() => {
     const { storageMode, storageKey, allGames } = getGameStorageDebugSnapshot(games)
-    const activeGameId = activeGame?.id ? String(activeGame.id) : null
+    const activeGameId = currentActiveGame?.id ? String(currentActiveGame.id) : null
     const persistedGame = activeGameId ? allGames.find((game) => game.id === activeGameId) || null : null
+    const playerCount = Array.isArray(currentActiveGame?.players) ? currentActiveGame.players.length : 0
 
     return toJsonSafe({
       view,
@@ -295,14 +350,16 @@ function App() {
       entrySource,
       playScreen,
       activeGameId,
-      activeGame,
+      activeGame: currentActiveGame,
+      turnNumber: normalizeTurnNumber(currentActiveGame?.turnNumber),
+      activePlayerIndex: normalizeActivePlayerIndex(currentActiveGame?.activePlayerIndex, playerCount),
       persistedGame,
       storageMode,
       storageKey,
       allGames,
       wizardDraft,
     }, {})
-  }, [view, activeGameMode, entrySource, playScreen, activeGame, games, wizardDraft])
+  }, [view, activeGameMode, entrySource, playScreen, currentActiveGame, games, wizardDraft])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -376,11 +433,12 @@ function App() {
       ) : null}
       {view === 'play' ? (
         playScreen === 'welcome' ? (
-          <WelcomeToLifePage game={activeGame} onBegin={handlePlayBegin} />
+          <WelcomeToLifePage game={currentActiveGame} onBegin={handlePlayBegin} />
         ) : (
           <PlayGamePage
-            game={activeGame}
-            onChooseAction={handlePlayPlaceholderAction}
+            game={currentActiveGame}
+            isAdvancingTurn={isAdvancingTurn}
+            onChooseAction={handleAdvanceTurn}
             onNextPlayer={handlePlayPlaceholderAction}
             onPass={handlePlayPlaceholderAction}
             onPreviousPlayer={handlePlayPlaceholderAction}

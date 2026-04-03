@@ -3,9 +3,31 @@ import { seedGames } from '../data/seedGames'
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 export const GAME_STORAGE_KEY = STORAGE_KEY
 
+const normalizeTurnNumber = (turnNumber) => {
+  if (!Number.isInteger(turnNumber) || turnNumber < 1) {
+    return 1
+  }
+  return turnNumber
+}
+
+const normalizeActivePlayerIndex = (activePlayerIndex, playerCount) => {
+  if (playerCount <= 0) {
+    return 0
+  }
+  if (!Number.isInteger(activePlayerIndex) || activePlayerIndex < 0) {
+    return 0
+  }
+  return activePlayerIndex % playerCount
+}
+
 const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
+  turnNumber: normalizeTurnNumber(game.turnNumber),
+  activePlayerIndex: normalizeActivePlayerIndex(
+    game.activePlayerIndex,
+    Array.isArray(game.players) ? game.players.length : 0,
+  ),
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)

@@ -31,9 +31,15 @@ test('play turn desktop layout matches the player-turn mock anatomy', async ({ p
       id: 'turn-route',
       name: 'Choices Matter',
       status: 'active',
+      turnNumber: 7,
+      activePlayerIndex: 3,
       players: [
         { name: 'Ari', avatar: 'panda', careerTrack: 'Degree Track' },
         { name: 'Jo', avatar: 'fox', careerTrack: 'Trades Track' },
+        { name: 'Sam', avatar: 'frog', careerTrack: 'Degree Track' },
+        { name: 'Luz', avatar: 'owl', careerTrack: 'Creator Track' },
+        { name: 'Kai', avatar: 'tiger-face', careerTrack: 'Degree Track' },
+        { name: 'Vic', avatar: 'penguin', careerTrack: 'Trades Track' },
       ],
       lastUpdated: now,
       createdAt: now,
@@ -45,7 +51,10 @@ test('play turn desktop layout matches the player-turn mock anatomy', async ({ p
   await disableAnimations(page)
   await page.getByRole('button', { name: "Let's Begin!" }).click()
 
-  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 7' })).toBeVisible()
+  await expect(page.getByText("Luz's Turn")).toBeVisible()
+  await expect(page.getByText('Kai')).toBeVisible()
+  await expect(page.getByText('Vic')).toBeVisible()
   await expect(page.getByText('Net Worth:')).toBeVisible()
   await expect(page.getByText('Modifier Icons')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Choose Action' })).toBeVisible()

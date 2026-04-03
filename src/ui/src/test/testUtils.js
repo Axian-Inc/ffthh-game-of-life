@@ -14,6 +14,8 @@ export const createGame = (overrides = {}) => ({
   name: overrides.name ?? 'Family Game Night',
   status: overrides.status ?? 'active',
   players: overrides.players ?? [createPlayer()],
+  turnNumber: overrides.turnNumber ?? 1,
+  activePlayerIndex: overrides.activePlayerIndex ?? 0,
   lastUpdated: overrides.lastUpdated ?? Date.now(),
   createdAt: overrides.createdAt ?? Date.now(),
   resumable: overrides.resumable ?? true,

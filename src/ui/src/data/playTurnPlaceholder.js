@@ -13,20 +13,8 @@ import gardeningIcon from 'openmoji/color/svg/1F331.svg'
 import vetBillIcon from 'openmoji/color/svg/1F415.svg'
 import sewerBackupIcon from 'openmoji/color/svg/1F6B0.svg'
 import marketCrashIcon from 'openmoji/color/svg/1F4C9.svg'
-import jackPortrait from '../assets/turn/jack-portrait.svg'
-import mayaPortrait from '../assets/turn/maya-portrait.svg'
-import jordanPortrait from '../assets/turn/jordan-portrait.svg'
-import samPortrait from '../assets/turn/sam-portrait.svg'
 
 export const PLAY_TURN_PLACEHOLDER = {
-  turnTitle: 'Modern Game of Life - Turn 10',
-  activePlayerLabel: "Jack's Turn",
-  players: [
-    { id: 'jack', name: 'Jack', portraitSrc: jackPortrait, portraitAlt: 'Jack portrait', isActive: true },
-    { id: 'maya', name: 'Maya', portraitSrc: mayaPortrait, portraitAlt: 'Maya portrait', isActive: false },
-    { id: 'jordan', name: 'Jordan', portraitSrc: jordanPortrait, portraitAlt: 'Jordan portrait', isActive: false },
-    { id: 'sam', name: 'Sam', portraitSrc: samPortrait, portraitAlt: 'Sam portrait', isActive: false },
-  ],
   financialStats: [
     { id: 'net-worth', label: 'Net Worth', value: '$57,500', iconSrc: moneyBagIcon, iconAlt: 'Money bag' },
     { id: 'cash', label: 'Cash (Spendable)', value: '$12,350', iconSrc: cashIcon, iconAlt: 'Cash' },
