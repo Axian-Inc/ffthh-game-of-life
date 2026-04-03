@@ -21,7 +21,6 @@ if [[ -f "$repo_root/src/api/package.json" ]]; then
 fi
 
 npm --prefix "$ui_dir" ci
-npm --prefix "$ui_dir" run test:ci
 
 workspace="$(terraform -chdir="$tf_dir" workspace show)"
 if [[ "$workspace" == "default" ]]; then

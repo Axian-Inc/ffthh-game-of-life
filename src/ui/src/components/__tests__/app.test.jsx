@@ -75,6 +75,7 @@ describe('App create flow', () => {
     expect(window.life.status()).toMatchObject({
       view: 'home',
       entrySource: 'none',
+      playScreen: 'welcome',
       activeGameId: null,
       activeGame: null,
       persistedGame: null,
@@ -121,6 +122,7 @@ describe('App create flow', () => {
       expect(window.life.status()).toMatchObject({
         view: 'play',
         entrySource: 'create',
+        playScreen: 'welcome',
         activeGameId: 'created-game',
         persistedGame: expect.objectContaining({
           id: 'created-game',
@@ -130,6 +132,19 @@ describe('App create flow', () => {
     )
 
     expect(window.life.status().persistedGame.players).toHaveLength(2)
+    expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+
+    await waitFor(() =>
+      expect(window.life.status()).toMatchObject({
+        view: 'play',
+        playScreen: 'turn',
+        activeGameId: 'created-game',
+      }),
+    )
+
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeInTheDocument()
   })
 
   it('reports resumed game state from window.life.status()', async () => {
@@ -157,11 +172,23 @@ describe('App create flow', () => {
     expect(window.life.status()).toMatchObject({
       view: 'play',
       entrySource: 'resume',
+      playScreen: 'welcome',
       activeGameId: 'resume-route',
       persistedGame: expect.objectContaining({
         id: 'resume-route',
         name: 'Resume Ready',
       }),
     })
+
+    const persistedBefore = JSON.stringify(window.life.status().persistedGame)
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+    expect(window.life.status()).toMatchObject({
+      view: 'play',
+      entrySource: 'resume',
+      playScreen: 'turn',
+      activeGameId: 'resume-route',
+    })
+    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    expect(JSON.stringify(window.life.status().persistedGame)).toBe(persistedBefore)
   })
 })

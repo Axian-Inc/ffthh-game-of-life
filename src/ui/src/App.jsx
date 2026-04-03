@@ -6,6 +6,7 @@ import GameListSection from './components/layout/GameListSection'
 import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
+import PlayGamePage from './components/pages/PlayGamePage'
 import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
@@ -47,6 +48,7 @@ function App() {
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [entrySource, setEntrySource] = useState('none')
+  const [playScreen, setPlayScreen] = useState('welcome')
   const [wizardDraft, setWizardDraft] = useState(null)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
@@ -65,6 +67,7 @@ function App() {
     openCreate()
     setCreateError('')
     clearDebugState()
+    setPlayScreen('welcome')
   }
 
   const handleBackClick = () => {
@@ -72,6 +75,7 @@ function App() {
     setCreateError('')
     setIsCreating(false)
     clearDebugState()
+    setPlayScreen('welcome')
   }
 
   const handleWizardStatusChange = useCallback((nextStatus) => {
@@ -104,6 +108,7 @@ function App() {
       }
       const createdGame = await createGame(newGame)
       setEntrySource('create')
+      setPlayScreen('welcome')
       setWizardDraft(null)
       openPlay(createdGame)
     } catch {
@@ -165,9 +170,16 @@ function App() {
     })
 
     setEntrySource('resume')
+    setPlayScreen('welcome')
     setWizardDraft(null)
     openPlay(game)
   }
+
+  const handlePlayBegin = useCallback(() => {
+    setPlayScreen('turn')
+  }, [])
+
+  const handlePlayPlaceholderAction = useCallback(() => {}, [])
 
   const handleViewResults = (game) => {
     openSession(game, 'results')
@@ -191,6 +203,7 @@ function App() {
     if (routeRequest.view === 'home') {
       closeAll()
       clearDebugState()
+      setPlayScreen('welcome')
       setRouteRequest(null)
       setHasHydratedRoute(true)
       return
@@ -204,12 +217,14 @@ function App() {
     if (!targetGame) {
       closeAll()
       clearDebugState()
+      setPlayScreen('welcome')
       setRouteRequest(null)
       setHasHydratedRoute(true)
       return
     }
 
     setEntrySource('route')
+    setPlayScreen('welcome')
     setWizardDraft(null)
     openPlay(targetGame)
 
@@ -263,6 +278,12 @@ function App() {
     previousViewRef.current = view
   }, [view])
 
+  useEffect(() => {
+    if (view !== 'play') {
+      setPlayScreen('welcome')
+    }
+  }, [view])
+
   const getLifeStatus = useCallback(() => {
     const { storageMode, storageKey, allGames } = getGameStorageDebugSnapshot(games)
     const activeGameId = activeGame?.id ? String(activeGame.id) : null
@@ -272,6 +293,7 @@ function App() {
       view,
       activeGameMode,
       entrySource,
+      playScreen,
       activeGameId,
       activeGame,
       persistedGame,
@@ -280,7 +302,7 @@ function App() {
       allGames,
       wizardDraft,
     }, {})
-  }, [view, activeGameMode, entrySource, activeGame, games, wizardDraft])
+  }, [view, activeGameMode, entrySource, playScreen, activeGame, games, wizardDraft])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -353,7 +375,18 @@ function App() {
         </>
       ) : null}
       {view === 'play' ? (
-        <WelcomeToLifePage game={activeGame} onBegin={handleBackClick} />
+        playScreen === 'welcome' ? (
+          <WelcomeToLifePage game={activeGame} onBegin={handlePlayBegin} />
+        ) : (
+          <PlayGamePage
+            game={activeGame}
+            onChooseAction={handlePlayPlaceholderAction}
+            onNextPlayer={handlePlayPlaceholderAction}
+            onPass={handlePlayPlaceholderAction}
+            onPreviousPlayer={handlePlayPlaceholderAction}
+            onSeeHistory={handlePlayPlaceholderAction}
+          />
+        )
       ) : null}
     </PageShell>
   )

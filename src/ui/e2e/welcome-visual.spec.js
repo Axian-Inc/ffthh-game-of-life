@@ -5,6 +5,13 @@ const visualSnapshotOptions = {
   maxDiffPixels: 6500,
 }
 
+const disableAnimations = async (page) => {
+  await page.addStyleTag({
+    content:
+      '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;}',
+  })
+}
+
 const setGames = async (page, games) => {
   await page.goto('/')
   await page.evaluate(
@@ -14,10 +21,7 @@ const setGames = async (page, games) => {
     { storageKey: STORAGE_KEY, records: games },
   )
   await page.reload()
-  await page.addStyleTag({
-    content:
-      '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;}',
-  })
+  await disableAnimations(page)
 }
 
 test('direct /games/:id/play route opens Welcome and does not show placeholder board content', async ({
@@ -38,6 +42,7 @@ test('direct /games/:id/play route opens Welcome and does not show placeholder b
   }
   await setGames(page, [game])
   await page.goto(`/games/${game.id}/play`)
+  await disableAnimations(page)
 
   await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
   await expect(page.getByRole('button', { name: "Let's Begin!" })).toBeVisible()
@@ -46,6 +51,9 @@ test('direct /games/:id/play route opens Welcome and does not show placeholder b
   await expect
     .poll(() => page.evaluate(() => window.life.status().entrySource))
     .toBe('route')
+  await expect
+    .poll(() => page.evaluate(() => window.life.status().playScreen))
+    .toBe('welcome')
 
   await expect(page.locator('.page')).toHaveScreenshot(
     'welcome-desktop-baseline.png',
@@ -53,7 +61,7 @@ test('direct /games/:id/play route opens Welcome and does not show placeholder b
   )
 })
 
-test('resume lands on Welcome and Let\'s Begin routes back to home', async ({ page }) => {
+test('resume lands on Welcome and Let\'s Begin opens the turn screen in-place', async ({ page }) => {
   const now = Date.now()
   await setGames(page, [
     {
@@ -78,6 +86,9 @@ test('resume lands on Welcome and Let\'s Begin routes back to home', async ({ pa
     .toBe('resume')
 
   await page.getByRole('button', { name: "Let's Begin!" }).click()
-  await expect(page).toHaveURL('/')
-  await expect(page.getByRole('heading', { name: 'Game of LIFE' })).toBeVisible()
+  await expect(page).toHaveURL(/\/games\/resume-route\/play$/)
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
+  await expect
+    .poll(() => page.evaluate(() => window.life.status().playScreen))
+    .toBe('turn')
 })

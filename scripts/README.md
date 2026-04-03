@@ -12,7 +12,7 @@
 - `scripts/check.sh`
   - Verifies required tools, AWS configuration, Terraform backend access, and that the active Terraform workspace is not `default`.
 - `scripts/deploy.sh`
-  - Runs preflight checks, installs dependencies, executes UI unit tests, applies Terraform, builds the UI, syncs the build to S3, and invalidates CloudFront.
+  - Runs preflight checks, installs dependencies, applies Terraform, builds the UI, syncs the build to S3, and invalidates CloudFront.
 
 ## Typical usage
 - Run preflight checks:

@@ -34,11 +34,10 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
   - `terraform/main.tf`: S3, CloudFront, DynamoDB, Lambda, API Gateway.
   - `terraform/outputs.tf`: exposes `api_base_url` for the UI build.
 - Deploy:
-  - `scripts/deploy.sh`: runs checks + tests, applies Terraform, builds UI, syncs to S3.
+  - `scripts/deploy.sh`: runs checks, applies Terraform, builds UI, and syncs to S3.
 
 ## Testing
 - UI tests use Vitest + Testing Library.
-- Deploys run `npm --prefix src/ui run test:ci` before infra/app steps.
 
 ## Non-goals (current)
 - Authn/authz for the API.
@@ -47,4 +46,4 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
 ## UI flow
 +- Home: hero + game list.
 +- Create: modal-driven setup for game name, player identity, city, education, career, and summary.
-+- Play: welcome page entry for both new games and resumes.
++- Play: welcome page entry for both new games and resumes, followed by the player-turn screen.

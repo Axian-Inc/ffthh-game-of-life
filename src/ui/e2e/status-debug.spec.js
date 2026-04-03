@@ -69,13 +69,23 @@ test('window.life.status reports created game state after Start Game', async ({ 
   await page.getByRole('button', { name: /Start Game/i }).click()
   await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
 
-  const status = await page.evaluate(() => window.life.status())
+  let status = await page.evaluate(() => window.life.status())
   expect(status.entrySource).toBe('create')
+  expect(status.playScreen).toBe('welcome')
   expect(status.activeGameId).toBeTruthy()
   expect(status.activeGame.name).toBe('Console Check')
   expect(status.persistedGame.name).toBe('Console Check')
   expect(status.persistedGame.players).toHaveLength(2)
   expect(status.storageKey).toBe(STORAGE_KEY)
+
+  const persistedBefore = JSON.stringify(status.persistedGame)
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
+  await page.getByRole('button', { name: 'Choose Action' }).click()
+
+  status = await page.evaluate(() => window.life.status())
+  expect(status.playScreen).toBe('turn')
+  expect(JSON.stringify(status.persistedGame)).toBe(persistedBefore)
 })
 
 test('window.life.status reports resumed game state from the home screen', async ({ page }) => {
@@ -97,9 +107,19 @@ test('window.life.status reports resumed game state from the home screen', async
   await page.getByRole('button', { name: 'Resume', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Welcome to Life!' })).toBeVisible()
 
-  const status = await page.evaluate(() => window.life.status())
+  let status = await page.evaluate(() => window.life.status())
   expect(status.entrySource).toBe('resume')
+  expect(status.playScreen).toBe('welcome')
   expect(status.activeGameId).toBe('resume-debug')
   expect(status.persistedGame.id).toBe('resume-debug')
   expect(status.persistedGame.players).toHaveLength(2)
+
+  const persistedBefore = JSON.stringify(status.persistedGame)
+  await page.getByRole('button', { name: "Let's Begin!" }).click()
+  await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 10' })).toBeVisible()
+  await page.getByRole('button', { name: 'Pass' }).click()
+
+  status = await page.evaluate(() => window.life.status())
+  expect(status.playScreen).toBe('turn')
+  expect(JSON.stringify(status.persistedGame)).toBe(persistedBefore)
 })

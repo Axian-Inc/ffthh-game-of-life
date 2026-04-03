@@ -12,6 +12,7 @@ Normative references:
 - `docs/sample-images/6.PickCareer.png`
 - `docs/sample-images/7.GameSummary.png`
 - `docs/sample-images/8.Life.Start.png`
+- `docs/sample-images/9.PlayerTurn.png`
 
 ## 1. Global rules
 1. The supported UI target is desktop browser at `1280x720`.
@@ -118,7 +119,33 @@ Required anatomy:
 5. A wide centered `Let's Begin!` CTA at the bottom.
 6. `Start Game` and `Resume` both land here first.
 
-## 6. Interaction rules
+## 6. Player Turn (`9.PlayerTurn.png`)
+Required anatomy:
+1. Keep the same warm off-white canvas and center a stacked play layout inside the desktop viewport.
+2. Center the title `Modern Game of Life - Turn 10` above the subtitle `Jack's Turn`.
+3. Render a horizontal four-player rail beneath the subtitle with left and right chevrons flanking the player tiles.
+4. Each player tile uses a portrait card above a centered player label.
+5. The active player tile uses a teal-to-purple outline glow; inactive tiles use pale-lilac surfaces with subtle borders.
+6. Place a large white status card beneath the rail with three equal columns separated by faint vertical dividers.
+7. The left column lists `Net Worth`, `Cash (Spendable)`, `Assets & Investments`, and `Debt` with large supporting icons and bold values.
+8. The middle column lists `Job`, `Income`, `Physical Health`, `Mental Health`, and `Location`, with physical and mental health shown as green fills on pale tracks.
+9. The right column groups modifier icons into `Choice Modifiers` and `Life Modifiers`, each with three labeled icons.
+10. Center three wide pill buttons under the card: `See History`, `Choose Action`, and `Pass`.
+
+Visual rules:
+1. The title uses dark navy text with a slightly tighter line height than the home hero.
+2. The subtitle uses muted gray text and lighter weight than the title.
+3. Portrait tiles are `64px` square inside rounded cards with soft interior padding.
+4. The active-player card glow uses the shared teal-blue-purple gradient family rather than a solid ring.
+5. Inactive-player cards use a pale lilac-white fill and soft neutral stroke.
+6. The status card uses a `24px` radius, white fill, soft shadow, and internal divider lines.
+7. Financial labels and status labels use dark ink text; debt values use a red warning tone.
+8. Health tracks use pale gray-green rails with bright green fills and fully rounded ends.
+9. Side action buttons use a dark slate gradient with white text.
+10. The center action button uses the bright teal-blue-purple gradient and carries the strongest shadow.
+11. Keep even spacing across the three bottom buttons and preserve the large whitespace halo around the card.
+
+## 7. Interaction rules
 1. Player nicknames must stay unique within the current setup.
 2. Avatar selection is required for every committed player.
 3. Adding a player from summary opens the next `Player N` step with a fresh random nickname starter and no avatar selected.
