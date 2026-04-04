@@ -60,3 +60,10 @@ Lightweight, task-focused log for what changed, why, and where.
 - What changed: Removed the deploy-time Playwright gate so `scripts/deploy.sh` now runs preflight checks, installs dependencies, runs UI unit tests, and proceeds with Terraform/build/publish steps without forcing the E2E suite.
 - Paths: scripts/deploy.sh, scripts/README.md, CHANGELOG.md, NOTES.md
 - Commands/runbooks: scripts/deploy.sh, npm --prefix src/ui run test:e2e:ci
+
+## 2026-04-04
+- Task: Add persisted turn actions and player-scoped history in play mode.
+- Why: The player-turn screen now needs real save-state mutation and a way to review each active player's recorded moves.
+- What changed: Wired both `Choose Action` and `Pass` to record a saved move and advance seat order, normalized legacy saves that do not yet include move history, and added a `See History` modal scoped to the current active player. Updated the architecture/style-guide docs to describe the live behavior instead of the earlier placeholder-only turn screen.
+- Paths: src/ui/src/App.jsx, src/ui/src/services/gameStorage.js, src/ui/src/components/modals/PlayerHistoryModal.jsx, src/ui/src/components/modals/ModalManager.jsx, src/ui/src/hooks/useModalState.js, docs/ARCHITECTURE.md, docs/game-of-life-style-guide.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui test -- --run, npm --prefix src/ui run build

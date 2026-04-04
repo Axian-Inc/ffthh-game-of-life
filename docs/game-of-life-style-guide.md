@@ -132,6 +132,7 @@ Required anatomy:
 9. The middle column lists `Job`, `Income`, `Physical Health`, `Mental Health`, and `Location`, with physical and mental health shown as green fills on pale tracks.
 10. The right column groups modifier icons into `Choice Modifiers` and `Life Modifiers`, each with three labeled icons.
 11. Center three wide pill buttons under the card: `See History`, `Choose Action`, and `Pass`.
+12. `See History` opens a modal for the currently active player only; it does not provide cross-player switching inside the modal.
 
 Visual rules:
 1. The title uses dark navy text with a slightly tighter line height than the home hero.
@@ -146,6 +147,7 @@ Visual rules:
 10. The center action button uses the bright teal-blue-purple gradient and carries the strongest shadow.
 11. Keep even spacing across the three bottom buttons and preserve the large whitespace halo around the card.
 12. The title must reflect the persisted `turnNumber`, and the subtitle must reflect the active player's name.
+13. The player-history modal should reuse the existing blurred overlay + white modal shell, list saved moves in reverse chronological order, and show an empty state when that player has no recorded actions.
 
 ## 7. Interaction rules
 1. Player nicknames must stay unique within the current setup.
@@ -153,5 +155,5 @@ Visual rules:
 3. Adding a player from summary opens the next `Player N` step with a fresh random nickname starter and no avatar selected.
 4. Changing education must clear any incompatible career selection.
 5. New games are persisted only when `Start Game` is pressed.
-6. On the Take Turn screen, both `Choose Action` and `Pass` advance to the next player in seat order; only after the last player acts does the next click increment the turn number and wrap to player `1`.
+6. On the Take Turn screen, both `Choose Action` and `Pass` record a saved move for the current player and then advance to the next player in seat order; only after the last player acts does the next click increment the turn number and wrap to player `1`.
 7. `See History` opens a modal scoped to the currently active player and lists only that player's recorded actions.

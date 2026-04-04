@@ -16,6 +16,7 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
    - API mode: HTTP calls to `/games` and `/games/{id}`.
 2. UI creates/deletes games through the same adapter.
 3. In play mode, completed turn actions (`Choose Action`, `Pass`) append a saved move-history entry and then persist updated turn progression (`turnNumber`, `activePlayerIndex`) on the game.
+   - The current UI persists move history as a game-level `moveHistory` array and filters it per player when `See History` opens.
 4. In AWS, Lambda handles CRUD and writes to DynamoDB.
 
 ## Environments
@@ -29,6 +30,7 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
 - UI:
   - `src/ui/src/App.jsx`: app state + modal flow + persistence calls.
   - `src/ui/src/services/gameStorage.js`: storage adapter and API client.
+  - `src/ui/src/components/modals/PlayerHistoryModal.jsx`: player-scoped move history modal used from the turn screen.
 - API:
   - `src/api/index.js`: Lambda handler for list/create/delete games.
 - Infra:

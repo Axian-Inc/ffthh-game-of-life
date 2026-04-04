@@ -3,7 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
-- Added post-create career selection and play placeholder pages for new games.
+- Added a two-step play flow with a welcome screen, persisted turn advancement for `Choose Action` and `Pass`, and a player-scoped move-history modal.
 - Added Playwright browser automation tests for manual and CI use.
 - Added deploy/check scripts, Makefile targets, and deploy runbook.
 - Added persistent game storage with local dev persistence and an AWS-backed API for deployments.

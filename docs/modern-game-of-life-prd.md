@@ -135,9 +135,9 @@
 8.5 Reflection content should emphasize adaptation and next-step choices rather than judgment.
 
 ## 9. Important Public Interfaces and Types (Future Implementation Contract)
-9.1 `GameState` must include game metadata, campaign progression, active player index, random seed, modifier context(s), and full player state collection.
+9.1 `GameState` must include game metadata, campaign progression, active player index, random seed, modifier context(s), full player state collection, and a reviewable turn/action log. The current UI prototype may persist that log as a game-level move-history collection until the richer player-state model lands.
 
-9.2 `PlayerState` must include id, name, avatar, age, careerId, cityId, cash, debts collection, assets collection, netWorth, physicalHealth, mentalHealth, statusEffects collection, and actionHistory collection.
+9.2 `PlayerState` must include id, name, avatar, age, careerId, cityId, cash, debts collection, assets collection, netWorth, physicalHealth, mentalHealth, statusEffects collection, and actionHistory collection. Player-facing history views may be derived from either persisted per-player history or a normalized shared move log so long as the visible result is scoped correctly to the selected player.
 
 9.3 `CareerDefinition` must include id, label, startCash, startDebt, incomeModel, riskModifiers, and switchCost.
 

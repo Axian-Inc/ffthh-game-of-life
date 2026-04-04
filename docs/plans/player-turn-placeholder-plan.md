@@ -1,5 +1,7 @@
 # High-Fidelity Player Turn Placeholder
 
+Historical note: this document describes the initial placeholder-only turn-screen rollout. It is not the current source of truth for play-mode behavior now that turn actions persist state and `See History` opens a player-scoped modal. Use `docs/ARCHITECTURE.md` and `docs/game-of-life-style-guide.md` for current behavior.
+
 ## Summary
 - Add the missing turn-screen spec for [9.PlayerTurn.png](/workspaces/ffthh-game-of-life/docs/sample-images/9.PlayerTurn.png) and implement it as a desktop-only, high-fidelity UI shell that matches the mockup closely.
 - Keep the current play entry flow: `/games/:id/play` still opens the Welcome screen first, and `Let's Begin!` advances into the new player-turn screen for both created and resumed games.
