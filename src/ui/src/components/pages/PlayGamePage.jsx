@@ -139,7 +139,7 @@ const PlayGamePage = ({
         <PrimaryButton className="play-turn-action-primary" disabled={isAdvancingTurn} onClick={onChooseAction}>
           {isAdvancingTurn ? 'Advancing...' : 'Choose Action'}
         </PrimaryButton>
-        <SecondaryButton className="play-turn-action-muted" onClick={onPass}>
+        <SecondaryButton className="play-turn-action-muted" disabled={isAdvancingTurn} onClick={onPass}>
           Pass
         </SecondaryButton>
       </div>

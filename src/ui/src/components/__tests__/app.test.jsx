@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, afterEach, vi } from 'vitest'
 import App from '../../App'
@@ -141,6 +141,7 @@ describe('App create flow', () => {
         persistedGame: expect.objectContaining({
           id: 'created-game',
           name: 'Console Check',
+          moveHistory: [],
         }),
       }),
     )
@@ -170,17 +171,40 @@ describe('App create flow', () => {
         playScreen: 'turn',
         turnNumber: 1,
         activePlayerIndex: 1,
+        isHistoryOpen: false,
         persistedGame: expect.objectContaining({
           turnNumber: 1,
           activePlayerIndex: 1,
+          moveHistory: [
+            expect.objectContaining({
+              playerId: 'player-1',
+              playerName: 'Ted',
+              turnNumber: 1,
+              actionType: 'choose_action',
+              actionLabel: 'Choose Action',
+            }),
+          ],
         }),
       }),
     )
 
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
     expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
+    expect(window.life.status().persistedGame.moveHistory).toHaveLength(1)
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    await user.click(screen.getByRole('button', { name: 'See History' }))
+
+    expect(screen.getByText("Mia's Actions")).toBeInTheDocument()
+    expect(screen.getByText('No moves have been recorded for this player yet.')).toBeInTheDocument()
+    expect(window.life.status()).toMatchObject({
+      isHistoryOpen: true,
+      historyPlayerId: 'player-2',
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Close' }))
+    expect(screen.queryByText("Mia's Actions")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Pass' }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
@@ -190,12 +214,32 @@ describe('App create flow', () => {
         persistedGame: expect.objectContaining({
           turnNumber: 2,
           activePlayerIndex: 0,
+          moveHistory: [
+            expect.objectContaining({
+              actionType: 'choose_action',
+              playerId: 'player-1',
+            }),
+            expect.objectContaining({
+              actionType: 'pass',
+              playerId: 'player-2',
+              playerName: 'Mia',
+              turnNumber: 1,
+              actionLabel: 'Pass',
+            }),
+          ],
         }),
       }),
     )
 
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 2' })).toBeInTheDocument()
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
+    expect(window.life.status().persistedGame.moveHistory).toHaveLength(2)
+
+    await user.click(screen.getByRole('button', { name: 'See History' }))
+    const historyDialog = screen.getByRole('dialog')
+    expect(within(historyDialog).getByText("Ted's Actions")).toBeInTheDocument()
+    expect(within(historyDialog).getByText('Choose Action')).toBeInTheDocument()
+    expect(within(historyDialog).queryByText('Pass')).not.toBeInTheDocument()
   })
 
   it('reports resumed game state from window.life.status()', async () => {
@@ -206,6 +250,7 @@ describe('App create flow', () => {
       status: 'active',
       turnNumber: 3,
       activePlayerIndex: 1,
+      moveHistory: [],
       players: [
         { id: 'player-1', name: 'Ari', avatar: 'fox' },
         { id: 'player-2', name: 'Jo', avatar: 'bear' },
@@ -262,6 +307,14 @@ describe('App create flow', () => {
         persistedGame: expect.objectContaining({
           turnNumber: 4,
           activePlayerIndex: 0,
+          moveHistory: [
+            expect.objectContaining({
+              playerId: 'player-2',
+              playerName: 'Jo',
+              turnNumber: 3,
+              actionType: 'choose_action',
+            }),
+          ],
         }),
       }),
     )
@@ -269,5 +322,55 @@ describe('App create flow', () => {
     expect(JSON.stringify(window.life.status().persistedGame)).not.toBe(persistedBefore)
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeInTheDocument()
     expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
+  })
+
+  it('normalizes missing move history for older saved games', async () => {
+    const user = userEvent.setup()
+    const olderGame = {
+      id: 'older-game',
+      name: 'Older Save',
+      status: 'active',
+      turnNumber: 2,
+      activePlayerIndex: 0,
+      players: [
+        { id: 'player-1', name: 'Ari', avatar: 'fox' },
+        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+      ],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
+      resumable: true,
+    }
+
+    mockUseGamesState.games = [olderGame]
+    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => {
+      const updatedGame = {
+        ...updates,
+        id: gameId,
+      }
+      mockUseGamesState.games = [updatedGame]
+      window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([updatedGame]))
+      return updatedGame
+    })
+    window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([olderGame]))
+
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Resume' }))
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+
+    expect(window.life.status().persistedGame.moveHistory).toEqual([])
+
+    await user.click(screen.getByRole('button', { name: 'Pass' }))
+
+    await waitFor(() =>
+      expect(window.life.status().persistedGame.moveHistory).toEqual([
+        expect.objectContaining({
+          playerId: 'player-1',
+          actionType: 'pass',
+          actionLabel: 'Pass',
+          turnNumber: 2,
+        }),
+      ]),
+    )
   })
 })

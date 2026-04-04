@@ -1,14 +1,18 @@
 import CreateGameModal from './CreateGameModal'
 import ResumeGameModal from './ResumeGameModal'
 import DeleteGameModal from './DeleteGameModal'
+import PlayerHistoryModal from './PlayerHistoryModal'
 
 const ModalManager = ({
   view,
   activeGame,
   activeGameMode,
   pendingDelete,
+  historyPlayer,
+  historyEntries,
   onBackdropClick,
   onCloseAll,
+  onHistoryClose,
   onDeleteCancel,
   onDeleteConfirm,
   createGameProps,
@@ -35,6 +39,13 @@ const ModalManager = ({
       onBackdropClick={onBackdropClick}
       onCancel={onDeleteCancel}
       onConfirm={onDeleteConfirm}
+    />
+    <PlayerHistoryModal
+      isOpen={Boolean(historyPlayer)}
+      playerName={historyPlayer?.playerName || 'Player'}
+      entries={historyEntries}
+      onBackdropClick={onBackdropClick}
+      onClose={onHistoryClose}
     />
   </>
 )

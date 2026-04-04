@@ -4,6 +4,7 @@ import { vi } from 'vitest'
 import ModalBackdrop from '../modals/ModalBackdrop'
 import ResumeGameModal from '../modals/ResumeGameModal'
 import DeleteGameModal from '../modals/DeleteGameModal'
+import PlayerHistoryModal from '../modals/PlayerHistoryModal'
 import ModalManager from '../modals/ModalManager'
 import { createGame } from '../../test/testUtils'
 
@@ -52,6 +53,37 @@ describe('Modal components', () => {
     expect(screen.getByText('Remove “Delete Me”?')).toBeInTheDocument()
   })
 
+  it('PlayerHistoryModal renders scoped move history', () => {
+    render(
+      <PlayerHistoryModal
+        isOpen
+        playerName="Ari"
+        entries={[
+          {
+            id: 'move-2',
+            turnNumber: 2,
+            actionLabel: 'Pass',
+            createdAt: Date.UTC(2026, 3, 4, 12, 30),
+          },
+          {
+            id: 'move-1',
+            turnNumber: 1,
+            actionLabel: 'Choose Action',
+            createdAt: Date.UTC(2026, 3, 4, 11, 15),
+          },
+        ]}
+        onBackdropClick={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText("Ari's Actions")).toBeInTheDocument()
+    expect(screen.getByText('Pass')).toBeInTheDocument()
+    expect(screen.getByText('Choose Action')).toBeInTheDocument()
+    expect(screen.getByText('Turn 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  })
+
   it('ModalManager renders delete modal when pending delete exists', () => {
     const game = createGame({ name: 'Pending Delete' })
     render(
@@ -60,8 +92,11 @@ describe('Modal components', () => {
         activeGame={null}
         activeGameMode="resume"
         pendingDelete={game}
+        historyPlayer={null}
+        historyEntries={[]}
         onBackdropClick={vi.fn()}
         onCloseAll={vi.fn()}
+        onHistoryClose={vi.fn()}
         onDeleteCancel={vi.fn()}
         onDeleteConfirm={vi.fn()}
         createGameProps={{
@@ -92,5 +127,39 @@ describe('Modal components', () => {
     )
 
     expect(screen.getByText('Remove “Pending Delete”?')).toBeInTheDocument()
+  })
+
+  it('ModalManager renders player history modal when history is open', () => {
+    render(
+      <ModalManager
+        view="play"
+        activeGame={createGame()}
+        activeGameMode="resume"
+        pendingDelete={null}
+        historyPlayer={{ playerId: 'player-1', playerName: 'Ari' }}
+        historyEntries={[
+          {
+            id: 'move-1',
+            turnNumber: 1,
+            actionLabel: 'Pass',
+            createdAt: Date.UTC(2026, 3, 4, 10, 0),
+          },
+        ]}
+        onBackdropClick={vi.fn()}
+        onCloseAll={vi.fn()}
+        onHistoryClose={vi.fn()}
+        onDeleteCancel={vi.fn()}
+        onDeleteConfirm={vi.fn()}
+        createGameProps={{
+          onSubmit: vi.fn(),
+          submitError: '',
+          isSubmitting: false,
+          onStatusChange: vi.fn(),
+        }}
+      />,
+    )
+
+    expect(screen.getByText("Ari's Actions")).toBeInTheDocument()
+    expect(screen.getByText('Pass')).toBeInTheDocument()
   })
 })

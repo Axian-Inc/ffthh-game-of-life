@@ -12,6 +12,11 @@ import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
 
+const MOVE_LABELS = {
+  choose_action: 'Choose Action',
+  pass: 'Pass',
+}
+
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
     return { view: 'home' }
@@ -59,6 +64,22 @@ const normalizeActivePlayerIndex = (activePlayerIndex, playerCount) => {
   return activePlayerIndex % playerCount
 }
 
+const getPlayerKey = (player, index) => {
+  if (player?.id != null) {
+    return String(player.id)
+  }
+  return `player-${index}`
+}
+
+const getMoveHistory = (game) => (Array.isArray(game?.moveHistory) ? game.moveHistory : [])
+
+const generateMoveId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  return `move-${Date.now()}-${Math.floor(Math.random() * 100000)}`
+}
+
 function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
@@ -72,13 +93,25 @@ function App() {
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
   const newGameCardRef = useRef(null)
   const newGameButtonRef = useRef(null)
-  const { state, openCreate, openSession, openPlay, openDelete, closeAll } = useModalState()
-  const { view, activeGame, activeGameMode, pendingDelete } = state
+  const { state, openCreate, openSession, openPlay, openDelete, openHistory, closeHistory, closeAll } =
+    useModalState()
+  const { view, activeGame, activeGameMode, pendingDelete, historyPlayer } = state
   const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
     useGames()
   const previousViewRef = useRef(view)
   const currentActiveGame =
     activeGame?.id != null ? games.find((game) => game.id === String(activeGame.id)) || activeGame : activeGame
+  const currentPlayers = Array.isArray(currentActiveGame?.players) ? currentActiveGame.players : []
+  const currentPlayerCount = currentPlayers.length
+  const currentActivePlayerIndex = normalizeActivePlayerIndex(currentActiveGame?.activePlayerIndex, currentPlayerCount)
+  const currentActivePlayer = currentPlayers[currentActivePlayerIndex] || null
+  const currentActivePlayerKey = currentActivePlayer ? getPlayerKey(currentActivePlayer, currentActivePlayerIndex) : null
+  const historyEntries = historyPlayer
+    ? getMoveHistory(currentActiveGame)
+        .filter((entry) => entry.playerId === historyPlayer.playerId)
+        .sort((left, right) => right.createdAt - left.createdAt)
+    : []
+
   const clearDebugState = useCallback(() => {
     setEntrySource('none')
     setWizardDraft(null)
@@ -125,6 +158,7 @@ function App() {
         })),
         turnNumber: 1,
         activePlayerIndex: 0,
+        moveHistory: [],
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
@@ -204,36 +238,78 @@ function App() {
 
   const handlePlayPlaceholderAction = useCallback(() => {}, [])
 
-  const handleAdvanceTurn = useCallback(async () => {
+  const handleRecordMoveAndAdvanceTurn = useCallback(
+    async (actionType) => {
+      if (isAdvancingTurn || !currentActiveGame) {
+        return
+      }
+
+      const players = Array.isArray(currentActiveGame.players) ? currentActiveGame.players : []
+      if (players.length === 0) {
+        return
+      }
+
+      const activePlayerIndex = normalizeActivePlayerIndex(currentActiveGame.activePlayerIndex, players.length)
+      const activePlayer = players[activePlayerIndex] || null
+      if (!activePlayer) {
+        return
+      }
+
+      const currentTurnNumber = normalizeTurnNumber(currentActiveGame.turnNumber)
+      const nextPlayerIndex = (activePlayerIndex + 1) % players.length
+      const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
+      const timestamp = Date.now()
+      const nextMoveHistory = [
+        ...getMoveHistory(currentActiveGame),
+        {
+          id: generateMoveId(),
+          playerId: getPlayerKey(activePlayer, activePlayerIndex),
+          playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
+          turnNumber: currentTurnNumber,
+          actionType,
+          actionLabel: MOVE_LABELS[actionType] || 'Move',
+          createdAt: timestamp,
+        },
+      ]
+
+      setIsAdvancingTurn(true)
+
+      try {
+        const updatedGame = await updateGame(currentActiveGame.id, {
+          ...currentActiveGame,
+          turnNumber: nextTurnNumber,
+          activePlayerIndex: nextPlayerIndex,
+          moveHistory: nextMoveHistory,
+          lastUpdated: timestamp,
+        })
+        openPlay(updatedGame)
+      } finally {
+        setIsAdvancingTurn(false)
+      }
+    },
+    [isAdvancingTurn, currentActiveGame, updateGame, openPlay],
+  )
+
+  const handleAdvanceTurn = useCallback(() => {
+    return handleRecordMoveAndAdvanceTurn('choose_action')
+  }, [handleRecordMoveAndAdvanceTurn])
+
+  const handlePassTurn = useCallback(() => {
+    return handleRecordMoveAndAdvanceTurn('pass')
+  }, [handleRecordMoveAndAdvanceTurn])
+
+  const handleOpenHistory = useCallback(() => {
     if (isAdvancingTurn || !currentActiveGame) {
       return
     }
-
-    const players = Array.isArray(currentActiveGame.players) ? currentActiveGame.players : []
-    if (players.length === 0) {
+    if (!currentActivePlayerKey) {
       return
     }
-
-    const currentTurnNumber = normalizeTurnNumber(currentActiveGame.turnNumber)
-    const currentActivePlayerIndex = normalizeActivePlayerIndex(currentActiveGame.activePlayerIndex, players.length)
-    const nextPlayerIndex = (currentActivePlayerIndex + 1) % players.length
-    const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
-    const timestamp = Date.now()
-
-    setIsAdvancingTurn(true)
-
-    try {
-      const updatedGame = await updateGame(currentActiveGame.id, {
-        ...currentActiveGame,
-        turnNumber: nextTurnNumber,
-        activePlayerIndex: nextPlayerIndex,
-        lastUpdated: timestamp,
-      })
-      openPlay(updatedGame)
-    } finally {
-      setIsAdvancingTurn(false)
-    }
-  }, [isAdvancingTurn, currentActiveGame, updateGame, openPlay])
+    openHistory({
+      playerId: currentActivePlayerKey,
+      playerName: currentActivePlayer?.name?.trim() || `Player ${currentActivePlayerIndex + 1}`,
+    })
+  }, [isAdvancingTurn, currentActiveGame, currentActivePlayer, currentActivePlayerIndex, currentActivePlayerKey, openHistory])
 
   const handleViewResults = (game) => {
     openSession(game, 'results')
@@ -308,7 +384,7 @@ function App() {
   }, [newGameId, view, isLoading, setNewGameId])
 
   useEffect(() => {
-    if (view !== 'session' && !pendingDelete) {
+    if (view !== 'session' && !pendingDelete && !historyPlayer) {
       return
     }
 
@@ -317,13 +393,17 @@ function App() {
         return
       }
       if (event.key === 'Escape') {
+        if (historyPlayer) {
+          closeHistory()
+          return
+        }
         closeAll()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [view, pendingDelete, isCreating, closeAll])
+  }, [view, pendingDelete, historyPlayer, isCreating, closeHistory, closeAll])
 
   useEffect(() => {
     if (previousViewRef.current === 'create' && view === 'home') {
@@ -353,13 +433,15 @@ function App() {
       activeGame: currentActiveGame,
       turnNumber: normalizeTurnNumber(currentActiveGame?.turnNumber),
       activePlayerIndex: normalizeActivePlayerIndex(currentActiveGame?.activePlayerIndex, playerCount),
+      isHistoryOpen: Boolean(historyPlayer),
+      historyPlayerId: historyPlayer?.playerId || null,
       persistedGame,
       storageMode,
       storageKey,
       allGames,
       wizardDraft,
     }, {})
-  }, [view, activeGameMode, entrySource, playScreen, currentActiveGame, games, wizardDraft])
+  }, [view, activeGameMode, entrySource, playScreen, currentActiveGame, games, wizardDraft, historyPlayer])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -380,6 +462,10 @@ function App() {
       return
     }
     if (event.target === event.currentTarget) {
+      if (historyPlayer) {
+        closeHistory()
+        return
+      }
       closeAll()
     }
   }
@@ -391,8 +477,11 @@ function App() {
       activeGame={activeGame}
       activeGameMode={activeGameMode}
       pendingDelete={pendingDelete}
+      historyPlayer={historyPlayer}
+      historyEntries={historyEntries}
       onBackdropClick={handleBackdropClick}
       onCloseAll={handleBackClick}
+      onHistoryClose={closeHistory}
       onDeleteCancel={handleDeleteCancel}
       onDeleteConfirm={handleDeleteConfirm}
       createGameProps={{
@@ -404,7 +493,7 @@ function App() {
     />
   )
 
-  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete)
+  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete) || Boolean(historyPlayer)
 
   return (
     <PageShell isBlurred={isModalOpen} modals={modals}>
@@ -440,9 +529,9 @@ function App() {
             isAdvancingTurn={isAdvancingTurn}
             onChooseAction={handleAdvanceTurn}
             onNextPlayer={handlePlayPlaceholderAction}
-            onPass={handlePlayPlaceholderAction}
+            onPass={handlePassTurn}
             onPreviousPlayer={handlePlayPlaceholderAction}
-            onSeeHistory={handlePlayPlaceholderAction}
+            onSeeHistory={handleOpenHistory}
           />
         )
       ) : null}

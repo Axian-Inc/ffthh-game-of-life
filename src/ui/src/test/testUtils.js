@@ -16,6 +16,7 @@ export const createGame = (overrides = {}) => ({
   players: overrides.players ?? [createPlayer()],
   turnNumber: overrides.turnNumber ?? 1,
   activePlayerIndex: overrides.activePlayerIndex ?? 0,
+  moveHistory: overrides.moveHistory ?? [],
   lastUpdated: overrides.lastUpdated ?? Date.now(),
   createdAt: overrides.createdAt ?? Date.now(),
   resumable: overrides.resumable ?? true,

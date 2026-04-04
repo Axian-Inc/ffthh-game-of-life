@@ -153,4 +153,5 @@ Visual rules:
 3. Adding a player from summary opens the next `Player N` step with a fresh random nickname starter and no avatar selected.
 4. Changing education must clear any incompatible career selection.
 5. New games are persisted only when `Start Game` is pressed.
-6. On the Take Turn screen, `Choose Action` advances to the next player in seat order; only after the last player acts does the next click increment the turn number and wrap to player `1`.
+6. On the Take Turn screen, both `Choose Action` and `Pass` advance to the next player in seat order; only after the last player acts does the next click increment the turn number and wrap to player `1`.
+7. `See History` opens a modal scoped to the currently active player and lists only that player's recorded actions.

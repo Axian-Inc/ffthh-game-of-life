@@ -20,6 +20,24 @@ const normalizeActivePlayerIndex = (activePlayerIndex, playerCount) => {
   return activePlayerIndex % playerCount
 }
 
+const normalizeMoveHistory = (moveHistory) => {
+  if (!Array.isArray(moveHistory)) {
+    return []
+  }
+
+  return moveHistory.map((entry, index) => ({
+    id: entry?.id != null ? String(entry.id) : `move-${index}`,
+    playerId: entry?.playerId != null ? String(entry.playerId) : '',
+    playerName: typeof entry?.playerName === 'string' && entry.playerName.trim() ? entry.playerName : 'Player',
+    turnNumber: normalizeTurnNumber(entry?.turnNumber),
+    actionType:
+      typeof entry?.actionType === 'string' && entry.actionType.trim() ? entry.actionType : 'choose_action',
+    actionLabel:
+      typeof entry?.actionLabel === 'string' && entry.actionLabel.trim() ? entry.actionLabel : 'Choose Action',
+    createdAt: Number.isFinite(entry?.createdAt) ? entry.createdAt : 0,
+  }))
+}
+
 const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
@@ -28,6 +46,7 @@ const normalizeGame = (game) => ({
     game.activePlayerIndex,
     Array.isArray(game.players) ? game.players.length : 0,
   ),
+  moveHistory: normalizeMoveHistory(game.moveHistory),
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)

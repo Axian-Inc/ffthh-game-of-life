@@ -9,6 +9,8 @@ describe('Page components', () => {
   it('renders PlayGamePage with live player turn content', async () => {
     const user = userEvent.setup()
     const onChooseAction = vi.fn()
+    const onPass = vi.fn()
+    const onSeeHistory = vi.fn()
     const game = createGame({
       players: [
         { id: 'player-1', name: 'Ari', avatar: 'fox' },
@@ -18,7 +20,7 @@ describe('Page components', () => {
       activePlayerIndex: 1,
     })
 
-    render(<PlayGamePage game={game} onChooseAction={onChooseAction} />)
+    render(<PlayGamePage game={game} onChooseAction={onChooseAction} onPass={onPass} onSeeHistory={onSeeHistory} />)
 
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 3' })).toBeInTheDocument()
     expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
@@ -26,9 +28,17 @@ describe('Page components', () => {
     expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Choose Action' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pass' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'See History' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Choose Action' }))
     expect(onChooseAction).toHaveBeenCalledTimes(1)
+
+    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    expect(onPass).toHaveBeenCalledTimes(1)
+
+    await user.click(screen.getByRole('button', { name: 'See History' }))
+    expect(onSeeHistory).toHaveBeenCalledTimes(1)
   })
 
   it('renders WelcomeToLifePage and handles begin navigation', async () => {
