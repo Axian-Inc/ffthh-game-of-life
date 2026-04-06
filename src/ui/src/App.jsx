@@ -7,9 +7,18 @@ import GameErrorState from './components/games/GameErrorState'
 import GameGrid from './components/games/GameGrid'
 import ModalManager from './components/modals/ModalManager'
 import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
+import TakeTurnPage from './components/pages/TakeTurnPage'
+import TurnSummaryPage from './components/pages/TurnSummaryPage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
+import {
+  advanceFromSummary,
+  beginGameFromWelcome,
+  ensurePlayableGame,
+  initializeGameForPlay,
+  resolveTurn,
+} from './services/gameplay'
 
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
@@ -46,6 +55,8 @@ function App() {
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [isSavingTurn, setIsSavingTurn] = useState(false)
+  const [turnError, setTurnError] = useState('')
   const [entrySource, setEntrySource] = useState('none')
   const [wizardDraft, setWizardDraft] = useState(null)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
@@ -54,11 +65,12 @@ function App() {
   const newGameButtonRef = useRef(null)
   const { state, openCreate, openSession, openPlay, openDelete, closeAll } = useModalState()
   const { view, activeGame, activeGameMode, pendingDelete } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, newGameId, setNewGameId } = useGames()
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } = useGames()
   const previousViewRef = useRef(view)
   const clearDebugState = useCallback(() => {
     setEntrySource('none')
     setWizardDraft(null)
+    setTurnError('')
   }, [])
 
   const handleCreateClick = () => {
@@ -91,7 +103,7 @@ function App() {
 
     try {
       const timestamp = Date.now()
-      const newGame = {
+      const newGame = initializeGameForPlay({
         name: payloadName,
         status: 'active',
         players: payloadPlayers.map((player) => ({
@@ -101,7 +113,7 @@ function App() {
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
-      }
+      })
       const createdGame = await createGame(newGame)
       setEntrySource('create')
       setWizardDraft(null)
@@ -166,7 +178,8 @@ function App() {
 
     setEntrySource('resume')
     setWizardDraft(null)
-    openPlay(game)
+    setTurnError('')
+    openPlay(ensurePlayableGame(game))
   }
 
   const handleViewResults = (game) => {
@@ -211,7 +224,7 @@ function App() {
 
     setEntrySource('route')
     setWizardDraft(null)
-    openPlay(targetGame)
+    openPlay(ensurePlayableGame(targetGame))
 
     setRouteRequest(null)
     setHasHydratedRoute(true)
@@ -262,6 +275,69 @@ function App() {
     }
     previousViewRef.current = view
   }, [view])
+
+  const persistActiveGame = useCallback(
+    async (nextGame) => {
+      const persistedGame = await updateGame(nextGame.id, nextGame)
+      openPlay(ensurePlayableGame(persistedGame))
+      return persistedGame
+    },
+    [openPlay, updateGame],
+  )
+
+  const handleBeginGame = useCallback(async () => {
+    if (!activeGame) {
+      return
+    }
+
+    setIsSavingTurn(true)
+    setTurnError('')
+
+    try {
+      await persistActiveGame(beginGameFromWelcome(activeGame))
+    } catch {
+      setTurnError('We could not start that turn yet. Please try again.')
+    } finally {
+      setIsSavingTurn(false)
+    }
+  }, [activeGame, persistActiveGame])
+
+  const handleCompleteTurn = useCallback(
+    async (actionId) => {
+      if (!activeGame) {
+        return
+      }
+
+      setIsSavingTurn(true)
+      setTurnError('')
+
+      try {
+        await persistActiveGame(resolveTurn(activeGame, actionId))
+      } catch {
+        setTurnError('We could not save that turn yet. Please try again.')
+      } finally {
+        setIsSavingTurn(false)
+      }
+    },
+    [activeGame, persistActiveGame],
+  )
+
+  const handleContinueFromSummary = useCallback(async () => {
+    if (!activeGame) {
+      return
+    }
+
+    setIsSavingTurn(true)
+    setTurnError('')
+
+    try {
+      await persistActiveGame(advanceFromSummary(activeGame))
+    } catch {
+      setTurnError('We could not move to the next turn yet. Please try again.')
+    } finally {
+      setIsSavingTurn(false)
+    }
+  }, [activeGame, persistActiveGame])
 
   const getLifeStatus = useCallback(() => {
     const { storageMode, storageKey, allGames } = getGameStorageDebugSnapshot(games)
@@ -353,7 +429,30 @@ function App() {
         </>
       ) : null}
       {view === 'play' ? (
-        <WelcomeToLifePage game={activeGame} onBegin={handleBackClick} />
+        activeGame?.playState?.view === 'summary' ? (
+          <TurnSummaryPage
+            game={activeGame}
+            onContinue={handleContinueFromSummary}
+            onHome={handleBackClick}
+            isSaving={isSavingTurn}
+            summaryError={turnError}
+          />
+        ) : activeGame?.playState?.view === 'turn' ? (
+          <TakeTurnPage
+            game={activeGame}
+            onCompleteTurn={handleCompleteTurn}
+            onHome={handleBackClick}
+            isSaving={isSavingTurn}
+            turnError={turnError}
+          />
+        ) : (
+          <WelcomeToLifePage
+            game={activeGame}
+            onBegin={handleBeginGame}
+            isStarting={isSavingTurn}
+            startError={turnError}
+          />
+        )
       ) : null}
     </PageShell>
   )

@@ -2,12 +2,15 @@ import { Sparkles } from 'lucide-react'
 import PrimaryButton from '../ui/PrimaryButton'
 import './welcome-to-life.css'
 
-const WelcomeToLifePage = ({ onBegin }) => (
+const WelcomeToLifePage = ({ game, onBegin, isStarting = false, startError = '' }) => (
   <section className="welcome-life-page">
     <div className="welcome-life-icon" aria-hidden="true">
       <Sparkles aria-hidden="true" />
     </div>
     <h2>Welcome to Life!</h2>
+    <p className="welcome-life-game-name">
+      {game?.name || 'Your game'} is ready. The first month starts after this screen.
+    </p>
     <div className="welcome-life-sections">
       <section>
         <h3>A Month at a Time</h3>
@@ -40,7 +43,14 @@ const WelcomeToLifePage = ({ onBegin }) => (
         was and what decisions influenced it. Your choices determine how you adapt!
       </p>
     </section>
-    <PrimaryButton onClick={onBegin}>Let&apos;s Begin!</PrimaryButton>
+    <PrimaryButton disabled={isStarting} onClick={onBegin}>
+      {isStarting ? 'Saving...' : "Let's Begin!"}
+    </PrimaryButton>
+    {startError ? (
+      <p className="field-error" role="alert">
+        {startError}
+      </p>
+    ) : null}
   </section>
 )
 

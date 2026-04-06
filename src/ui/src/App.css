@@ -1026,6 +1026,122 @@ h1 {
   font-weight: 600;
 }
 
+.turn-hero-panel,
+.turn-player-header,
+.turn-panel-heading {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.turn-player-header {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+
+.turn-player-header h3,
+.turn-panel-heading h3 {
+  margin: 0;
+  color: var(--text-1);
+}
+
+.turn-player-header p,
+.turn-panel-heading p {
+  margin: 0;
+  color: var(--text-2);
+}
+
+.turn-player-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  background: rgba(92, 198, 212, 0.18);
+  display: grid;
+  place-items: center;
+  font-size: 1.75rem;
+}
+
+.turn-player-avatar .player-avatar-render {
+  font-size: 1.75rem;
+}
+
+.turn-stats-grid,
+.turn-summary-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.turn-stats-grid div,
+.turn-summary-grid div {
+  padding: var(--space-4);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border-soft);
+}
+
+.turn-stats-grid dt,
+.turn-summary-grid dt {
+  margin-bottom: 8px;
+  color: var(--text-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.turn-stats-grid dd,
+.turn-summary-grid dd {
+  margin: 0;
+  color: var(--text-1);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.turn-baseline-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 12px;
+  color: var(--text-1);
+}
+
+.turn-action-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.turn-action-card {
+  border-radius: 20px;
+  border: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 242, 234, 0.92) 100%);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.turn-action-card h4,
+.turn-action-card p,
+.turn-action-card strong {
+  margin: 0;
+}
+
+.turn-action-card h4 {
+  color: var(--text-1);
+  font-size: 1.1rem;
+}
+
+.turn-action-card p {
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.turn-action-card strong {
+  color: var(--text-1);
+  line-height: 1.5;
+}
+
 @media (max-width: 720px) {
   .game-name-row {
     grid-template-columns: minmax(0, 1fr);
@@ -1047,5 +1163,9 @@ h1 {
   .play-game-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .turn-player-header {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
