@@ -12,6 +12,13 @@ Lightweight, task-focused log for what changed, why, and where.
 - Follow-ups:
 
 ## 2026-05-07
+- Task: Enable OpenCode websearch in the devcontainer.
+- Why: OpenCode needs `OPENCODE_ENABLE_EXA=1` plus `permission.websearch = "allow"` for websearch to be available by default.
+- What changed: Added the OpenCode Exa environment flag to the devcontainer and a post-create helper that creates or updates the container user's OpenCode config without replacing unrelated settings.
+- Paths: .devcontainer/devcontainer.json, .devcontainer/post-create.sh, .devcontainer/configure-opencode.sh, README.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: bash -n .devcontainer/post-create.sh .devcontainer/install-ai-clis.sh .devcontainer/configure-opencode.sh, .devcontainer/configure-opencode.sh /tmp/opencode.json
+
+## 2026-05-07
 - Task: Provision AI CLIs in the devcontainer.
 - Why: Fresh devcontainer clones should have current Codex CLI and OpenCode available without host setup.
 - What changed: Added post-create scripts that install apt tools, configure Git LFS, install or update `@openai/codex` and `opencode-ai` from npm only when needed, and persist npm cache downloads across rebuilds.

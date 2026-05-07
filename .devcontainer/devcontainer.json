@@ -39,6 +39,7 @@
     "AWS_PROFILE": "default",
     "AWS_REGION": "us-west-2",
     "CHROME_BIN": "/usr/bin/chromium",
+    "OPENCODE_ENABLE_EXA": "1",
   },
 
   // VS Code-specific customizations

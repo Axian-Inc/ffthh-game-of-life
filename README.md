@@ -10,7 +10,7 @@ Modern Game of Life is a web implementation of a Game of Life-inspired education
 
 ## Optional dev container
 
-The repository includes a VS Code dev container with Terraform, AWS CLI, Node.js, Chromium, Git LFS, Codex CLI, and OpenCode preinstalled for a consistent local environment. Codex CLI and OpenCode are installed from npm during container creation and reuse a persistent npm cache across rebuilds.
+The repository includes a VS Code dev container with Terraform, AWS CLI, Node.js, Chromium, Git LFS, Codex CLI, and OpenCode preinstalled for a consistent local environment. Codex CLI and OpenCode are installed from npm during container creation and reuse a persistent npm cache across rebuilds. OpenCode websearch is enabled by default inside the container.
 
 ## First-time setup
 

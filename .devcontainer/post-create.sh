@@ -9,4 +9,7 @@ sudo chown -R vscode:vscode /home/vscode/.npm
 
 git lfs install --skip-repo
 
-bash "$(dirname "${BASH_SOURCE[0]}")/install-ai-clis.sh"
+exec_dir="$(dirname "${BASH_SOURCE[0]}")"
+
+bash "$exec_dir/configure-opencode.sh"
+bash "$exec_dir/install-ai-clis.sh"

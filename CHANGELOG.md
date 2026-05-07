@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Enabled OpenCode websearch by default in the devcontainer.
 - Added devcontainer setup for current Codex CLI and OpenCode installs with a persistent npm cache.
 - Added a two-step play flow with a welcome screen, persisted turn advancement for `Choose Action` and `Pass`, and a player-scoped move-history modal.
 - Added Playwright browser automation tests for manual and CI use.
