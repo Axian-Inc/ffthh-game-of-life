@@ -11,6 +11,13 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-05-07
+- Task: Provision AI CLIs in the devcontainer.
+- Why: Fresh devcontainer clones should have current Codex CLI and OpenCode available without host setup.
+- What changed: Added post-create scripts that install apt tools, configure Git LFS, install or update `@openai/codex` and `opencode-ai` from npm only when needed, and persist npm cache downloads across rebuilds.
+- Paths: .devcontainer/devcontainer.json, .devcontainer/post-create.sh, .devcontainer/install-ai-clis.sh, README.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: bash -n .devcontainer/post-create.sh .devcontainer/install-ai-clis.sh, .devcontainer/install-ai-clis.sh
+
 ## 2025-02-14
 - Task: Add persistent storage for games (local + AWS).
 - Why: Keep game lists across sessions in dev and production.

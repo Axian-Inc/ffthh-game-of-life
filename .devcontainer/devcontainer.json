@@ -8,7 +8,10 @@
   // Add tools via Dev Container Features
   "features": {
     // Terraform CLI
-    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "tflint": "none",
+      "terragrunt": "none"
+    },
 
     // AWS CLI v2
     "ghcr.io/devcontainers/features/aws-cli:1": {},
@@ -22,8 +25,13 @@
     }
   },
 
+  // Persist npm tarballs across dev container rebuilds to avoid repeated CLI downloads.
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-npm-cache,target=/home/vscode/.npm,type=volume"
+  ],
+
   // Commands to run after the container is created
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y chromium chromium-driver xvfb git-lfs && git lfs install --skip-repo",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
 
   // Environment inside the container
   "remoteEnv": {
