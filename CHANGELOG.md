@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Documented the current gameplay implementation status and next PRD-aligned simulation slice for future agents.
 - Fixed devcontainer OpenCode install reliability on Linux ARM64 by explicitly installing the matching platform binary package.
 - Enabled OpenCode websearch by default in the devcontainer.
 - Added devcontainer setup for current Codex CLI and OpenCode installs with a persistent npm cache.

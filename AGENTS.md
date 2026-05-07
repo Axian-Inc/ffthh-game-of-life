@@ -22,6 +22,7 @@
   - `terraform -chdir=terraform output -raw cloudfront_domain_name`
 
 ## Docs for Fast Context
+- Start with `docs/modern-game-of-life-prd.md` section 11 for the current implementation status and the recommended next product slice.
 - `NOTES.md` for task-level “what/why/where”.
 - `CHANGELOG.md` for user-visible and operational changes.
 - `scripts/README.md` for deploy prerequisites and usage.

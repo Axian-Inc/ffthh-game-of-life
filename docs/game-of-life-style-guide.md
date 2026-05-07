@@ -120,6 +120,8 @@ Required anatomy:
 6. `Start Game` and `Resume` both land here first.
 
 ## 6. Player Turn (`9.PlayerTurn.png`)
+Implementation status: the turn number, active player subtitle, seat-order rail, turn actions, and active-player history modal are wired to persisted game state. The financial, job, health, location, and modifier values remain placeholder UI data until the simulation state described in PRD section 11.3 is implemented.
+
 Required anatomy:
 1. Keep the same warm off-white canvas and center a stacked play layout inside the desktop viewport.
 2. Center the title above the subtitle; the reference screenshot shows `Modern Game of Life - Turn 10` and `Jack's Turn`, but implementation must substitute the persisted turn number and active player's name.

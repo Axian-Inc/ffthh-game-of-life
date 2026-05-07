@@ -12,6 +12,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Follow-ups:
 
 ## 2026-05-07
+- Task: Document current gameplay status and next PRD implementation slice.
+- Why: Future agents need a clear handoff for what is done and what to build next from the PRD.
+- What changed: Added a PRD implementation tracker, documented current persisted game shape, clarified placeholder player-turn values, and pointed agents to the next simulation-foundation task.
+- Paths: docs/modern-game-of-life-prd.md, docs/ARCHITECTURE.md, docs/game-of-life-style-guide.md, AGENTS.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: Documentation-only change; no test command required.
+- Follow-ups: Implement canonical player state initialization and no-action monthly turn resolution before building the full action picker.
+
+## 2026-05-07
 - Task: Fix OpenCode devcontainer install on Linux ARM64.
 - Why: `opencode-ai` can fail during postinstall when the matching platform binary optional dependency is not present.
 - What changed: Updated the AI CLI installer to select an OpenCode version with a published platform binary, install that binary explicitly with optional dependencies enabled, and repair broken installs even when the package version appears current.
