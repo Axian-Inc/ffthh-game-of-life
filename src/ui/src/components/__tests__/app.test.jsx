@@ -142,11 +142,21 @@ describe('App create flow', () => {
           id: 'created-game',
           name: 'Console Check',
           moveHistory: [],
+          turnHistory: [],
         }),
       }),
     )
 
     expect(window.life.status().persistedGame.players).toHaveLength(2)
+    expect(window.life.status().persistedGame.players[0]).toMatchObject({
+      id: 'player-1',
+      careerId: 'content-creator',
+      cityId: 'suburbia',
+      cash: 7500,
+      netWorth: 7500,
+      physicalHealth: 73,
+      mentalHealth: 72,
+    })
     expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
@@ -225,6 +235,23 @@ describe('App create flow', () => {
               playerName: 'Mia',
               turnNumber: 1,
               actionLabel: 'Pass',
+            }),
+          ],
+          turnHistory: [
+            expect.objectContaining({
+              playerId: 'player-2',
+              playerName: 'Mia',
+              turnNumber: 1,
+              actionType: 'pass',
+              phases: expect.arrayContaining([
+                expect.objectContaining({ id: 'net-worth' }),
+                expect.objectContaining({ id: 'debt-updates' }),
+                expect.objectContaining({ id: 'health' }),
+              ]),
+              postTurnSnapshot: expect.objectContaining({
+                cash: expect.any(Number),
+                netWorth: expect.any(Number),
+              }),
             }),
           ],
         }),
