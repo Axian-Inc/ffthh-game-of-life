@@ -50,7 +50,7 @@ test('window.life.status reports created game state after Start Game', async ({ 
   await buildPlayer(page, {
     nickname: 'Ted',
     avatar: 'Fox',
-    city: 'Suburbia',
+    city: 'Denver',
     track: 'Self-Taught',
     career: 'Content Creator',
   })
@@ -61,7 +61,7 @@ test('window.life.status reports created game state after Start Game', async ({ 
   await buildPlayer(page, {
     nickname: 'Mia',
     avatar: 'Bear',
-    city: 'Metro',
+    city: 'New York City',
     track: 'Degree',
     career: 'Software Engineer',
   })

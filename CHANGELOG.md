@@ -3,6 +3,9 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Added legacy player-state normalization and real no-action monthly turn resolution for `Pass`.
+- Initialized new-game players with persisted simulation state including cash, debt, net worth, health, status effects, and action history.
+- Added canonical city, education track, and career definition data for the upcoming simulation foundation.
 - Documented the current gameplay implementation status and next PRD-aligned simulation slice for future agents.
 - Fixed devcontainer OpenCode install reliability on Linux ARM64 by explicitly installing the matching platform binary package.
 - Enabled OpenCode websearch by default in the devcontainer.

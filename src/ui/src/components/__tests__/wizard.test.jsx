@@ -61,7 +61,7 @@ describe('NewGameWizard', () => {
     expect(nextButton).toBeEnabled()
 
     await user.click(nextButton)
-    await user.click(screen.getByRole('button', { name: /Suburbia/i }))
+    await user.click(screen.getByRole('button', { name: /Denver/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
     expect(screen.getByRole('heading', { name: 'Education Track' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Self-Taught/i }))
@@ -100,7 +100,7 @@ describe('NewGameWizard', () => {
     await buildPlayer(user, {
       nickname: 'Ted',
       avatar: 'Fox',
-      city: 'Suburbia',
+      city: 'Denver',
       track: 'Self-Taught',
       career: 'Content Creator',
     })
@@ -110,7 +110,7 @@ describe('NewGameWizard', () => {
     await buildPlayer(user, {
       nickname: 'Mia',
       avatar: 'Bear',
-      city: 'Metro',
+      city: 'New York City',
       track: 'Degree',
       career: 'Software Engineer',
     })

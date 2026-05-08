@@ -111,7 +111,7 @@ describe('App create flow', () => {
     await user.type(screen.getByRole('textbox', { name: 'Nickname' }), 'Ted')
     await user.click(screen.getByRole('button', { name: 'Fox' }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
-    await user.click(screen.getByRole('button', { name: /Suburbia/i }))
+    await user.click(screen.getByRole('button', { name: /Denver/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
     await user.click(screen.getByRole('button', { name: /Self-Taught/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
@@ -122,7 +122,7 @@ describe('App create flow', () => {
     await user.type(screen.getByRole('textbox', { name: 'Nickname' }), 'Mia')
     await user.click(screen.getByRole('button', { name: 'Bear' }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
-    await user.click(screen.getByRole('button', { name: /Metro/i }))
+    await user.click(screen.getByRole('button', { name: /New York City/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
     await user.click(screen.getByRole('button', { name: /Degree/i }))
     await user.click(screen.getByRole('button', { name: /Next/i }))
@@ -147,6 +147,38 @@ describe('App create flow', () => {
     )
 
     expect(window.life.status().persistedGame.players).toHaveLength(2)
+    expect(window.life.status().persistedGame.players).toEqual([
+      expect.objectContaining({
+        id: 'player-1',
+        name: 'Ted',
+        cityId: 'suburbia',
+        jobId: 'content-creator',
+        careerId: 'content-creator',
+        cash: 5000,
+        debts: [],
+        assets: [],
+        netWorth: 5000,
+        physicalHealth: 75,
+        mentalHealth: 74,
+        statusEffects: [],
+        actionHistory: [],
+      }),
+      expect.objectContaining({
+        id: 'player-2',
+        name: 'Mia',
+        cityId: 'metro',
+        jobId: 'software-engineer',
+        careerId: 'software-engineer',
+        cash: 8000,
+        debts: [expect.objectContaining({ balance: 30000, type: 'student-loan' })],
+        assets: [],
+        netWorth: -22000,
+        physicalHealth: 74,
+        mentalHealth: 73,
+        statusEffects: [],
+        actionHistory: [],
+      }),
+    ])
     expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
@@ -225,6 +257,22 @@ describe('App create flow', () => {
               playerName: 'Mia',
               turnNumber: 1,
               actionLabel: 'Pass',
+              turnResolution: expect.objectContaining({
+                preTurnSnapshot: expect.objectContaining({ cash: 8000, netWorth: -22000 }),
+                postTurnSnapshot: expect.objectContaining({ cash: 11975, netWorth: -17875 }),
+              }),
+            }),
+          ],
+          players: [
+            expect.objectContaining({ id: 'player-1', cash: 5000, netWorth: 5000 }),
+            expect.objectContaining({
+              id: 'player-2',
+              cash: 11975,
+              debts: [expect.objectContaining({ balance: 29850 })],
+              netWorth: -17875,
+              physicalHealth: 73,
+              mentalHealth: 71,
+              actionHistory: [expect.objectContaining({ actionType: 'pass', turnNumber: 1 })],
             }),
           ],
         }),

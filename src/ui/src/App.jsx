@@ -11,6 +11,8 @@ import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
+import { initializePlayerState } from './simulation/playerState'
+import { resolvePassTurn } from './simulation/turnResolution'
 
 const MOVE_LABELS = {
   choose_action: 'Choose Action',
@@ -152,10 +154,7 @@ function App() {
       const newGame = {
         name: payloadName,
         status: 'active',
-        players: payloadPlayers.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-        })),
+        players: payloadPlayers.map((player) => initializePlayerState(player)),
         turnNumber: 1,
         activePlayerIndex: 0,
         moveHistory: [],
@@ -259,6 +258,18 @@ function App() {
       const nextPlayerIndex = (activePlayerIndex + 1) % players.length
       const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
       const timestamp = Date.now()
+      const passResolution =
+        actionType === 'pass'
+          ? resolvePassTurn({
+              game: currentActiveGame,
+              activePlayerIndex,
+              turnNumber: currentTurnNumber,
+              timestamp,
+            })
+          : null
+      const nextPlayers = passResolution
+        ? players.map((player, index) => (index === activePlayerIndex ? passResolution.updatedPlayer : player))
+        : players
       const nextMoveHistory = [
         ...getMoveHistory(currentActiveGame),
         {
@@ -269,6 +280,7 @@ function App() {
           actionType,
           actionLabel: MOVE_LABELS[actionType] || 'Move',
           createdAt: timestamp,
+          ...(passResolution ? { turnResolution: passResolution.turnResolution } : {}),
         },
       ]
 
@@ -277,6 +289,7 @@ function App() {
       try {
         const updatedGame = await updateGame(currentActiveGame.id, {
           ...currentActiveGame,
+          players: nextPlayers,
           turnNumber: nextTurnNumber,
           activePlayerIndex: nextPlayerIndex,
           moveHistory: nextMoveHistory,

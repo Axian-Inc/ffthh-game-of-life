@@ -11,6 +11,27 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-05-08
+- Task: Add legacy normalization and no-action `Pass` turn resolution.
+- Why: Existing saved games need simulation-ready player state, and `Pass` should advance a real monthly turn before the full action picker is built.
+- What changed: Normalized players at storage boundaries, preserved rich move-history details, added deterministic pass resolution for income, living costs, debt interest/payment, health drift, empty event/action phases, and persisted turn-resolution snapshots on pass moves.
+- Paths: src/ui/src/simulation/playerState.js, src/ui/src/simulation/turnResolution.js, src/ui/src/services/gameStorage.js, src/ui/src/App.jsx, src/ui/src/simulation/__tests__/playerState.test.js, src/ui/src/simulation/__tests__/turnResolution.test.js, src/ui/src/services/__tests__/gameStorage.test.js, src/ui/src/components/__tests__/app.test.jsx, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build
+
+## 2026-05-08
+- Task: Initialize persisted player simulation state for new games.
+- Why: Turn resolution needs real financial and health fields on each player instead of wizard-only setup data.
+- What changed: Added player-state initialization and net-worth calculation helpers, wired new game creation to persist initialized players, and added tests for valid setup ids, zero-debt careers, fallback ids, net-worth math, and app creation output.
+- Paths: src/ui/src/simulation/playerState.js, src/ui/src/simulation/__tests__/playerState.test.js, src/ui/src/App.jsx, src/ui/src/components/__tests__/app.test.jsx, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build
+
+## 2026-05-08
+- Task: Add canonical simulation definitions for setup options.
+- Why: The next simulation-foundation slice needs city, education track, and career data with rule fields instead of wizard-only display data.
+- What changed: Added canonical definitions for cities, education tracks, and careers; derived existing wizard catalog exports from that data; updated tests and city display names to real US locations while preserving saved-game ids.
+- Paths: src/ui/src/data/simulationDefinitions.js, src/ui/src/data/wizardVisualCatalog.js, src/ui/src/data/__tests__/simulationDefinitions.test.js, src/ui/src/components/__tests__/wizard.test.jsx, src/ui/src/components/__tests__/app.test.jsx, src/ui/e2e/status-debug.spec.js, src/ui/e2e/wizard-visual.spec.js, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build
+
 ## 2026-05-07
 - Task: Document current gameplay status and next PRD implementation slice.
 - Why: Future agents need a clear handoff for what is done and what to build next from the PRD.

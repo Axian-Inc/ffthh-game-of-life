@@ -1,4 +1,5 @@
 import { seedGames } from '../data/seedGames'
+import { normalizePlayerState } from '../simulation/playerState'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 export const GAME_STORAGE_KEY = STORAGE_KEY
@@ -26,6 +27,7 @@ const normalizeMoveHistory = (moveHistory) => {
   }
 
   return moveHistory.map((entry, index) => ({
+    ...(entry || {}),
     id: entry?.id != null ? String(entry.id) : `move-${index}`,
     playerId: entry?.playerId != null ? String(entry.playerId) : '',
     playerName: typeof entry?.playerName === 'string' && entry.playerName.trim() ? entry.playerName : 'Player',
@@ -38,9 +40,18 @@ const normalizeMoveHistory = (moveHistory) => {
   }))
 }
 
+const normalizePlayers = (players) => {
+  if (!Array.isArray(players)) {
+    return []
+  }
+
+  return players.map(normalizePlayerState)
+}
+
 const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
+  players: normalizePlayers(game.players),
   turnNumber: normalizeTurnNumber(game.turnNumber),
   activePlayerIndex: normalizeActivePlayerIndex(
     game.activePlayerIndex,

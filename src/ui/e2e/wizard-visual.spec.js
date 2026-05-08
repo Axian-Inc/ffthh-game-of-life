@@ -26,7 +26,7 @@ const buildSinglePlayerSummary = async (page) => {
   await page.getByRole('textbox', { name: 'Nickname' }).fill('Ted')
   await page.getByRole('button', { name: 'Panda' }).click()
   await page.getByRole('button', { name: /^Next/i }).click()
-  await page.getByRole('button', { name: /Suburbia/i }).click()
+  await page.getByRole('button', { name: /Denver/i }).click()
   await page.getByRole('button', { name: /^Next/i }).click()
   await page.getByRole('button', { name: /Self-Taught/i }).click()
   await page.getByRole('button', { name: /^Next/i }).click()
