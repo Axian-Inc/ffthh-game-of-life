@@ -1,12 +1,16 @@
+import { initializePlayerState } from '../services/simulation'
+
 export const createPlayer = (overrides = {}) => ({
-  id: overrides.id ?? 'player-1',
-  name: overrides.name ?? 'Ari',
-  avatar: overrides.avatar ?? 'fox',
-  cityId: overrides.cityId ?? 'suburbia',
-  educationTrackId: overrides.educationTrackId ?? 'self-taught',
-  jobId: overrides.jobId ?? 'content-creator',
-  careerTrack: overrides.careerTrack ?? null,
-  ...overrides,
+  ...initializePlayerState({
+    id: overrides.id ?? 'player-1',
+    name: overrides.name ?? 'Ari',
+    avatar: overrides.avatar ?? 'fox',
+    cityId: overrides.cityId ?? 'suburbia',
+    educationTrackId: overrides.educationTrackId ?? 'self-taught',
+    jobId: overrides.jobId ?? 'content-creator',
+    careerTrack: overrides.careerTrack ?? null,
+    ...overrides,
+  }),
 })
 
 export const createGame = (overrides = {}) => ({

@@ -11,6 +11,7 @@ import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
+import { initializePlayers, resolveNoActionTurn } from './services/simulation'
 
 const MOVE_LABELS = {
   choose_action: 'Choose Action',
@@ -72,6 +73,7 @@ const getPlayerKey = (player, index) => {
 }
 
 const getMoveHistory = (game) => (Array.isArray(game?.moveHistory) ? game.moveHistory : [])
+const getTurnHistory = (game) => (Array.isArray(game?.turnHistory) ? game.turnHistory : [])
 
 const generateMoveId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -152,13 +154,11 @@ function App() {
       const newGame = {
         name: payloadName,
         status: 'active',
-        players: payloadPlayers.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-        })),
+        players: initializePlayers(payloadPlayers),
         turnNumber: 1,
         activePlayerIndex: 0,
         moveHistory: [],
+        turnHistory: [],
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
@@ -259,6 +259,24 @@ function App() {
       const nextPlayerIndex = (activePlayerIndex + 1) % players.length
       const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
       const timestamp = Date.now()
+      const actionLabel = MOVE_LABELS[actionType] || 'Move'
+      const nextPlayers = [...players]
+      const nextTurnHistory = [...getTurnHistory(currentActiveGame)]
+      let actionSummary = ''
+
+      if (actionType === 'pass') {
+        const resolved = resolveNoActionTurn({
+          player: activePlayer,
+          turnNumber: currentTurnNumber,
+          actionType,
+          actionLabel,
+          createdAt: timestamp,
+        })
+        nextPlayers[activePlayerIndex] = resolved.player
+        nextTurnHistory.push(resolved.turnLogEntry)
+        actionSummary = resolved.turnLogEntry.summary
+      }
+
       const nextMoveHistory = [
         ...getMoveHistory(currentActiveGame),
         {
@@ -267,7 +285,8 @@ function App() {
           playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
           turnNumber: currentTurnNumber,
           actionType,
-          actionLabel: MOVE_LABELS[actionType] || 'Move',
+          actionLabel,
+          summary: actionSummary,
           createdAt: timestamp,
         },
       ]
@@ -277,9 +296,11 @@ function App() {
       try {
         const updatedGame = await updateGame(currentActiveGame.id, {
           ...currentActiveGame,
+          players: nextPlayers,
           turnNumber: nextTurnNumber,
           activePlayerIndex: nextPlayerIndex,
           moveHistory: nextMoveHistory,
+          turnHistory: nextTurnHistory,
           lastUpdated: timestamp,
         })
         openPlay(updatedGame)
