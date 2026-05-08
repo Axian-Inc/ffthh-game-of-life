@@ -11,6 +11,7 @@ import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
+import { createInitialPlayerMoneyState, resolveMonthlyMoneyTurn } from './data/playerFinanceCatalog'
 
 const MOVE_LABELS = {
   choose_action: 'Choose Action',
@@ -152,10 +153,12 @@ function App() {
       const newGame = {
         name: payloadName,
         status: 'active',
-        players: payloadPlayers.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-        })),
+        players: payloadPlayers.map((player) =>
+          createInitialPlayerMoneyState({
+            ...player,
+            name: player.name.trim(),
+          }),
+        ),
         turnNumber: 1,
         activePlayerIndex: 0,
         moveHistory: [],
@@ -259,6 +262,8 @@ function App() {
       const nextPlayerIndex = (activePlayerIndex + 1) % players.length
       const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
       const timestamp = Date.now()
+      const { player: resolvedPlayer, moneyDelta, summary } = resolveMonthlyMoneyTurn(activePlayer)
+      const nextPlayers = players.map((player, index) => (index === activePlayerIndex ? resolvedPlayer : player))
       const nextMoveHistory = [
         ...getMoveHistory(currentActiveGame),
         {
@@ -268,6 +273,8 @@ function App() {
           turnNumber: currentTurnNumber,
           actionType,
           actionLabel: MOVE_LABELS[actionType] || 'Move',
+          summary,
+          moneyDelta,
           createdAt: timestamp,
         },
       ]
@@ -277,6 +284,7 @@ function App() {
       try {
         const updatedGame = await updateGame(currentActiveGame.id, {
           ...currentActiveGame,
+          players: nextPlayers,
           turnNumber: nextTurnNumber,
           activePlayerIndex: nextPlayerIndex,
           moveHistory: nextMoveHistory,

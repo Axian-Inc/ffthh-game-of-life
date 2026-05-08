@@ -26,6 +26,7 @@ const normalizeMoveHistory = (moveHistory) => {
   }
 
   return moveHistory.map((entry, index) => ({
+    ...entry,
     id: entry?.id != null ? String(entry.id) : `move-${index}`,
     playerId: entry?.playerId != null ? String(entry.playerId) : '',
     playerName: typeof entry?.playerName === 'string' && entry.playerName.trim() ? entry.playerName : 'Player',

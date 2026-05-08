@@ -120,7 +120,7 @@ Required anatomy:
 6. `Start Game` and `Resume` both land here first.
 
 ## 6. Player Turn (`9.PlayerTurn.png`)
-Implementation status: the turn number, active player subtitle, seat-order rail, turn actions, and active-player history modal are wired to persisted game state. The financial, job, health, location, and modifier values remain placeholder UI data until the simulation state described in PRD section 11.3 is implemented.
+Implementation status: the turn number, active player subtitle, seat-order rail, turn actions, active-player history modal, and basic financial/job/location values are wired to persisted game state. Health and modifier values remain shallow defaults until the fuller simulation state described in PRD section 11.3 is implemented.
 
 Required anatomy:
 1. Keep the same warm off-white canvas and center a stacked play layout inside the desktop viewport.

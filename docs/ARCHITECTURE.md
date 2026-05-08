@@ -15,15 +15,15 @@ fully locally (localStorage) or in AWS (DynamoDB + Lambda + API Gateway) with th
    - Local mode: `window.localStorage` with seeded defaults.
    - API mode: HTTP calls to `/games` and `/games/{id}`.
 2. UI creates/deletes games through the same adapter.
-3. In play mode, completed turn actions (`Choose Action`, `Pass`) append a saved move-history entry and then persist updated turn progression (`turnNumber`, `activePlayerIndex`) on the game.
+3. In play mode, completed turn actions (`Choose Action`, `Pass`) resolve one basic monthly money update for the active player, append a saved move-history entry, and then persist updated turn progression (`turnNumber`, `activePlayerIndex`) on the game.
    - The current UI persists move history as a game-level `moveHistory` array and filters it per player when `See History` opens.
 4. In AWS, Lambda handles CRUD and writes to DynamoDB.
 
 ## Current Game Shape
 - Created games persist game metadata, `players`, `turnNumber`, `activePlayerIndex`, `moveHistory`, timestamps, and resumability.
-- Created players currently persist setup selections: id, name, avatar, city id, education track id, job id, and a display career track label.
-- `moveHistory` entries currently record id, player id, player name, turn number, action type, action label, and timestamp.
-- Financial, career, health, location, and modifier values shown on the player-turn card are still placeholder UI data.
+- Created players currently persist setup selections plus basic money state: cash, education debt, assets, net worth, monthly income, monthly expenses, health defaults, status effects, and action history.
+- `moveHistory` entries currently record id, player id, player name, turn number, action type, action label, money delta, summary, and timestamp.
+- Financial, job, and location values shown on the player-turn card are read from persisted state/catalog data. Health and modifier values are still shallow defaults until richer simulation rules land.
 
 ## Next Architecture Target
 - Introduce canonical city and career definition data that can drive both setup display and simulation rules.

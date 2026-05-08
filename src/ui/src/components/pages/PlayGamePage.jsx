@@ -3,6 +3,8 @@ import PrimaryButton from '../ui/PrimaryButton'
 import SecondaryButton from '../ui/SecondaryButton'
 import PlayerAvatar from '../ui/PlayerAvatar'
 import { PLAY_TURN_PLACEHOLDER } from '../../data/playTurnPlaceholder'
+import { WIZARD_CAREER_BY_ID, WIZARD_CITY_BY_ID } from '../../data/wizardVisualCatalog'
+import { ensurePlayerMoneyState, sumDollars, sumMonthlyExpenses } from '../../data/playerFinanceCatalog'
 import './play-game-page.css'
 
 const noop = () => {}
@@ -19,6 +21,84 @@ const getActivePlayerIndex = (game, players) => {
   return game.activePlayerIndex % players.length
 }
 
+const formatCurrency = (value) => {
+  const amount = Number.isFinite(value) ? value : 0
+  const sign = amount < 0 ? '-' : ''
+  return `${sign}$${Math.abs(Math.round(amount)).toLocaleString()}`
+}
+
+const getStatIcon = (group, id) => PLAY_TURN_PLACEHOLDER[group].find((item) => item.id === id)?.iconSrc || ''
+
+const buildFinancialStats = (player) => {
+  const assetsTotal = sumDollars(player.assets)
+  const debtTotal = sumDollars(player.debts)
+
+  return [
+    { id: 'net-worth', label: 'Net Worth', value: formatCurrency(player.netWorth), iconSrc: getStatIcon('financialStats', 'net-worth') },
+    { id: 'cash', label: 'Cash (Spendable)', value: formatCurrency(player.cash), iconSrc: getStatIcon('financialStats', 'cash') },
+    {
+      id: 'assets',
+      label: 'Assets & Investments',
+      value: formatCurrency(assetsTotal),
+      iconSrc: getStatIcon('financialStats', 'assets'),
+    },
+    {
+      id: 'debt',
+      label: 'Debt',
+      value: formatCurrency(debtTotal),
+      iconSrc: getStatIcon('financialStats', 'debt'),
+      tone: debtTotal > 0 ? 'negative' : '',
+    },
+  ]
+}
+
+const buildStatusStats = (player) => {
+  const career = WIZARD_CAREER_BY_ID[player.jobId]
+  const city = WIZARD_CITY_BY_ID[player.cityId]
+  const monthlyExpenses = sumMonthlyExpenses(player.monthlyExpenses)
+
+  return [
+    {
+      id: 'job',
+      label: 'Job',
+      value: career?.title || 'Unassigned',
+      iconSrc: getStatIcon('statusStats', 'job'),
+    },
+    {
+      id: 'income',
+      label: 'Income',
+      value: `${formatCurrency(player.monthlyIncome)} / month`,
+      iconSrc: getStatIcon('statusStats', 'income'),
+    },
+    {
+      id: 'monthly-expenses',
+      label: 'Monthly Costs',
+      value: `${formatCurrency(monthlyExpenses)} / month`,
+      iconSrc: getStatIcon('financialStats', 'cash'),
+    },
+    {
+      id: 'physical-health',
+      label: 'Physical Health',
+      value: Math.max(0, Math.min(1, (Number.isFinite(player.physicalHealth) ? player.physicalHealth : 80) / 100)),
+      iconSrc: getStatIcon('statusStats', 'physical-health'),
+      kind: 'meter',
+    },
+    {
+      id: 'mental-health',
+      label: 'Mental Health',
+      value: Math.max(0, Math.min(1, (Number.isFinite(player.mentalHealth) ? player.mentalHealth : 80) / 100)),
+      iconSrc: getStatIcon('statusStats', 'mental-health'),
+      kind: 'meter',
+    },
+    {
+      id: 'location',
+      label: 'Location',
+      value: city?.name || 'Unknown',
+      iconSrc: getStatIcon('statusStats', 'location'),
+    },
+  ]
+}
+
 const PlayGamePage = ({
   game,
   isAdvancingTurn = false,
@@ -31,6 +111,9 @@ const PlayGamePage = ({
   const players = getPlayers(game)
   const activePlayerIndex = getActivePlayerIndex(game, players)
   const activePlayer = players[activePlayerIndex] || null
+  const playerStatus = ensurePlayerMoneyState(activePlayer || {})
+  const financialStats = buildFinancialStats(playerStatus)
+  const statusStats = buildStatusStats(playerStatus)
   const turnNumber = Number.isInteger(game?.turnNumber) && game.turnNumber > 0 ? game.turnNumber : 1
   const activePlayerName = activePlayer?.name?.trim() || 'Player'
 
@@ -69,7 +152,7 @@ const PlayGamePage = ({
 
       <div className="play-turn-status-card">
         <section className="play-turn-status-column" aria-label="Financial overview">
-          {PLAY_TURN_PLACEHOLDER.financialStats.map((item) => (
+          {financialStats.map((item) => (
             <div className="play-turn-stat-row" key={item.id}>
               <span className="play-turn-stat-icon" aria-hidden="true">
                 <img alt="" src={item.iconSrc} />
@@ -85,7 +168,7 @@ const PlayGamePage = ({
         </section>
 
         <section className="play-turn-status-column" aria-label="Player status">
-          {PLAY_TURN_PLACEHOLDER.statusStats.map((item) =>
+          {statusStats.map((item) =>
             item.kind === 'meter' ? (
               <div className="play-turn-stat-row play-turn-stat-row-meter" key={item.id}>
                 <span className="play-turn-stat-icon" aria-hidden="true">

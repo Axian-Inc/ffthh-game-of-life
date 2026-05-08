@@ -14,7 +14,14 @@ describe('Page components', () => {
     const game = createGame({
       players: [
         { id: 'player-1', name: 'Ari', avatar: 'fox' },
-        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+        {
+          id: 'player-2',
+          name: 'Jo',
+          avatar: 'bear',
+          cityId: 'metro',
+          educationTrackId: 'degree',
+          jobId: 'software-engineer',
+        },
       ],
       turnNumber: 3,
       activePlayerIndex: 1,
@@ -27,6 +34,9 @@ describe('Page components', () => {
     expect(screen.getByText('Ari')).toBeInTheDocument()
     expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
+    expect(screen.getByText('$6,000')).toBeInTheDocument()
+    expect(screen.getByText('$30,000')).toBeInTheDocument()
+    expect(screen.getByText('$4,800 / month')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Choose Action' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pass' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'See History' })).toBeInTheDocument()

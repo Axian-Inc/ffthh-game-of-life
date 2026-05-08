@@ -185,13 +185,15 @@ Implementation sequencing is managed through the normal product backlog and rele
 5. The player-turn screen shows the persisted turn number and active player name, renders all players in seat order, and highlights the active player.
 6. `Choose Action` and `Pass` currently behave as light turn actions: they record a move-history entry, save the updated game, rotate to the next player, and increment the turn number after the last player acts.
 7. `See History` opens a modal scoped to the active player and lists only that player's saved moves.
+8. New games initialize each player with basic persisted financial state from their education/job/city choices: cash, education debt, monthly income, monthly expenses, assets, and net worth.
+9. Completing a current light turn action applies one deterministic monthly money update: income is added, living costs are subtracted, net worth is recalculated, and the money delta is saved on the move-history entry.
 
 ### 11.2 Current limitations
-1. The player-turn financial, career, health, location, and modifier values are placeholder display data, not derived from persisted player state.
-2. Setup selections store UI ids, but they do not yet initialize the full PRD `PlayerState` contract from section 9.2.
-3. Career and city options exist as UI catalog data, but not yet as canonical simulation definitions matching sections 7.2 and 7.4.
-4. The monthly turn sequence from section 4.3 is not implemented. No net-worth, recurring-cost, debt, asset, health, event, action-resolution, or end-of-turn summary logic runs yet.
-5. `Choose Action` does not yet open an action catalog or resolve intended/unintended outcomes.
+1. The player-turn financial, job, and location values now come from persisted state/catalog definitions, but health and modifier values remain shallow defaults until the fuller simulation lands.
+2. Setup selections initialize the money-related parts of the PRD `PlayerState` contract, but they do not yet initialize the full career, city, health, status-effect, or action-history model from section 9.2.
+3. Career/city options exist as UI catalog data, and money rules exist as a finance catalog, but there are not yet full canonical simulation definitions matching sections 7.2 and 7.4.
+4. The monthly turn sequence from section 4.3 is only partially implemented. Basic income and living costs run, but debt interest/minimum payments, asset updates, health drift, events, action resolution, and end-of-turn summaries are not complete.
+5. `Choose Action` does not yet open an action catalog or resolve intended/unintended outcomes beyond the same basic monthly money update used by `Pass`.
 
 ### 11.3 Next implementation slice
 The next agent should implement the minimum real simulation foundation before building the full action picker.

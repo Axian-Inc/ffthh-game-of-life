@@ -147,6 +147,28 @@ describe('App create flow', () => {
     )
 
     expect(window.life.status().persistedGame.players).toHaveLength(2)
+    expect(window.life.status().persistedGame.players[0]).toMatchObject({
+      cash: 3000,
+      monthlyIncome: 4800,
+      monthlyExpenses: {
+        housing: 1350,
+        utilities: 290,
+        food: 580,
+        transport: 300,
+      },
+      netWorth: 3000,
+      debts: [],
+    })
+    expect(window.life.status().persistedGame.players[1]).toMatchObject({
+      cash: 6000,
+      monthlyIncome: 6200,
+      netWorth: -24000,
+      debts: [
+        expect.objectContaining({
+          balance: 30000,
+        }),
+      ],
+    })
     expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
@@ -172,19 +194,36 @@ describe('App create flow', () => {
         turnNumber: 1,
         activePlayerIndex: 1,
         isHistoryOpen: false,
-        persistedGame: expect.objectContaining({
-          turnNumber: 1,
-          activePlayerIndex: 1,
-          moveHistory: [
-            expect.objectContaining({
-              playerId: 'player-1',
-              playerName: 'Ted',
-              turnNumber: 1,
-              actionType: 'choose_action',
-              actionLabel: 'Choose Action',
-            }),
-          ],
-        }),
+          persistedGame: expect.objectContaining({
+            turnNumber: 1,
+            activePlayerIndex: 1,
+            players: [
+              expect.objectContaining({
+                id: 'player-1',
+                cash: 5280,
+                netWorth: 5280,
+              }),
+              expect.objectContaining({
+                id: 'player-2',
+                cash: 6000,
+                netWorth: -24000,
+              }),
+            ],
+            moveHistory: [
+              expect.objectContaining({
+                playerId: 'player-1',
+                playerName: 'Ted',
+                turnNumber: 1,
+                actionType: 'choose_action',
+                actionLabel: 'Choose Action',
+                moneyDelta: expect.objectContaining({
+                  cashBefore: 3000,
+                  expenses: 2520,
+                  cashAfter: 5280,
+                }),
+              }),
+            ],
+          }),
       }),
     )
 
@@ -211,23 +250,39 @@ describe('App create flow', () => {
         playScreen: 'turn',
         turnNumber: 2,
         activePlayerIndex: 0,
-        persistedGame: expect.objectContaining({
-          turnNumber: 2,
-          activePlayerIndex: 0,
-          moveHistory: [
-            expect.objectContaining({
-              actionType: 'choose_action',
-              playerId: 'player-1',
+          persistedGame: expect.objectContaining({
+            turnNumber: 2,
+            activePlayerIndex: 0,
+            players: [
+              expect.objectContaining({
+                id: 'player-1',
+                cash: 5280,
+              }),
+              expect.objectContaining({
+                id: 'player-2',
+                cash: 7400,
+                netWorth: -22600,
+              }),
+            ],
+            moveHistory: [
+              expect.objectContaining({
+                actionType: 'choose_action',
+                playerId: 'player-1',
             }),
             expect.objectContaining({
               actionType: 'pass',
               playerId: 'player-2',
-              playerName: 'Mia',
-              turnNumber: 1,
-              actionLabel: 'Pass',
-            }),
-          ],
-        }),
+                playerName: 'Mia',
+                turnNumber: 1,
+                actionLabel: 'Pass',
+                moneyDelta: expect.objectContaining({
+                  cashBefore: 6000,
+                  expenses: 4800,
+                  cashAfter: 7400,
+                }),
+              }),
+            ],
+          }),
       }),
     )
 

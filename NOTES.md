@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-05-08
+- Task: Add starting money and monthly living costs.
+- Why: Players need persisted financial state before richer action and event systems can have meaningful consequences.
+- What changed: Added canonical finance definitions by education/job, initialized new players with cash/debt/income/expenses/net worth, resolved each turn action with monthly income minus living costs, and rendered persisted money values on the turn screen.
+- Paths: src/ui/src/data/playerFinanceCatalog.js, src/ui/src/App.jsx, src/ui/src/components/pages/PlayGamePage.jsx, src/ui/src/services/gameStorage.js, src/ui/src/data/__tests__/playerFinanceCatalog.test.js, src/ui/src/components/__tests__/app.test.jsx, src/ui/src/components/__tests__/pages.test.jsx, src/ui/src/services/__tests__/gameStorage.test.js, docs/modern-game-of-life-prd.md, docs/ARCHITECTURE.md, docs/game-of-life-style-guide.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build
+- Follow-ups: Add debt interest/minimum payments and action-specific costs once the action picker lands.
+
 ## 2026-05-07
 - Task: Document current gameplay status and next PRD implementation slice.
 - Why: Future agents need a clear handoff for what is done and what to build next from the PRD.
