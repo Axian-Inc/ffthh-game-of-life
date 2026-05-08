@@ -8,6 +8,11 @@ import {
   WIZARD_TRACK_BY_ID,
   getCareerOptionsForTrack,
 } from '../../data/wizardVisualCatalog'
+import {
+  buildWorldSettingsFromDifficulty,
+  DIFFICULTY_PRESETS,
+} from '../../simulation/definitions'
+import { normalizeModifierContext } from '../../simulation/playerState'
 import NewGameWizardStep1GameName from './NewGameWizardStep1GameName'
 import NewGameWizardStep1Player from './NewGameWizardStep1Player'
 import NewGameWizardStep2City from './NewGameWizardStep2City'
@@ -25,13 +30,14 @@ const createPlayerDraft = (existingPlayers = [], reservedNames = []) => {
 
   return {
     starterName,
-    player: {
-      name: starterName,
-      avatar: '',
-      cityId: '',
-      educationTrackId: '',
-      jobId: '',
-    },
+      player: {
+        name: starterName,
+        avatar: '',
+        profileId: 'none',
+        cityId: '',
+        educationTrackId: '',
+        jobId: '',
+      },
   }
 }
 
@@ -77,6 +83,8 @@ const getStepTitle = (currentStep, playerNumber) => {
 const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = false, onStatusChange }) => {
   const [currentStep, setCurrentStep] = useState(1)
   const [gameName, setGameName] = useState(() => getRandomGameName())
+  const [difficultyMode, setDifficultyMode] = useState('normal')
+  const [worldSettings, setWorldSettings] = useState(() => buildWorldSettingsFromDifficulty('normal'))
   const [players, setPlayers] = useState([])
   const [playerDraftState, setPlayerDraftState] = useState(() => {
     const initialDraft = createPlayerDraft()
@@ -135,6 +143,8 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
     onStatusChange({
       currentStep,
       gameName,
+      difficultyMode,
+      worldSettings,
       players,
       draftPlayer,
       canStartGame,
@@ -142,7 +152,21 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
     })
 
     return () => onStatusChange(null)
-  }, [currentStep, gameName, players, draftPlayer, canStartGame, isSubmitting, onStatusChange])
+  }, [currentStep, gameName, difficultyMode, worldSettings, players, draftPlayer, canStartGame, isSubmitting, onStatusChange])
+
+  const handleDifficultyModeChange = (nextDifficultyMode) => {
+    setDifficultyMode(nextDifficultyMode)
+    if (nextDifficultyMode !== 'custom') {
+      setWorldSettings(buildWorldSettingsFromDifficulty(nextDifficultyMode))
+    }
+  }
+
+  const handleWorldSettingChange = (settingId, value) => {
+    setWorldSettings((current) => ({
+      ...current,
+      [settingId]: value,
+    }))
+  }
 
   const handleBack = () => {
     if (!showBackButton) {
@@ -163,6 +187,7 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         id: buildPlayerId(players.length),
         name: draftPlayer.name.trim(),
         avatar: draftPlayer.avatar,
+        profileId: draftPlayer.profileId || 'none',
         cityId: draftPlayer.cityId,
         educationTrackId: draftPlayer.educationTrackId,
         jobId: draftPlayer.jobId,
@@ -191,6 +216,10 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
     await onSubmit({
       name: trimmedGameName,
       players: players.map((player) => ({ ...player })),
+      modifierContext: normalizeModifierContext({
+        difficultyMode,
+        worldSettings: difficultyMode === 'custom' ? worldSettings : DIFFICULTY_PRESETS[difficultyMode].worldSettings,
+      }),
     })
   }
 
@@ -229,6 +258,10 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
             gameName={gameName}
             onGameNameChange={setGameName}
             maxGameNameLength={MAX_GAME_NAME_LENGTH}
+            difficultyMode={difficultyMode}
+            onDifficultyModeChange={handleDifficultyModeChange}
+            worldSettings={worldSettings}
+            onWorldSettingChange={handleWorldSettingChange}
             onNext={handleNext}
             isNextDisabled={!canAdvance[1]}
           />
@@ -243,6 +276,8 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
             avatarOptions={PLAYER_AVATAR_OPTIONS}
             maxPlayerNameLength={MAX_PLAYER_NAME_LENGTH}
             playerNameError={playerNameError}
+            selectedProfileId={draftPlayer.profileId || 'none'}
+            onProfileChange={(profileId) => updateDraftPlayer((current) => ({ ...current, profileId }))}
             onNext={handleNext}
             isNextDisabled={!canAdvance[2]}
           />
@@ -285,6 +320,8 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         {currentStep === 6 ? (
           <NewGameWizardStep6Summary
             gameName={trimmedGameName}
+            difficultyMode={difficultyMode}
+            worldSettings={difficultyMode === 'custom' ? worldSettings : DIFFICULTY_PRESETS[difficultyMode].worldSettings}
             players={players}
             onAddPlayer={handleAddPlayer}
             onStart={handleSubmit}

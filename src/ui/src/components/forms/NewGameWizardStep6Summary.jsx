@@ -3,9 +3,12 @@ import SecondaryButton from '../ui/SecondaryButton'
 import PrimaryButton from '../ui/PrimaryButton'
 import PlayerAvatar from '../ui/PlayerAvatar'
 import { WIZARD_CAREER_BY_ID, WIZARD_CITY_BY_ID } from '../../data/wizardVisualCatalog'
+import { PLAYER_PROFILE_OPTIONS } from '../../simulation/definitions'
 
 const NewGameWizardStep6Summary = ({
   gameName,
+  difficultyMode,
+  worldSettings,
   players,
   onAddPlayer,
   onStart,
@@ -21,11 +24,18 @@ const NewGameWizardStep6Summary = ({
         <p className="wizard-summary-meta">
           {players.length} player{players.length === 1 ? '' : 's'}
         </p>
+        <p className="wizard-summary-settings">
+          Difficulty: {difficultyMode.replace(/^./, (char) => char.toUpperCase())}
+        </p>
+        <p className="wizard-summary-settings">
+          Settings: {Object.values(worldSettings).join(' / ').replace(/-/g, ' ')}
+        </p>
       </div>
       <div className="wizard-summary-list">
         {players.map((player) => {
           const city = WIZARD_CITY_BY_ID[player.cityId]
           const job = WIZARD_CAREER_BY_ID[player.jobId]
+          const profile = PLAYER_PROFILE_OPTIONS.find((entry) => entry.id === player.profileId)
           return (
             <div key={player.id} className="wizard-summary-player">
               <span className="wizard-summary-avatar" aria-hidden="true">
@@ -36,6 +46,7 @@ const NewGameWizardStep6Summary = ({
                 <p>
                   {city?.icon} {city?.shortName || player.cityId} &bull; {job?.icon} {job?.title || player.jobId}
                 </p>
+                <p>Profile: {profile?.label || 'No Profile'}</p>
               </div>
             </div>
           )

@@ -117,26 +117,33 @@ describe('NewGameWizard', () => {
 
     await user.click(screen.getByRole('button', { name: /Start Game/i }))
 
-    expect(onSubmit).toHaveBeenCalledWith({
-      name: 'Weekend Plan',
-      players: [
-        expect.objectContaining({
-          id: 'player-1',
-          name: 'Ted',
-          avatar: 'fox',
-          cityId: 'suburbia',
-          educationTrackId: 'self-taught',
-          jobId: 'content-creator',
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Weekend Plan',
+        modifierContext: expect.objectContaining({
+          difficultyMode: 'normal',
         }),
-        expect.objectContaining({
-          id: 'player-2',
-          name: 'Mia',
-          avatar: 'bear',
-          cityId: 'metro',
-          educationTrackId: 'degree',
-          jobId: 'software-engineer',
-        }),
-      ],
-    })
+        players: [
+          expect.objectContaining({
+            id: 'player-1',
+            name: 'Ted',
+            avatar: 'fox',
+            profileId: 'none',
+            cityId: 'suburbia',
+            educationTrackId: 'self-taught',
+            jobId: 'content-creator',
+          }),
+          expect.objectContaining({
+            id: 'player-2',
+            name: 'Mia',
+            avatar: 'bear',
+            profileId: 'none',
+            cityId: 'metro',
+            educationTrackId: 'degree',
+            jobId: 'software-engineer',
+          }),
+        ],
+      }),
+    )
   })
 })

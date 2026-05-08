@@ -2,7 +2,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import PrimaryButton from '../ui/PrimaryButton'
 import SecondaryButton from '../ui/SecondaryButton'
 import PlayerAvatar from '../ui/PlayerAvatar'
-import { PLAY_TURN_PLACEHOLDER } from '../../data/playTurnPlaceholder'
+import {
+  PLAY_TURN_MODIFIER_GROUPS,
+  PLAY_TURN_STAT_ICONS,
+} from '../../data/playTurnPlaceholder'
+import { getCareerLabel, getCityLabel } from '../../simulation/definitions'
 import './play-game-page.css'
 
 const noop = () => {}
@@ -19,6 +23,23 @@ const getActivePlayerIndex = (game, players) => {
   return game.activePlayerIndex % players.length
 }
 
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0)
+
+const getMeterToneClass = (value) => {
+  if (value >= 70) {
+    return 'is-good'
+  }
+  if (value >= 40) {
+    return 'is-warning'
+  }
+  return 'is-danger'
+}
+
 const PlayGamePage = ({
   game,
   isAdvancingTurn = false,
@@ -33,6 +54,85 @@ const PlayGamePage = ({
   const activePlayer = players[activePlayerIndex] || null
   const turnNumber = Number.isInteger(game?.turnNumber) && game.turnNumber > 0 ? game.turnNumber : 1
   const activePlayerName = activePlayer?.name?.trim() || 'Player'
+  const activePlayerCash = Number.isFinite(activePlayer?.cash) ? activePlayer.cash : 0
+  const activePlayerDebt = Number.isFinite(activePlayer?.debt) ? activePlayer.debt : 0
+  const activePlayerAssets = Number.isFinite(activePlayer?.assetsValue) ? activePlayer.assetsValue : 0
+  const activePlayerNetWorth = Number.isFinite(activePlayer?.netWorth)
+    ? activePlayer.netWorth
+    : activePlayerCash + activePlayerAssets - activePlayerDebt
+  const activePlayerIncome = Number.isFinite(activePlayer?.monthlyIncome) ? activePlayer.monthlyIncome : 0
+  const activePlayerPhysicalHealth = Math.max(0, Math.min(100, Number(activePlayer?.physicalHealth) || 0))
+  const activePlayerMentalHealth = Math.max(0, Math.min(100, Number(activePlayer?.mentalHealth) || 0))
+  const activePlayerStress = Math.max(0, Math.min(100, Number(activePlayer?.stress) || 0))
+
+  const financialStats = [
+    {
+      id: 'net-worth',
+      label: 'Net Worth',
+      value: formatCurrency(activePlayerNetWorth),
+      iconSrc: PLAY_TURN_STAT_ICONS.moneyBagIcon,
+      tone: activePlayerNetWorth < 0 ? 'negative' : 'neutral',
+    },
+    {
+      id: 'cash',
+      label: 'Cash (Spendable)',
+      value: formatCurrency(activePlayerCash),
+      iconSrc: PLAY_TURN_STAT_ICONS.cashIcon,
+    },
+    {
+      id: 'assets',
+      label: 'Assets & Investments',
+      value: formatCurrency(activePlayerAssets),
+      iconSrc: PLAY_TURN_STAT_ICONS.assetsIcon,
+    },
+    {
+      id: 'debt',
+      label: 'Debt',
+      value: formatCurrency(activePlayerDebt),
+      iconSrc: PLAY_TURN_STAT_ICONS.debtIcon,
+      tone: activePlayerDebt > 0 ? 'negative' : 'neutral',
+    },
+  ]
+
+  const statusStats = [
+    { id: 'job', label: 'Job', value: getCareerLabel(activePlayer?.jobId), iconSrc: PLAY_TURN_STAT_ICONS.briefcaseIcon },
+    {
+      id: 'income',
+      label: 'Income',
+      value: `${formatCurrency(activePlayerIncome)} / month`,
+      iconSrc: PLAY_TURN_STAT_ICONS.incomeIcon,
+    },
+    {
+      id: 'location',
+      label: 'Location',
+      value: getCityLabel(activePlayer?.cityId),
+      iconSrc: PLAY_TURN_STAT_ICONS.locationIcon,
+    },
+    {
+      id: 'physical-health',
+      label: `Physical Health (${activePlayerPhysicalHealth})`,
+      value: activePlayerPhysicalHealth,
+      iconSrc: PLAY_TURN_STAT_ICONS.heartIcon,
+      kind: 'meter',
+      tone: getMeterToneClass(activePlayerPhysicalHealth),
+    },
+    {
+      id: 'mental-health',
+      label: `Mental Health (${activePlayerMentalHealth})`,
+      value: activePlayerMentalHealth,
+      iconSrc: PLAY_TURN_STAT_ICONS.brainIcon,
+      kind: 'meter',
+      tone: getMeterToneClass(activePlayerMentalHealth),
+    },
+    {
+      id: 'stress',
+      label: `Stress (${activePlayerStress})`,
+      value: activePlayerStress,
+      iconSrc: PLAY_TURN_STAT_ICONS.brainIcon,
+      kind: 'meter',
+      tone: getMeterToneClass(100 - activePlayerStress),
+    },
+  ]
 
   return (
     <section aria-label="Player turn placeholder" className="play-turn-page">
@@ -69,7 +169,7 @@ const PlayGamePage = ({
 
       <div className="play-turn-status-card">
         <section className="play-turn-status-column" aria-label="Financial overview">
-          {PLAY_TURN_PLACEHOLDER.financialStats.map((item) => (
+          {financialStats.map((item) => (
             <div className="play-turn-stat-row" key={item.id}>
               <span className="play-turn-stat-icon" aria-hidden="true">
                 <img alt="" src={item.iconSrc} />
@@ -85,7 +185,7 @@ const PlayGamePage = ({
         </section>
 
         <section className="play-turn-status-column" aria-label="Player status">
-          {PLAY_TURN_PLACEHOLDER.statusStats.map((item) =>
+          {statusStats.map((item) =>
             item.kind === 'meter' ? (
               <div className="play-turn-stat-row play-turn-stat-row-meter" key={item.id}>
                 <span className="play-turn-stat-icon" aria-hidden="true">
@@ -94,7 +194,10 @@ const PlayGamePage = ({
                 <div className="play-turn-stat-copy">
                   <p className="play-turn-stat-label play-turn-stat-label-inline">{item.label}</p>
                   <div className="play-turn-meter">
-                    <span className="play-turn-meter-fill" style={{ width: `${item.value * 100}%` }} />
+                    <span
+                      className={`play-turn-meter-fill ${item.tone ? ` ${item.tone}` : ''}`.trim()}
+                      style={{ width: `${item.value}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -114,7 +217,7 @@ const PlayGamePage = ({
 
         <section className="play-turn-status-column play-turn-status-column-modifiers" aria-label="Modifiers">
           <h3 className="play-turn-modifiers-title">Modifier Icons</h3>
-          {PLAY_TURN_PLACEHOLDER.modifierGroups.map((group) => (
+          {PLAY_TURN_MODIFIER_GROUPS.map((group) => (
             <div className="play-turn-modifier-group" key={group.id}>
               <p className="play-turn-modifier-group-title">{group.title}</p>
               <div className="play-turn-modifier-grid">

@@ -11,6 +11,8 @@ import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
+import { createDefaultModifierContext, initializePlayerState } from './simulation/playerState'
+import { resolvePlayerTurn } from './simulation/turnResolver'
 
 const MOVE_LABELS = {
   choose_action: 'Choose Action',
@@ -139,6 +141,7 @@ function App() {
   const handleCreateGame = async (wizardPayload) => {
     const payloadName = wizardPayload?.name?.trim() || ''
     const payloadPlayers = Array.isArray(wizardPayload?.players) ? wizardPayload.players : []
+    const modifierContext = wizardPayload?.modifierContext || createDefaultModifierContext()
     if (!payloadName || payloadPlayers.length < 2) {
       setCreateError('Add at least two players before starting.')
       return
@@ -149,13 +152,21 @@ function App() {
 
     try {
       const timestamp = Date.now()
+      const gameSeed =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `seed-${timestamp}-${Math.floor(Math.random() * 100000)}`
       const newGame = {
         name: payloadName,
         status: 'active',
-        players: payloadPlayers.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-        })),
+        seed: gameSeed,
+        modifierContext,
+        players: payloadPlayers.map((player) =>
+          initializePlayerState({
+            ...player,
+            name: player.name.trim(),
+          }, modifierContext),
+        ),
         turnNumber: 1,
         activePlayerIndex: 0,
         moveHistory: [],
@@ -259,6 +270,16 @@ function App() {
       const nextPlayerIndex = (activePlayerIndex + 1) % players.length
       const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
       const timestamp = Date.now()
+      const resolvedTurn = resolvePlayerTurn({
+        game: currentActiveGame,
+        player: activePlayer,
+        actionType,
+        turnNumber: currentTurnNumber,
+        playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
+      })
+      const nextPlayers = players.map((player, index) =>
+        index === activePlayerIndex ? resolvedTurn.player : player,
+      )
       const nextMoveHistory = [
         ...getMoveHistory(currentActiveGame),
         {
@@ -268,6 +289,8 @@ function App() {
           turnNumber: currentTurnNumber,
           actionType,
           actionLabel: MOVE_LABELS[actionType] || 'Move',
+          statDelta: resolvedTurn.totalDelta,
+          turnLog: resolvedTurn.turnLog,
           createdAt: timestamp,
         },
       ]
@@ -277,6 +300,7 @@ function App() {
       try {
         const updatedGame = await updateGame(currentActiveGame.id, {
           ...currentActiveGame,
+          players: nextPlayers,
           turnNumber: nextTurnNumber,
           activePlayerIndex: nextPlayerIndex,
           moveHistory: nextMoveHistory,

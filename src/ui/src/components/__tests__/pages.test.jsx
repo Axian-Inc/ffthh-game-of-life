@@ -13,8 +13,26 @@ describe('Page components', () => {
     const onSeeHistory = vi.fn()
     const game = createGame({
       players: [
-        { id: 'player-1', name: 'Ari', avatar: 'fox' },
-        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+        {
+          id: 'player-1',
+          name: 'Ari',
+          avatar: 'fox',
+          cityId: 'suburbia',
+          jobId: 'musician',
+          physicalHealth: 72,
+          mentalHealth: 70,
+          stress: 28,
+        },
+        {
+          id: 'player-2',
+          name: 'Jo',
+          avatar: 'bear',
+          cityId: 'metro',
+          jobId: 'software-engineer',
+          physicalHealth: 69,
+          mentalHealth: 68,
+          stress: 33,
+        },
       ],
       turnNumber: 3,
       activePlayerIndex: 1,
@@ -27,6 +45,7 @@ describe('Page components', () => {
     expect(screen.getByText('Ari')).toBeInTheDocument()
     expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
+    expect(screen.getByText('Physical Health (69)')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Choose Action' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pass' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'See History' })).toBeInTheDocument()

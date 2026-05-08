@@ -205,6 +205,14 @@
   background: linear-gradient(90deg, #45d162 0%, #31bf62 100%);
 }
 
+.play-turn-meter-fill.is-warning {
+  background: linear-gradient(90deg, #f4c942 0%, #f0a53b 100%);
+}
+
+.play-turn-meter-fill.is-danger {
+  background: linear-gradient(90deg, #ef6a6a 0%, #d84d4d 100%);
+}
+
 .play-turn-status-column-modifiers {
   gap: 12px;
 }
