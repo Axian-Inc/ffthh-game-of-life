@@ -165,6 +165,7 @@ describe('App create flow', () => {
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    await user.click(screen.getByRole('button', { name: /Study/i }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
@@ -180,8 +181,8 @@ describe('App create flow', () => {
               playerId: 'player-1',
               playerName: 'Ted',
               turnNumber: 1,
-              actionType: 'choose_action',
-              actionLabel: 'Choose Action',
+              actionType: 'study',
+              actionLabel: 'Study',
             }),
           ],
         }),
@@ -216,7 +217,7 @@ describe('App create flow', () => {
           activePlayerIndex: 0,
           moveHistory: [
             expect.objectContaining({
-              actionType: 'choose_action',
+              actionType: 'study',
               playerId: 'player-1',
             }),
             expect.objectContaining({
@@ -238,7 +239,7 @@ describe('App create flow', () => {
     await user.click(screen.getByRole('button', { name: 'See History' }))
     const historyDialog = screen.getByRole('dialog')
     expect(within(historyDialog).getByText("Ted's Actions")).toBeInTheDocument()
-    expect(within(historyDialog).getByText('Choose Action')).toBeInTheDocument()
+    expect(within(historyDialog).getByText('Study')).toBeInTheDocument()
     expect(within(historyDialog).queryByText('Pass')).not.toBeInTheDocument()
   })
 
@@ -295,6 +296,7 @@ describe('App create flow', () => {
     expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    await user.click(screen.getByRole('button', { name: /Study/i }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
@@ -312,7 +314,7 @@ describe('App create flow', () => {
               playerId: 'player-2',
               playerName: 'Jo',
               turnNumber: 3,
-              actionType: 'choose_action',
+              actionType: 'study',
             }),
           ],
         }),

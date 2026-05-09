@@ -12,11 +12,23 @@ import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
 import { createDefaultModifierContext, initializePlayerState } from './simulation/playerState'
+import { getAvailableTurnActions } from './simulation/actionCatalog'
 import { resolvePlayerTurn } from './simulation/turnResolver'
 
 const MOVE_LABELS = {
   choose_action: 'Choose Action',
   pass: 'Pass',
+  study: 'Study',
+  workout: 'Workout',
+  side_gig: 'Side Gig',
+  debt_paydown: 'Debt Paydown',
+  social_time: 'Social Time',
+  vacation_escape: 'Vacation Escape',
+  startup_bet: 'Startup Bet',
+  festival_weekend: 'Festival Weekend',
+  car_breakdown: 'Address Car Breakdown',
+  plumbing_leak: 'Address Plumbing Leak',
+  burnout_warning: 'Address Burnout Warning',
 }
 
 const parseAppRoute = (pathname) => {
@@ -88,6 +100,8 @@ function App() {
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false)
+  const [isActionPickerOpen, setIsActionPickerOpen] = useState(false)
+  const [actionMenu, setActionMenu] = useState({ regularActions: [], advancedActions: [], unexpectedActions: [] })
   const [entrySource, setEntrySource] = useState('none')
   const [playScreen, setPlayScreen] = useState('welcome')
   const [wizardDraft, setWizardDraft] = useState(null)
@@ -277,6 +291,10 @@ function App() {
         turnNumber: currentTurnNumber,
         playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
       })
+      const recordedActionType = resolvedTurn.turnLog.actionType
+      const actionLabelKey = recordedActionType.startsWith('address_issue:')
+        ? recordedActionType.slice('address_issue:'.length)
+        : recordedActionType
       const nextPlayers = players.map((player, index) =>
         index === activePlayerIndex ? resolvedTurn.player : player,
       )
@@ -287,8 +305,8 @@ function App() {
           playerId: getPlayerKey(activePlayer, activePlayerIndex),
           playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
           turnNumber: currentTurnNumber,
-          actionType,
-          actionLabel: MOVE_LABELS[actionType] || 'Move',
+          actionType: recordedActionType,
+          actionLabel: MOVE_LABELS[actionLabelKey] || 'Move',
           statDelta: resolvedTurn.totalDelta,
           turnLog: resolvedTurn.turnLog,
           createdAt: timestamp,
@@ -307,6 +325,8 @@ function App() {
           lastUpdated: timestamp,
         })
         openPlay(updatedGame)
+        setActionMenu({ regularActions: [], advancedActions: [], unexpectedActions: [] })
+        setIsActionPickerOpen(false)
       } finally {
         setIsAdvancingTurn(false)
       }
@@ -315,8 +335,34 @@ function App() {
   )
 
   const handleAdvanceTurn = useCallback(() => {
-    return handleRecordMoveAndAdvanceTurn('choose_action')
-  }, [handleRecordMoveAndAdvanceTurn])
+    if (isAdvancingTurn) {
+      return
+    }
+    if (currentActiveGame && currentActivePlayer) {
+      const availableActions = getAvailableTurnActions({
+        game: currentActiveGame,
+        player: currentActivePlayer,
+        turnNumber: normalizeTurnNumber(currentActiveGame.turnNumber),
+      })
+      setActionMenu(availableActions)
+    }
+    setIsActionPickerOpen(true)
+  }, [isAdvancingTurn, currentActiveGame, currentActivePlayer])
+
+  const handleSelectAction = useCallback(
+    (actionType) => {
+      return handleRecordMoveAndAdvanceTurn(actionType)
+    },
+    [handleRecordMoveAndAdvanceTurn],
+  )
+
+  const handleCancelActionPicker = useCallback(() => {
+    if (isAdvancingTurn) {
+      return
+    }
+    setActionMenu({ regularActions: [], advancedActions: [], unexpectedActions: [] })
+    setIsActionPickerOpen(false)
+  }, [isAdvancingTurn])
 
   const handlePassTurn = useCallback(() => {
     return handleRecordMoveAndAdvanceTurn('pass')
@@ -552,6 +598,10 @@ function App() {
             game={currentActiveGame}
             isAdvancingTurn={isAdvancingTurn}
             onChooseAction={handleAdvanceTurn}
+            actionOptions={actionMenu}
+            isActionPickerOpen={isActionPickerOpen}
+            onActionPick={handleSelectAction}
+            onCancelActionPicker={handleCancelActionPicker}
             onNextPlayer={handlePlayPlaceholderAction}
             onPass={handlePassTurn}
             onPreviousPlayer={handlePlayPlaceholderAction}

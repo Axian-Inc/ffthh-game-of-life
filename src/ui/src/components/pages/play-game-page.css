@@ -276,6 +276,86 @@
   gap: var(--turn-action-gap);
 }
 
+.play-turn-action-picker {
+  width: min(944px, 100%);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(47, 55, 80, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 14px 28px rgba(56, 72, 110, 0.12);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.play-turn-action-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.play-turn-action-picker-header h3 {
+  margin: 0;
+  color: var(--turn-title);
+  font-size: 1.02rem;
+}
+
+.play-turn-action-picker-close {
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.play-turn-action-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.play-turn-action-picker-group {
+  display: grid;
+  gap: 8px;
+}
+
+.play-turn-action-picker-group-title {
+  margin: 0;
+  color: var(--turn-title);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.play-turn-action-option {
+  border: 1px solid rgba(47, 55, 80, 0.16);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--turn-title);
+  text-align: left;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.play-turn-action-option:hover {
+  border-color: rgba(43, 198, 185, 0.75);
+}
+
+.play-turn-action-option span {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+.play-turn-action-option.is-advanced {
+  background: linear-gradient(180deg, #fff9e8 0%, #fff2cc 100%);
+  border-color: rgba(200, 154, 33, 0.48);
+}
+
+.play-turn-action-option.is-unexpected {
+  background: linear-gradient(180deg, #fff1f1 0%, #ffe2e2 100%);
+  border-color: rgba(208, 84, 84, 0.45);
+}
+
 .play-turn-action-muted,
 .play-turn-action-primary {
   min-height: 64px;
@@ -322,6 +402,10 @@
   }
 
   .play-turn-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .play-turn-action-picker-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }

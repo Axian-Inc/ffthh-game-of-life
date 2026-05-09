@@ -64,6 +64,7 @@ export const initializePlayerState = (player, modifierContext = createDefaultMod
     stress,
     statusEffects: Array.isArray(player.statusEffects) ? player.statusEffects : [],
     actionHistory: Array.isArray(player.actionHistory) ? player.actionHistory : [],
+    activeIssues: Array.isArray(player.activeIssues) ? player.activeIssues : [],
     playerTraits: createDefaultPlayerTraits(player.playerTraits),
     profileId: typeof player.profileId === 'string' && player.profileId ? player.profileId : 'none',
   }
@@ -94,5 +95,6 @@ export const normalizePlayerState = (player, modifierContext = createDefaultModi
     profileId: typeof player.profileId === 'string' && player.profileId ? player.profileId : 'none',
     statusEffects: Array.isArray(player.statusEffects) ? player.statusEffects : [],
     actionHistory: Array.isArray(player.actionHistory) ? player.actionHistory : [],
+    activeIssues: Array.isArray(player.activeIssues) ? player.activeIssues : [],
   }
 }

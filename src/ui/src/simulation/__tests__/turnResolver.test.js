@@ -43,4 +43,21 @@ describe('resolvePlayerTurn', () => {
     expect(basePhase.delta.cash).toBe(-100)
     expect(basePhase.delta.mentalHealth).toBe(1)
   })
+
+  it('compounds unresolved issue penalties across turns', () => {
+    const game = { id: 'game-1', seed: 'seed-issues', modifierContext: { difficultyMode: 'normal' } }
+    const player = {
+      ...createPlayer(),
+      activeIssues: [{ id: 'car_breakdown-1', issueType: 'car_breakdown', label: 'Car Breakdown', stackCount: 0, turnsActive: 0 }],
+    }
+
+    const first = resolvePlayerTurn({ game, player, actionType: 'pass', turnNumber: 3, playerName: 'Ari' })
+    const second = resolvePlayerTurn({ game, player: first.player, actionType: 'pass', turnNumber: 4, playerName: 'Ari' })
+
+    const firstIssueTick = first.turnLog.phaseDeltas.find((entry) => entry.phase === 'issue_tick')
+    const secondIssueTick = second.turnLog.phaseDeltas.find((entry) => entry.phase === 'issue_tick')
+    expect(firstIssueTick).toBeTruthy()
+    expect(secondIssueTick).toBeTruthy()
+    expect(Math.abs(secondIssueTick.delta.cash)).toBeGreaterThan(Math.abs(firstIssueTick.delta.cash))
+  })
 })

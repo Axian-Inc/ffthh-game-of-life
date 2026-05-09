@@ -47,6 +47,10 @@ const PlayGamePage = ({
   onNextPlayer = noop,
   onSeeHistory = noop,
   onChooseAction = noop,
+  actionOptions = { regularActions: [], advancedActions: [], unexpectedActions: [] },
+  isActionPickerOpen = false,
+  onActionPick = noop,
+  onCancelActionPicker = noop,
   onPass = noop,
 }) => {
   const players = getPlayers(game)
@@ -64,6 +68,9 @@ const PlayGamePage = ({
   const activePlayerPhysicalHealth = Math.max(0, Math.min(100, Number(activePlayer?.physicalHealth) || 0))
   const activePlayerMentalHealth = Math.max(0, Math.min(100, Number(activePlayer?.mentalHealth) || 0))
   const activePlayerStress = Math.max(0, Math.min(100, Number(activePlayer?.stress) || 0))
+  const regularActions = Array.isArray(actionOptions?.regularActions) ? actionOptions.regularActions : []
+  const advancedActions = Array.isArray(actionOptions?.advancedActions) ? actionOptions.advancedActions : []
+  const unexpectedActions = Array.isArray(actionOptions?.unexpectedActions) ? actionOptions.unexpectedActions : []
 
   const financialStats = [
     {
@@ -246,6 +253,74 @@ const PlayGamePage = ({
           Pass
         </SecondaryButton>
       </div>
+
+      {isActionPickerOpen ? (
+        <section className="play-turn-action-picker" aria-label="Choose a turn action">
+          <div className="play-turn-action-picker-header">
+            <h3>Choose Your Action</h3>
+            <button type="button" className="play-turn-action-picker-close" onClick={onCancelActionPicker}>
+              Cancel
+            </button>
+          </div>
+          <div className="play-turn-action-picker-group">
+            <p className="play-turn-action-picker-group-title">Regular Actions</p>
+            <div className="play-turn-action-picker-grid">
+              {regularActions.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  className="play-turn-action-option"
+                  onClick={() => onActionPick(action.id)}
+                  disabled={isAdvancingTurn}
+                >
+                  <strong>{action.label}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {advancedActions.length > 0 ? (
+            <div className="play-turn-action-picker-group">
+              <p className="play-turn-action-picker-group-title">Advanced Action</p>
+              <div className="play-turn-action-picker-grid">
+                {advancedActions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="play-turn-action-option is-advanced"
+                    onClick={() => onActionPick(action.id)}
+                    disabled={isAdvancingTurn}
+                  >
+                    <strong>{action.label}</strong>
+                    <span>{action.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {unexpectedActions.length > 0 ? (
+            <div className="play-turn-action-picker-group">
+              <p className="play-turn-action-picker-group-title">Unexpected Issues</p>
+              <div className="play-turn-action-picker-grid">
+                {unexpectedActions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className="play-turn-action-option is-unexpected"
+                    onClick={() => onActionPick(action.id)}
+                    disabled={isAdvancingTurn}
+                  >
+                    <strong>{action.label}</strong>
+                    <span>{action.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
     </section>
   )
 }
