@@ -21,6 +21,7 @@ htmlcov/
 .terraform/*
 *.tfstate
 *.tfstate.*
+terraform/games-api.zip
 crash.log
 crash.*.log
 terraform.tfvars
@@ -36,3 +37,4 @@ node_modules/
 
 # Local auth secret
 auth.json
+.DS_Store

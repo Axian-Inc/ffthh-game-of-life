@@ -1,0 +1,9 @@
+{
+  "name": "ffthh-game-of-life-api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0"
+  }
+}

@@ -1,34 +1,45 @@
-# WARNING!
-DO NOT RUN THIS PROJECT OUTSIDE A DEV CONTAINER (or at least, the Codex portion of it)
+# Modern Game of Life
 
-# Pre-Requisites
+Modern Game of Life is a web implementation of a Game of Life-inspired educational experience. The repository contains a React/Vite UI, an AWS-backed game storage API, and Terraform infrastructure for deployment.
 
-1. Docker
-1. VS Code w/Dev Containers extension 
-1. OpenAI Codex Account Token 
-1. AWS Key
+## Prerequisites
 
-# INITIAL SETUP (Outside Dev Container)
+1. Node.js and npm
+2. Terraform `~> 1.10`
+3. AWS CLI configured for the target AWS account in `us-west-2`
 
-1. Open a new VS Code window and use the Dev Containers extension to "Clone Repository in Container Volume"
-1. Find the `axian-inc/ffthh-game-of-life` repository, and select the `main` branch
-1. Install & run Codex CLI on your local machine, and go through Web UI user authentication
-    - Example: `brew install codex` or  `npm install -g @openai/codex`
+## Optional dev container
 
-    - NOTE: We’ll only be running codex to enable auth, you won’t need many of its features on the Host OS.
-1. On Mac and Windows find and copy `~/.codex/auth.json` (we will be copying it to your dev container)
+The repository includes a VS Code dev container with Terraform, AWS CLI, Node.js, Chromium, Git LFS, Codex CLI, and OpenCode preinstalled for a consistent local environment. Codex CLI and OpenCode are installed from npm during container creation and reuse a persistent npm cache across rebuilds. OpenCode websearch is enabled by default inside the container.
 
-# INITIAL SETUP (In Dev Container)
-1. Open a fresh terminal and run `aws configure` and follow the prompts to setup the AWS CLI with your access token for the L&D environment. Be sure to set the region to us-west-2
-1. Copy your Codex `auth.json` from your host machine to this exact directory in your container: `~/.codex/auth.json`
-1. Create a new branch with your name in it
-1. Navigate to `terraform` directory and run `terraform init`
-1. Run `terraform workspace new {your initials}`. Ensure that you are on this workspace when you run terraform commands. 
+## First-time setup
 
-    - There are instructions in the AGENT.MD file for Codex to try and enforce this, as well as for codex to ensure the workspace name is in all deployed resources. This should ensure everyone can deploy their own stack without conflicts with each other
+1. Configure AWS credentials with `aws configure`.
+2. Initialize Terraform:
+   `terraform -chdir=terraform init -reconfigure`
+3. Select or create a non-default Terraform workspace:
+   `terraform -chdir=terraform workspace new <name>`
+   or
+   `terraform -chdir=terraform workspace select <name>`
 
-# Developing
+Do not run Terraform in the `default` workspace.
 
-Simply run `codex --yolo` to get started using Codex for development
+## Common commands
 
-NOTE: (the `--yolo` command allows Codex to run without any restrctions, hence the container)
+1. Install UI dependencies:
+   `npm --prefix src/ui ci`
+2. Run UI unit tests:
+   `npm --prefix src/ui run test:ci`
+3. Run UI end-to-end tests:
+   `npm --prefix src/ui run test:e2e:ci`
+4. Run deployment preflight checks:
+   `scripts/check.sh`
+5. Deploy the application:
+   `scripts/deploy.sh`
+
+## Documentation
+
+- Product requirements: `docs/modern-game-of-life-prd.md`
+- Architecture: `docs/ARCHITECTURE.md`
+- UI style guide: `docs/game-of-life-style-guide.md`
+- Script usage: `scripts/README.md`

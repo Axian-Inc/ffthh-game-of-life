@@ -1,5 +1,5 @@
 {
-  "name": "Python + Terraform + AWS + Codex",
+  "name": "Modern Game of Life Dev Environment",
 
   // Base image: Python, git, zsh, common build tools, non-root `vscode` user
   // https://mcr.microsoft.com/devcontainers/python
@@ -8,7 +8,10 @@
   // Add tools via Dev Container Features
   "features": {
     // Terraform CLI
-    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "tflint": "none",
+      "terragrunt": "none"
+    },
 
     // AWS CLI v2
     "ghcr.io/devcontainers/features/aws-cli:1": {},
@@ -16,20 +19,27 @@
     // Git (image already includes git, but this keeps it explicit/up-to-date)
     "ghcr.io/devcontainers/features/git:1": {},
 
-    // Node.js for Codex CLI (installed via npm)
+    // Node.js for UI development and tests
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
     }
   },
 
+  // Persist npm tarballs across dev container rebuilds to avoid repeated CLI downloads.
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-npm-cache,target=/home/vscode/.npm,type=volume"
+  ],
+
   // Commands to run after the container is created
-  "postCreateCommand": "npm install -g @openai/codex",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
 
   // Environment inside the container
   "remoteEnv": {
     // Default AWS profile + region (tweak as needed)
     "AWS_PROFILE": "default",
     "AWS_REGION": "us-west-2",
+    "CHROME_BIN": "/usr/bin/chromium",
+    "OPENCODE_ENABLE_EXA": "1",
   },
 
   // VS Code-specific customizations
