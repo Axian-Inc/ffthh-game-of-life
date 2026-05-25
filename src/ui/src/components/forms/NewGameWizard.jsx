@@ -24,20 +24,21 @@ import './new-game-wizard.css'
 const MAX_GAME_NAME_LENGTH = 60
 const MAX_PLAYER_NAME_LENGTH = 24
 const MIN_PLAYERS_TO_START = 2
+const DEFAULT_DIFFICULTY_MODE = 'normal'
 
 const createPlayerDraft = (existingPlayers = [], reservedNames = []) => {
   const starterName = getRandomPlayerName([...existingPlayers.map((player) => player.name), ...reservedNames])
 
   return {
     starterName,
-      player: {
-        name: starterName,
-        avatar: '',
-        profileId: 'none',
-        cityId: '',
-        educationTrackId: '',
-        jobId: '',
-      },
+    player: {
+      name: starterName,
+      avatar: '',
+      profileId: 'none',
+      cityId: '',
+      educationTrackId: '',
+      jobId: '',
+    },
   }
 }
 
@@ -83,8 +84,8 @@ const getStepTitle = (currentStep, playerNumber) => {
 const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = false, onStatusChange }) => {
   const [currentStep, setCurrentStep] = useState(1)
   const [gameName, setGameName] = useState(() => getRandomGameName())
-  const [difficultyMode, setDifficultyMode] = useState('normal')
-  const [worldSettings, setWorldSettings] = useState(() => buildWorldSettingsFromDifficulty('normal'))
+  const [difficultyMode, setDifficultyMode] = useState(DEFAULT_DIFFICULTY_MODE)
+  const [worldSettings, setWorldSettings] = useState(() => buildWorldSettingsFromDifficulty(DEFAULT_DIFFICULTY_MODE))
   const [players, setPlayers] = useState([])
   const [playerDraftState, setPlayerDraftState] = useState(() => {
     const initialDraft = createPlayerDraft()
@@ -187,7 +188,7 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
         id: buildPlayerId(players.length),
         name: draftPlayer.name.trim(),
         avatar: draftPlayer.avatar,
-        profileId: draftPlayer.profileId || 'none',
+        profileId: 'none',
         cityId: draftPlayer.cityId,
         educationTrackId: draftPlayer.educationTrackId,
         jobId: draftPlayer.jobId,
@@ -276,8 +277,6 @@ const NewGameWizard = ({ onCancel, onSubmit, submitError = '', isSubmitting = fa
             avatarOptions={PLAYER_AVATAR_OPTIONS}
             maxPlayerNameLength={MAX_PLAYER_NAME_LENGTH}
             playerNameError={playerNameError}
-            selectedProfileId={draftPlayer.profileId || 'none'}
-            onProfileChange={(profileId) => updateDraftPlayer((current) => ({ ...current, profileId }))}
             onNext={handleNext}
             isNextDisabled={!canAdvance[2]}
           />

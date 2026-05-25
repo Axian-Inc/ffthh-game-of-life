@@ -11,6 +11,13 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-05-25
+- Task: Remove pre-game profile selection.
+- Why: New-game setup should still capture game difficulty and core player setup choices, but not ask players to choose a realism profile before play.
+- What changed: Removed the profile dropdown from the player identity step, stopped rendering profile details in the summary, kept persisted `profileId` defaulted to `none`, and updated wizard tests plus visual snapshots.
+- Paths: src/ui/src/components/forms/NewGameWizard.jsx, src/ui/src/components/forms/NewGameWizardStep1Player.jsx, src/ui/src/components/forms/NewGameWizardStep6Summary.jsx, src/ui/src/components/__tests__/wizard.test.jsx, src/ui/e2e/__snapshots__/, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run build, cd src/ui && npx playwright test e2e/wizard-visual.spec.js --update-snapshots, cd src/ui && npx playwright test e2e/wizard-visual.spec.js
+
 ## 2026-05-07
 - Task: Document current gameplay status and next PRD implementation slice.
 - Why: Future agents need a clear handoff for what is done and what to build next from the PRD.

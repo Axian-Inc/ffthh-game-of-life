@@ -52,6 +52,7 @@ describe('NewGameWizard', () => {
     const nextButton = screen.getByRole('button', { name: /Next/i })
     expect(nicknameInput).toHaveValue('Avery')
     expect(nextButton).toBeDisabled()
+    expect(screen.queryByRole('combobox', { name: 'Player realism profile' })).not.toBeInTheDocument()
 
     await user.clear(nicknameInput)
     await user.type(nicknameInput, 'Ted')
@@ -79,6 +80,7 @@ describe('NewGameWizard', () => {
 
     expect(screen.getByText('Game Name')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Family Game Night' })).toBeInTheDocument()
+    expect(screen.queryByText(/Profile:/i)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Start Game/i })).toBeDisabled()
 
     await user.click(screen.getByRole('button', { name: /Add Player/i }))

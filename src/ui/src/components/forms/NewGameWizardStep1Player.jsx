@@ -1,7 +1,6 @@
 import PlayerAvatar from '../ui/PlayerAvatar'
 import PrimaryButton from '../ui/PrimaryButton'
 import { ArrowRight } from 'lucide-react'
-import { PLAYER_PROFILE_OPTIONS } from '../../simulation/definitions'
 
 const NewGameWizardStep1Player = ({
   playerName,
@@ -13,8 +12,6 @@ const NewGameWizardStep1Player = ({
   playerNameError,
   onNext,
   isNextDisabled,
-  selectedProfileId,
-  onProfileChange,
 }) => {
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !isNextDisabled) {
@@ -58,22 +55,6 @@ const NewGameWizardStep1Player = ({
         })}
       </div>
 
-      <label className="wizard-select-label" htmlFor="wizard-player-profile">
-        <span>Player realism profile</span>
-        <select
-          id="wizard-player-profile"
-          className="wizard-text-input wizard-select-input"
-          value={selectedProfileId}
-          onChange={(event) => onProfileChange(event.target.value)}
-          aria-label="Player realism profile"
-        >
-          {PLAYER_PROFILE_OPTIONS.map((profile) => (
-            <option key={profile.id} value={profile.id}>
-              {profile.label}
-            </option>
-          ))}
-        </select>
-      </label>
       <PrimaryButton className="wizard-action-button" onClick={onNext} disabled={isNextDisabled}>
         Next <ArrowRight aria-hidden="true" />
       </PrimaryButton>
