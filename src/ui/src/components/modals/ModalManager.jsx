@@ -2,16 +2,20 @@ import CreateGameModal from './CreateGameModal'
 import ResumeGameModal from './ResumeGameModal'
 import DeleteGameModal from './DeleteGameModal'
 import PlayerHistoryModal from './PlayerHistoryModal'
+import ActionSelectionModal from './ActionSelectionModal'
 
 const ModalManager = ({
   view,
   activeGame,
   activeGameMode,
   pendingDelete,
+  actionSelection,
   historyPlayer,
   historyEntries,
   onBackdropClick,
   onCloseAll,
+  onActionSelectionCancel,
+  onActionSelectionConfirm,
   onHistoryClose,
   onDeleteCancel,
   onDeleteConfirm,
@@ -40,6 +44,16 @@ const ModalManager = ({
       onCancel={onDeleteCancel}
       onConfirm={onDeleteConfirm}
     />
+    {actionSelection ? (
+      <ActionSelectionModal
+        isOpen
+        playerName={actionSelection.playerName || 'Player'}
+        turnNumber={actionSelection.turnNumber || 1}
+        onBackdropClick={onBackdropClick}
+        onCancel={onActionSelectionCancel}
+        onConfirm={onActionSelectionConfirm}
+      />
+    ) : null}
     <PlayerHistoryModal
       isOpen={Boolean(historyPlayer)}
       playerName={historyPlayer?.playerName || 'Player'}

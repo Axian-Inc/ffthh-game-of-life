@@ -6,6 +6,9 @@ import { PLAY_TURN_PLACEHOLDER } from '../../data/playTurnPlaceholder'
 import './play-game-page.css'
 
 const noop = () => {}
+const SEE_HISTORY_TOOLTIP = "Review this player's saved actions for the game so far."
+const CHOOSE_ACTION_TOOLTIP = 'Record a choice and move to the next player. Full action outcomes are coming soon.'
+const PASS_TOOLTIP = 'Resolve this month with no action, then move to the next player.'
 
 const getPlayers = (game) => (Array.isArray(game?.players) ? game.players : [])
 
@@ -133,13 +136,23 @@ const PlayGamePage = ({
       </div>
 
       <div className="play-turn-actions">
-        <SecondaryButton className="play-turn-action-muted" onClick={onSeeHistory}>
+        <SecondaryButton className="play-turn-action-muted" onClick={onSeeHistory} title={SEE_HISTORY_TOOLTIP}>
           See History
         </SecondaryButton>
-        <PrimaryButton className="play-turn-action-primary" disabled={isAdvancingTurn} onClick={onChooseAction}>
+        <PrimaryButton
+          className="play-turn-action-primary"
+          disabled={isAdvancingTurn}
+          onClick={onChooseAction}
+          title={CHOOSE_ACTION_TOOLTIP}
+        >
           {isAdvancingTurn ? 'Advancing...' : 'Choose Action'}
         </PrimaryButton>
-        <SecondaryButton className="play-turn-action-muted" disabled={isAdvancingTurn} onClick={onPass}>
+        <SecondaryButton
+          className="play-turn-action-muted"
+          disabled={isAdvancingTurn}
+          onClick={onPass}
+          title={PASS_TOOLTIP}
+        >
           Pass
         </SecondaryButton>
       </div>

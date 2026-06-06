@@ -84,6 +84,8 @@ test('window.life.status reports created game state after Start Game', async ({ 
   await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeVisible()
   await expect(page.getByText("Ted's Turn")).toBeVisible()
   await page.getByRole('button', { name: 'Choose Action' }).click()
+  await page.getByRole('button', { name: /Join Gym/i }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Choose Action' }).click()
 
   status = await page.evaluate(() => window.life.status())
   expect(status.playScreen).toBe('turn')
@@ -94,6 +96,8 @@ test('window.life.status reports created game state after Start Game', async ({ 
 
   await expect(page.getByText("Mia's Turn")).toBeVisible()
   await page.getByRole('button', { name: 'Choose Action' }).click()
+  await page.getByRole('button', { name: /Side Gig/i }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Choose Action' }).click()
 
   status = await page.evaluate(() => window.life.status())
   expect(status.turnNumber).toBe(2)
@@ -136,6 +140,8 @@ test('window.life.status reports resumed game state from the home screen', async
   await expect(page.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeVisible()
   await expect(page.getByText("Jo's Turn")).toBeVisible()
   await page.getByRole('button', { name: 'Choose Action' }).click()
+  await page.getByRole('button', { name: /Career Switch/i }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Choose Action' }).click()
 
   status = await page.evaluate(() => window.life.status())
   expect(status.playScreen).toBe('turn')

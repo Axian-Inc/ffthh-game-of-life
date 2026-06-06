@@ -90,6 +90,7 @@ function App() {
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false)
   const [entrySource, setEntrySource] = useState('none')
   const [playScreen, setPlayScreen] = useState('welcome')
+  const [actionSelection, setActionSelection] = useState(null)
   const [wizardDraft, setWizardDraft] = useState(null)
   const [routeRequest, setRouteRequest] = useState(() => parseAppRoute(window.location.pathname))
   const [hasHydratedRoute, setHasHydratedRoute] = useState(false)
@@ -128,6 +129,7 @@ function App() {
 
   const handleBackClick = () => {
     closeAll()
+    setActionSelection(null)
     setCreateError('')
     setIsCreating(false)
     clearDebugState()
@@ -205,6 +207,7 @@ function App() {
 
   const handleDeleteCancel = () => {
     closeAll()
+    setActionSelection(null)
     clearDebugState()
   }
 
@@ -238,7 +241,7 @@ function App() {
   const handlePlayPlaceholderAction = useCallback(() => {}, [])
 
   const handleRecordMoveAndAdvanceTurn = useCallback(
-    async (actionType) => {
+    async (actionType, selectedAction = null) => {
       if (isAdvancingTurn || !currentActiveGame) {
         return
       }
@@ -278,8 +281,9 @@ function App() {
           playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
           turnNumber: currentTurnNumber,
           actionType,
-          actionLabel: MOVE_LABELS[actionType] || 'Move',
+          actionLabel: selectedAction?.label || MOVE_LABELS[actionType] || 'Move',
           createdAt: timestamp,
+          ...(selectedAction?.id ? { actionId: selectedAction.id } : {}),
           ...(passResolution ? { turnResolution: passResolution.turnResolution } : {}),
         },
       ]
@@ -304,8 +308,27 @@ function App() {
   )
 
   const handleAdvanceTurn = useCallback(() => {
-    return handleRecordMoveAndAdvanceTurn('choose_action')
-  }, [handleRecordMoveAndAdvanceTurn])
+    if (isAdvancingTurn || !currentActiveGame || !currentActivePlayer) {
+      return
+    }
+
+    setActionSelection({
+      playerName: currentActivePlayer.name?.trim() || `Player ${currentActivePlayerIndex + 1}`,
+      turnNumber: normalizeTurnNumber(currentActiveGame.turnNumber),
+    })
+  }, [isAdvancingTurn, currentActiveGame, currentActivePlayer, currentActivePlayerIndex])
+
+  const handleActionSelectionCancel = useCallback(() => {
+    setActionSelection(null)
+  }, [])
+
+  const handleActionSelectionConfirm = useCallback(
+    async (selectedAction) => {
+      setActionSelection(null)
+      await handleRecordMoveAndAdvanceTurn('choose_action', selectedAction)
+    },
+    [handleRecordMoveAndAdvanceTurn],
+  )
 
   const handlePassTurn = useCallback(() => {
     return handleRecordMoveAndAdvanceTurn('pass')
@@ -397,7 +420,7 @@ function App() {
   }, [newGameId, view, isLoading, setNewGameId])
 
   useEffect(() => {
-    if (view !== 'session' && !pendingDelete && !historyPlayer) {
+    if (view !== 'session' && !pendingDelete && !actionSelection && !historyPlayer) {
       return
     }
 
@@ -406,6 +429,10 @@ function App() {
         return
       }
       if (event.key === 'Escape') {
+        if (actionSelection) {
+          setActionSelection(null)
+          return
+        }
         if (historyPlayer) {
           closeHistory()
           return
@@ -416,7 +443,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [view, pendingDelete, historyPlayer, isCreating, closeHistory, closeAll])
+  }, [view, pendingDelete, actionSelection, historyPlayer, isCreating, closeHistory, closeAll])
 
   useEffect(() => {
     if (previousViewRef.current === 'create' && view === 'home') {
@@ -475,6 +502,10 @@ function App() {
       return
     }
     if (event.target === event.currentTarget) {
+      if (actionSelection) {
+        setActionSelection(null)
+        return
+      }
       if (historyPlayer) {
         closeHistory()
         return
@@ -490,10 +521,13 @@ function App() {
       activeGame={activeGame}
       activeGameMode={activeGameMode}
       pendingDelete={pendingDelete}
+      actionSelection={actionSelection}
       historyPlayer={historyPlayer}
       historyEntries={historyEntries}
       onBackdropClick={handleBackdropClick}
       onCloseAll={handleBackClick}
+      onActionSelectionCancel={handleActionSelectionCancel}
+      onActionSelectionConfirm={handleActionSelectionConfirm}
       onHistoryClose={closeHistory}
       onDeleteCancel={handleDeleteCancel}
       onDeleteConfirm={handleDeleteConfirm}
@@ -506,7 +540,8 @@ function App() {
     />
   )
 
-  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete) || Boolean(historyPlayer)
+  const isModalOpen =
+    view === 'create' || view === 'session' || Boolean(pendingDelete) || Boolean(actionSelection) || Boolean(historyPlayer)
 
   return (
     <PageShell isBlurred={isModalOpen} modals={modals}>

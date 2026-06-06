@@ -27,17 +27,26 @@ describe('Page components', () => {
     expect(screen.getByText('Ari')).toBeInTheDocument()
     expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Choose Action' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pass' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'See History' })).toBeInTheDocument()
+    const chooseActionButton = screen.getByRole('button', { name: 'Choose Action' })
+    const passButton = screen.getByRole('button', { name: 'Pass' })
+    const seeHistoryButton = screen.getByRole('button', { name: 'See History' })
+    expect(chooseActionButton).toBeInTheDocument()
+    expect(chooseActionButton).toHaveAttribute(
+      'title',
+      'Record a choice and move to the next player. Full action outcomes are coming soon.',
+    )
+    expect(passButton).toBeInTheDocument()
+    expect(passButton).toHaveAttribute('title', 'Resolve this month with no action, then move to the next player.')
+    expect(seeHistoryButton).toBeInTheDocument()
+    expect(seeHistoryButton).toHaveAttribute('title', "Review this player's saved actions for the game so far.")
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    await user.click(chooseActionButton)
     expect(onChooseAction).toHaveBeenCalledTimes(1)
 
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    await user.click(passButton)
     expect(onPass).toHaveBeenCalledTimes(1)
 
-    await user.click(screen.getByRole('button', { name: 'See History' }))
+    await user.click(seeHistoryButton)
     expect(onSeeHistory).toHaveBeenCalledTimes(1)
   })
 

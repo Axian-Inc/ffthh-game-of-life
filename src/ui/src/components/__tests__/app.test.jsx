@@ -197,6 +197,13 @@ describe('App create flow', () => {
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    const actionDialog = screen.getByRole('dialog')
+    expect(within(actionDialog).getByText("Ted's Turn 1")).toBeInTheDocument()
+    const chooseActionConfirm = within(actionDialog).getByRole('button', { name: 'Choose Action' })
+    expect(chooseActionConfirm).toBeDisabled()
+    await user.click(within(actionDialog).getByRole('button', { name: /Join Gym/i }))
+    expect(chooseActionConfirm).toBeEnabled()
+    await user.click(chooseActionConfirm)
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
@@ -213,7 +220,8 @@ describe('App create flow', () => {
               playerName: 'Ted',
               turnNumber: 1,
               actionType: 'choose_action',
-              actionLabel: 'Choose Action',
+              actionId: 'join-gym',
+              actionLabel: 'Join Gym',
             }),
           ],
         }),
@@ -286,7 +294,7 @@ describe('App create flow', () => {
     await user.click(screen.getByRole('button', { name: 'See History' }))
     const historyDialog = screen.getByRole('dialog')
     expect(within(historyDialog).getByText("Ted's Actions")).toBeInTheDocument()
-    expect(within(historyDialog).getByText('Choose Action')).toBeInTheDocument()
+    expect(within(historyDialog).getByText('Join Gym')).toBeInTheDocument()
     expect(within(historyDialog).queryByText('Pass')).not.toBeInTheDocument()
   })
 
@@ -343,6 +351,10 @@ describe('App create flow', () => {
     expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    const actionDialog = screen.getByRole('dialog')
+    expect(within(actionDialog).getByText("Jo's Turn 3")).toBeInTheDocument()
+    await user.click(within(actionDialog).getByRole('button', { name: /Side Gig/i }))
+    await user.click(within(actionDialog).getByRole('button', { name: 'Choose Action' }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
@@ -361,6 +373,8 @@ describe('App create flow', () => {
               playerName: 'Jo',
               turnNumber: 3,
               actionType: 'choose_action',
+              actionId: 'side-gig',
+              actionLabel: 'Side Gig',
             }),
           ],
         }),
@@ -369,6 +383,52 @@ describe('App create flow', () => {
 
     expect(JSON.stringify(window.life.status().persistedGame)).not.toBe(persistedBefore)
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeInTheDocument()
+    expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
+  })
+
+  it('does not advance the turn when action selection is canceled or dismissed', async () => {
+    const user = userEvent.setup()
+    const activeGame = {
+      id: 'cancel-action-game',
+      name: 'Cancel Action',
+      status: 'active',
+      turnNumber: 2,
+      activePlayerIndex: 0,
+      moveHistory: [],
+      players: [
+        { id: 'player-1', name: 'Ari', avatar: 'fox' },
+        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+      ],
+      lastUpdated: Date.now(),
+      createdAt: Date.now(),
+      resumable: true,
+    }
+
+    mockUseGamesState.games = [activeGame]
+    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => ({
+      ...updates,
+      id: gameId,
+    }))
+
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Resume' }))
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+
+    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    expect(screen.getByText("Ari's Turn 2")).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByText("Ari's Turn 2")).not.toBeInTheDocument()
+    expect(mockUseGamesState.updateGame).not.toHaveBeenCalled()
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 2' })).toBeInTheDocument()
+    expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    expect(screen.getByText("Ari's Turn 2")).toBeInTheDocument()
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByText("Ari's Turn 2")).not.toBeInTheDocument()
+    expect(mockUseGamesState.updateGame).not.toHaveBeenCalled()
+    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 2' })).toBeInTheDocument()
     expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
   })
 

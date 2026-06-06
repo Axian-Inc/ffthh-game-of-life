@@ -5,6 +5,7 @@ import ModalBackdrop from '../modals/ModalBackdrop'
 import ResumeGameModal from '../modals/ResumeGameModal'
 import DeleteGameModal from '../modals/DeleteGameModal'
 import PlayerHistoryModal from '../modals/PlayerHistoryModal'
+import ActionSelectionModal from '../modals/ActionSelectionModal'
 import ModalManager from '../modals/ModalManager'
 import { createGame } from '../../test/testUtils'
 
@@ -84,6 +85,60 @@ describe('Modal components', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 
+  it('ActionSelectionModal renders actions and submits the selected action', async () => {
+    const user = userEvent.setup()
+    const onConfirm = vi.fn()
+
+    render(
+      <ActionSelectionModal
+        isOpen
+        playerName="Ari"
+        turnNumber={2}
+        onBackdropClick={vi.fn()}
+        onCancel={vi.fn()}
+        onConfirm={onConfirm}
+      />,
+    )
+
+    expect(screen.getByText("Ari's Turn 2")).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Study or School/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Career Switch/i })).toBeInTheDocument()
+    const confirmButton = screen.getByRole('button', { name: 'Choose Action' })
+    expect(confirmButton).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: /Join Gym/i }))
+    expect(confirmButton).toBeEnabled()
+
+    await user.click(confirmButton)
+    expect(onConfirm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'join-gym',
+        label: 'Join Gym',
+      }),
+    )
+  })
+
+  it('ActionSelectionModal supports canceling without selecting an action', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    const onConfirm = vi.fn()
+
+    render(
+      <ActionSelectionModal
+        isOpen
+        playerName="Ari"
+        turnNumber={1}
+        onBackdropClick={vi.fn()}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onCancel).toHaveBeenCalledTimes(1)
+    expect(onConfirm).not.toHaveBeenCalled()
+  })
+
   it('ModalManager renders delete modal when pending delete exists', () => {
     const game = createGame({ name: 'Pending Delete' })
     render(
@@ -161,5 +216,35 @@ describe('Modal components', () => {
 
     expect(screen.getByText("Ari's Actions")).toBeInTheDocument()
     expect(screen.getByText('Pass')).toBeInTheDocument()
+  })
+
+  it('ModalManager renders action selection modal when action selection is open', () => {
+    render(
+      <ModalManager
+        view="play"
+        activeGame={createGame()}
+        activeGameMode="resume"
+        pendingDelete={null}
+        actionSelection={{ playerName: 'Ari', turnNumber: 3 }}
+        historyPlayer={null}
+        historyEntries={[]}
+        onBackdropClick={vi.fn()}
+        onCloseAll={vi.fn()}
+        onActionSelectionCancel={vi.fn()}
+        onActionSelectionConfirm={vi.fn()}
+        onHistoryClose={vi.fn()}
+        onDeleteCancel={vi.fn()}
+        onDeleteConfirm={vi.fn()}
+        createGameProps={{
+          onSubmit: vi.fn(),
+          submitError: '',
+          isSubmitting: false,
+          onStatusChange: vi.fn(),
+        }}
+      />,
+    )
+
+    expect(screen.getByText("Ari's Turn 3")).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Debt Paydown/i })).toBeInTheDocument()
   })
 })

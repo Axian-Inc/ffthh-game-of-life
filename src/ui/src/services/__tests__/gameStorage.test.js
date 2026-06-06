@@ -64,6 +64,7 @@ describe('gameStorage normalization', () => {
               turnNumber: 2,
               actionType: 'pass',
               actionLabel: 'Pass',
+              actionId: 99,
               createdAt: 123,
             },
           ],
@@ -74,13 +75,14 @@ describe('gameStorage normalization', () => {
     expect(readStoredGamesSnapshot()).toEqual([
       expect.objectContaining({
         moveHistory: [
-            expect.objectContaining({
-              id: '42',
-              playerId: '7',
+          expect.objectContaining({
+            id: '42',
+            playerId: '7',
             playerName: 'Ari',
             turnNumber: 2,
             actionType: 'pass',
             actionLabel: 'Pass',
+            actionId: '99',
             createdAt: 123,
           }),
         ],
