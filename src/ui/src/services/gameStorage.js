@@ -21,6 +21,22 @@ const normalizeActivePlayerIndex = (activePlayerIndex, playerCount) => {
   return activePlayerIndex % playerCount
 }
 
+const normalizeStatDelta = (statDelta) => {
+  if (!statDelta || typeof statDelta !== 'object') {
+    return null
+  }
+
+  return {
+    cash: Number.isFinite(statDelta.cash) ? statDelta.cash : 0,
+    debt: Number.isFinite(statDelta.debt) ? statDelta.debt : 0,
+    assetsValue: Number.isFinite(statDelta.assetsValue) ? statDelta.assetsValue : 0,
+    netWorth: Number.isFinite(statDelta.netWorth) ? statDelta.netWorth : 0,
+    physicalHealth: Number.isFinite(statDelta.physicalHealth) ? statDelta.physicalHealth : 0,
+    mentalHealth: Number.isFinite(statDelta.mentalHealth) ? statDelta.mentalHealth : 0,
+    stress: Number.isFinite(statDelta.stress) ? statDelta.stress : 0,
+  }
+}
+
 const normalizeMoveHistory = (moveHistory) => {
   if (!Array.isArray(moveHistory)) {
     return []
@@ -35,6 +51,8 @@ const normalizeMoveHistory = (moveHistory) => {
       typeof entry?.actionType === 'string' && entry.actionType.trim() ? entry.actionType : 'choose_action',
     actionLabel:
       typeof entry?.actionLabel === 'string' && entry.actionLabel.trim() ? entry.actionLabel : 'Choose Action',
+    statDelta: normalizeStatDelta(entry?.statDelta),
+    turnLog: entry?.turnLog && typeof entry.turnLog === 'object' ? entry.turnLog : null,
     createdAt: Number.isFinite(entry?.createdAt) ? entry.createdAt : 0,
   }))
 }

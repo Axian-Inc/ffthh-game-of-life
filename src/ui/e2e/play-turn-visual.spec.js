@@ -57,7 +57,7 @@ test('play turn desktop layout matches the player-turn mock anatomy', async ({ p
   await expect(page.getByText('Vic')).toBeVisible()
   await expect(page.getByText('Net Worth:')).toBeVisible()
   await expect(page.getByText('Modifier Icons')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Choose Action' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Study/i })).toBeVisible()
 
   await expect(page.locator('.page')).toHaveScreenshot(
     'play-turn-desktop-baseline.png',

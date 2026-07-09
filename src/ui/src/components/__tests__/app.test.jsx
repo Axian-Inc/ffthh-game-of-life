@@ -164,7 +164,6 @@ describe('App create flow', () => {
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
     await user.click(screen.getByRole('button', { name: /Study/i }))
 
     await waitFor(() =>
@@ -205,7 +204,7 @@ describe('App create flow', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }))
     expect(screen.queryByText("Mia's Actions")).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    await user.click(screen.getByRole('button', { name: /Study/i }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
@@ -221,11 +220,11 @@ describe('App create flow', () => {
               playerId: 'player-1',
             }),
             expect.objectContaining({
-              actionType: 'pass',
+              actionType: 'study',
               playerId: 'player-2',
               playerName: 'Mia',
               turnNumber: 1,
-              actionLabel: 'Pass',
+              actionLabel: 'Study',
             }),
           ],
         }),
@@ -295,7 +294,6 @@ describe('App create flow', () => {
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 3' })).toBeInTheDocument()
     expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
     await user.click(screen.getByRole('button', { name: /Study/i }))
 
     await waitFor(() =>
@@ -362,14 +360,14 @@ describe('App create flow', () => {
 
     expect(window.life.status().persistedGame.moveHistory).toEqual([])
 
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    await user.click(screen.getByRole('button', { name: /Study/i }))
 
     await waitFor(() =>
       expect(window.life.status().persistedGame.moveHistory).toEqual([
         expect.objectContaining({
           playerId: 'player-1',
-          actionType: 'pass',
-          actionLabel: 'Pass',
+          actionType: 'study',
+          actionLabel: 'Study',
           turnNumber: 2,
         }),
       ]),

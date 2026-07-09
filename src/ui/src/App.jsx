@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import PageShell from './components/layout/PageShell'
 import Hero from './components/layout/Hero'
@@ -100,8 +100,6 @@ function App() {
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false)
-  const [isActionPickerOpen, setIsActionPickerOpen] = useState(false)
-  const [actionMenu, setActionMenu] = useState({ regularActions: [], advancedActions: [], unexpectedActions: [] })
   const [entrySource, setEntrySource] = useState('none')
   const [playScreen, setPlayScreen] = useState('welcome')
   const [wizardDraft, setWizardDraft] = useState(null)
@@ -122,6 +120,17 @@ function App() {
   const currentActivePlayerIndex = normalizeActivePlayerIndex(currentActiveGame?.activePlayerIndex, currentPlayerCount)
   const currentActivePlayer = currentPlayers[currentActivePlayerIndex] || null
   const currentActivePlayerKey = currentActivePlayer ? getPlayerKey(currentActivePlayer, currentActivePlayerIndex) : null
+  const currentActionOptions = useMemo(() => {
+    if (!currentActiveGame || !currentActivePlayer) {
+      return { regularActions: [], advancedActions: [], unexpectedActions: [] }
+    }
+
+    return getAvailableTurnActions({
+      game: currentActiveGame,
+      player: currentActivePlayer,
+      turnNumber: normalizeTurnNumber(currentActiveGame.turnNumber),
+    })
+  }, [currentActiveGame, currentActivePlayer])
   const historyEntries = historyPlayer
     ? getMoveHistory(currentActiveGame)
         .filter((entry) => entry.playerId === historyPlayer.playerId)
@@ -325,8 +334,6 @@ function App() {
           lastUpdated: timestamp,
         })
         openPlay(updatedGame)
-        setActionMenu({ regularActions: [], advancedActions: [], unexpectedActions: [] })
-        setIsActionPickerOpen(false)
       } finally {
         setIsAdvancingTurn(false)
       }
@@ -334,39 +341,12 @@ function App() {
     [isAdvancingTurn, currentActiveGame, updateGame, openPlay],
   )
 
-  const handleAdvanceTurn = useCallback(() => {
-    if (isAdvancingTurn) {
-      return
-    }
-    if (currentActiveGame && currentActivePlayer) {
-      const availableActions = getAvailableTurnActions({
-        game: currentActiveGame,
-        player: currentActivePlayer,
-        turnNumber: normalizeTurnNumber(currentActiveGame.turnNumber),
-      })
-      setActionMenu(availableActions)
-    }
-    setIsActionPickerOpen(true)
-  }, [isAdvancingTurn, currentActiveGame, currentActivePlayer])
-
   const handleSelectAction = useCallback(
     (actionType) => {
       return handleRecordMoveAndAdvanceTurn(actionType)
     },
     [handleRecordMoveAndAdvanceTurn],
   )
-
-  const handleCancelActionPicker = useCallback(() => {
-    if (isAdvancingTurn) {
-      return
-    }
-    setActionMenu({ regularActions: [], advancedActions: [], unexpectedActions: [] })
-    setIsActionPickerOpen(false)
-  }, [isAdvancingTurn])
-
-  const handlePassTurn = useCallback(() => {
-    return handleRecordMoveAndAdvanceTurn('pass')
-  }, [handleRecordMoveAndAdvanceTurn])
 
   const handleOpenHistory = useCallback(() => {
     if (isAdvancingTurn || !currentActiveGame) {
@@ -597,13 +577,9 @@ function App() {
           <PlayGamePage
             game={currentActiveGame}
             isAdvancingTurn={isAdvancingTurn}
-            onChooseAction={handleAdvanceTurn}
-            actionOptions={actionMenu}
-            isActionPickerOpen={isActionPickerOpen}
+            actionOptions={currentActionOptions}
             onActionPick={handleSelectAction}
-            onCancelActionPicker={handleCancelActionPicker}
             onNextPlayer={handlePlayPlaceholderAction}
-            onPass={handlePassTurn}
             onPreviousPlayer={handlePlayPlaceholderAction}
             onSeeHistory={handleOpenHistory}
           />

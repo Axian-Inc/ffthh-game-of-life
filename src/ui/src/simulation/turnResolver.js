@@ -9,7 +9,7 @@ import { computeNetWorth, normalizePlayerState } from './playerState'
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
 
-const ACTION_BASE_EFFECTS = {
+export const ACTION_BASE_EFFECTS = {
   pass: {
     cash: 0,
     debt: 0,
@@ -32,15 +32,15 @@ const ACTION_BASE_EFFECTS = {
     assetsValue: 20,
     physicalHealth: -1,
     mentalHealth: 1,
-    stress: 1,
+    stress: 0,
   },
   workout: {
     cash: -90,
     debt: 0,
     assetsValue: 0,
-    physicalHealth: 3,
-    mentalHealth: 1,
-    stress: -2,
+    physicalHealth: 4,
+    mentalHealth: 2,
+    stress: -5,
   },
   side_gig: {
     cash: 260,
@@ -48,23 +48,23 @@ const ACTION_BASE_EFFECTS = {
     assetsValue: 20,
     physicalHealth: -1,
     mentalHealth: -1,
-    stress: 2,
+    stress: 4,
   },
   debt_paydown: {
     cash: -220,
-    debt: -280,
+    debt: -360,
     assetsValue: 0,
     physicalHealth: 0,
-    mentalHealth: 1,
-    stress: -1,
+    mentalHealth: 2,
+    stress: -4,
   },
   social_time: {
     cash: -120,
     debt: 0,
     assetsValue: 0,
     physicalHealth: 0,
-    mentalHealth: 3,
-    stress: -2,
+    mentalHealth: 5,
+    stress: -6,
   },
   vacation_escape: {
     cash: -900,
@@ -72,7 +72,7 @@ const ACTION_BASE_EFFECTS = {
     assetsValue: 0,
     physicalHealth: 1,
     mentalHealth: 5,
-    stress: -4,
+    stress: -8,
   },
   startup_bet: {
     cash: -700,
@@ -88,11 +88,11 @@ const ACTION_BASE_EFFECTS = {
     assetsValue: 0,
     physicalHealth: 0,
     mentalHealth: 4,
-    stress: -3,
+    stress: -5,
   },
 }
 
-const ISSUE_CATALOG = [
+export const ISSUE_CATALOG = [
   { id: 'car_breakdown', label: 'Car Breakdown', spawnChance: 0.07, ignore: { cash: -120, stress: 1 }, address: { cash: -450, stress: 1 } },
   {
     id: 'plumbing_leak',
@@ -120,13 +120,61 @@ const applyDelta = (state, delta) => ({
   stress: clamp(Math.round(state.stress + (delta.stress || 0)), 0, 100),
 })
 
-const getActionBaseEffects = (actionType) => ({ ...(ACTION_BASE_EFFECTS[actionType] || ACTION_BASE_EFFECTS.pass) })
+export const getActionBaseEffects = (actionType) => ({ ...(ACTION_BASE_EFFECTS[actionType] || ACTION_BASE_EFFECTS.pass) })
 
 const parseIssueActionType = (actionType) => {
   if (!String(actionType).startsWith('address_issue:')) {
     return null
   }
   return String(actionType).slice('address_issue:'.length)
+}
+
+const toDeltaRange = (min, max) => ({ min, max })
+
+export const getActionPotentialEffects = ({ actionType, player }) => {
+  const addressedIssueId = parseIssueActionType(actionType)
+  if (addressedIssueId) {
+    const issue = (Array.isArray(player?.activeIssues) ? player.activeIssues : []).find(
+      (entry) => entry.id === addressedIssueId,
+    )
+    const issueRule = ISSUE_CATALOG.find((entry) => entry.id === issue?.issueType)
+    if (issueRule) {
+      return {
+        delta: {
+          cash: issueRule.address.cash || 0,
+          debt: issueRule.address.debt || 0,
+          assetsValue: issueRule.address.assetsValue || 0,
+          physicalHealth: issueRule.address.physicalHealth || 0,
+          mentalHealth: issueRule.address.mentalHealth || 0,
+          stress: issueRule.address.stress || 0,
+        },
+        ranges: {},
+        isVariable: false,
+      }
+    }
+  }
+
+  const delta = getActionBaseEffects(actionType)
+  const ranges = {}
+
+  if (actionType === 'vacation_escape') {
+    ranges.cash = toDeltaRange(delta.cash - 500, delta.cash)
+    ranges.mentalHealth = toDeltaRange(delta.mentalHealth - 2, delta.mentalHealth + 2)
+  }
+  if (actionType === 'startup_bet') {
+    ranges.assetsValue = toDeltaRange(delta.assetsValue - 800, delta.assetsValue + 1400)
+    ranges.mentalHealth = toDeltaRange(delta.mentalHealth - 1, delta.mentalHealth + 1)
+  }
+  if (actionType === 'festival_weekend') {
+    ranges.cash = toDeltaRange(delta.cash - 250, delta.cash)
+    ranges.physicalHealth = toDeltaRange(delta.physicalHealth - 1, delta.physicalHealth + 1)
+  }
+
+  return {
+    delta,
+    ranges,
+    isVariable: Object.keys(ranges).length > 0,
+  }
 }
 
 const scaleIssuePenalty = (delta, stackCount) => {

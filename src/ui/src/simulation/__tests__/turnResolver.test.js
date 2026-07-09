@@ -60,4 +60,17 @@ describe('resolvePlayerTurn', () => {
     expect(secondIssueTick).toBeTruthy()
     expect(Math.abs(secondIssueTick.delta.cash)).toBeGreaterThan(Math.abs(firstIssueTick.delta.cash))
   })
+
+  it('gives regular actions meaningful stress relief options', () => {
+    const game = { id: 'game-1', seed: 'seed-stress', modifierContext: { difficultyMode: 'normal' } }
+    const player = { ...createPlayer(), stress: 55 }
+
+    const workout = resolvePlayerTurn({ game, player, actionType: 'workout', turnNumber: 1, playerName: 'Ari' })
+    const socialTime = resolvePlayerTurn({ game, player, actionType: 'social_time', turnNumber: 1, playerName: 'Ari' })
+    const debtPaydown = resolvePlayerTurn({ game, player, actionType: 'debt_paydown', turnNumber: 1, playerName: 'Ari' })
+
+    expect(workout.totalDelta.stress).toBeLessThan(0)
+    expect(socialTime.totalDelta.stress).toBeLessThan(0)
+    expect(debtPaydown.totalDelta.stress).toBeLessThan(0)
+  })
 })

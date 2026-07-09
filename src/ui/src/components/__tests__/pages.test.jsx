@@ -8,8 +8,7 @@ import { createGame } from '../../test/testUtils'
 describe('Page components', () => {
   it('renders PlayGamePage with live player turn content', async () => {
     const user = userEvent.setup()
-    const onChooseAction = vi.fn()
-    const onPass = vi.fn()
+    const onActionPick = vi.fn()
     const onSeeHistory = vi.fn()
     const game = createGame({
       players: [
@@ -38,23 +37,20 @@ describe('Page components', () => {
       activePlayerIndex: 1,
     })
 
-    render(<PlayGamePage game={game} onChooseAction={onChooseAction} onPass={onPass} onSeeHistory={onSeeHistory} />)
+    render(<PlayGamePage game={game} onActionPick={onActionPick} onSeeHistory={onSeeHistory} />)
 
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 3' })).toBeInTheDocument()
     expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
     expect(screen.getByText('Ari')).toBeInTheDocument()
     expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
-    expect(screen.getByText('Physical Health (69)')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Choose Action' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pass' })).toBeInTheDocument()
+    expect(screen.getByText('Physical Health:')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Study/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Pass' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'See History' })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
-    expect(onChooseAction).toHaveBeenCalledTimes(1)
-
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
-    expect(onPass).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByRole('button', { name: /Study/i }))
+    expect(onActionPick).toHaveBeenCalledWith('study')
 
     await user.click(screen.getByRole('button', { name: 'See History' }))
     expect(onSeeHistory).toHaveBeenCalledTimes(1)

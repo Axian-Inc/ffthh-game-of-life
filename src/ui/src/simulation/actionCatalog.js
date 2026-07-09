@@ -1,5 +1,6 @@
 import { createSeededRng } from './random'
 import { normalizePlayerState } from './playerState'
+import { getActionPotentialEffects } from './turnResolver'
 
 export const REGULAR_ACTIONS = [
   { id: 'study', label: 'Study', description: 'Invest in skills, near-term cost for growth.', category: 'regular' },
@@ -40,6 +41,11 @@ const toIssueAction = (issue) => ({
   category: 'unexpected',
 })
 
+const withEffectPreview = (action, player) => ({
+  ...action,
+  effectPreview: getActionPotentialEffects({ actionType: action.id, player }),
+})
+
 const weightedPick = (rng, weightedEntries) => {
   const totalWeight = weightedEntries.reduce((sum, entry) => sum + entry.weight, 0)
   if (totalWeight <= 0) {
@@ -58,8 +64,10 @@ const weightedPick = (rng, weightedEntries) => {
 
 export const getAvailableTurnActions = ({ game, player, turnNumber }) => {
   const normalizedPlayer = normalizePlayerState(player, game?.modifierContext)
-  const regularActions = REGULAR_ACTIONS
-  const unexpectedActions = (normalizedPlayer.activeIssues || []).map(toIssueAction)
+  const regularActions = REGULAR_ACTIONS.map((action) => withEffectPreview(action, normalizedPlayer))
+  const unexpectedActions = (normalizedPlayer.activeIssues || [])
+    .map(toIssueAction)
+    .map((action) => withEffectPreview(action, normalizedPlayer))
 
   const rng = createSeededRng(`${game?.seed || game?.id || 'game'}:offer:${turnNumber}:${normalizedPlayer.id}`)
   const baseChance = 0.1
@@ -74,7 +82,7 @@ export const getAvailableTurnActions = ({ game, player, turnNumber }) => {
     )
     const selected = weightedPick(rng, weighted)
     if (selected) {
-      advancedActions = [selected]
+      advancedActions = [withEffectPreview(selected, normalizedPlayer)]
     }
   }
 
