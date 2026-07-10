@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-07-10
+- Task: Add local project expert MCP server.
+- Why: Local agents need a source-grounded way to ask project architecture, design-pattern, functional-area, and code-search questions without re-reading the whole repository from scratch.
+- What changed: Added a dependency-free stdio MCP server with tools for project overview, project questions, native `rg` search, functional-area lookup, curated coding patterns, and canonical document reads. Documented local-agent setup and added smoke tests.
+- Paths: tools/project-expert-mcp/, README.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix tools/project-expert-mcp test
+- Follow-ups: Keep `tools/project-expert-mcp/src/projectKnowledge.js` aligned with future architecture and layout changes.
+
 ## 2026-05-25
 - Task: Remove pre-game profile selection.
 - Why: New-game setup should still capture game difficulty and core player setup choices, but not ask players to choose a realism profile before play.

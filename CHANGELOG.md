@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Added a read-only local project expert MCP server for architecture, design-pattern, functional-area, canonical-doc, and `rg`-backed source-search context.
 - Removed the player realism profile selector from new-game setup while keeping difficulty, city, education, and career choices.
 - Documented the current gameplay implementation status and next PRD-aligned simulation slice for future agents.
 - Fixed devcontainer OpenCode install reliability on Linux ARM64 by explicitly installing the matching platform binary package.

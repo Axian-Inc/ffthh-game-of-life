@@ -37,6 +37,19 @@ Do not run Terraform in the `default` workspace.
 5. Deploy the application:
    `scripts/deploy.sh`
 
+## Local project expert MCP server
+
+This repository includes a read-only local MCP server that exposes project architecture, design patterns, functional-area ownership, canonical docs, and `rg`-backed source search to MCP-capable local agents.
+
+Run or test it from the repository root:
+
+1. Run MCP server tests:
+   `npm --prefix tools/project-expert-mcp test`
+2. Start the stdio MCP server:
+   `npm --prefix tools/project-expert-mcp start`
+
+Setup details and the client configuration snippet are in `tools/project-expert-mcp/README.md`.
+
 ## Documentation
 
 - Product requirements: `docs/modern-game-of-life-prd.md`

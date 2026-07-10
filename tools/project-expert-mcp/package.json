@@ -1,0 +1,17 @@
+{
+  "name": "ffthh-project-expert-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local MCP server that exposes Modern Game of Life project knowledge.",
+  "bin": {
+    "ffthh-project-expert-mcp": "./bin/project-expert-mcp.js"
+  },
+  "scripts": {
+    "start": "node ./bin/project-expert-mcp.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
