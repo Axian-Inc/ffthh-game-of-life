@@ -1,0 +1,33 @@
+{
+  "defaultMaxTokens": 1200,
+  "maxTokens": 8000,
+  "priorityFiles": [
+    "AGENTS.md",
+    "README.md",
+    "docs/modern-game-of-life-prd.md",
+    "docs/ARCHITECTURE.md",
+    "docs/game-of-life-style-guide.md",
+    "NOTES.md",
+    "CHANGELOG.md",
+    "scripts/README.md"
+  ],
+  "topicAliases": {
+    "prd": ["docs/modern-game-of-life-prd.md"],
+    "architecture": ["docs/ARCHITECTURE.md"],
+    "style": ["docs/game-of-life-style-guide.md"],
+    "deploy": ["scripts/README.md", "scripts/deploy.sh", "terraform/main.tf", "terraform/outputs.tf"],
+    "simulation": ["src/ui/src/simulation", "docs/modern-game-of-life-prd.md", "docs/ARCHITECTURE.md"],
+    "ui": ["src/ui/src/App.jsx", "src/ui/src/components", "src/ui/src/hooks", "docs/game-of-life-style-guide.md"],
+    "api": ["src/api/index.js", "terraform/main.tf", "docs/ARCHITECTURE.md"],
+    "tests": ["src/ui/src/components/__tests__", "src/ui/src/simulation/__tests__", "src/ui/src/services/__tests__"]
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".terraform",
+    ".git",
+    "src/ui/e2e/__snapshots__",
+    "package-lock.json"
+  ]
+}

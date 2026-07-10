@@ -26,3 +26,12 @@
 - `NOTES.md` for task-level “what/why/where”.
 - `CHANGELOG.md` for user-visible and operational changes.
 - `scripts/README.md` for deploy prerequisites and usage.
+
+## Token Saver MCP
+- When repository context can be gathered by the Token Saver MCP server, agents must use the MCP server instead of directly reading broad docs or file sets.
+- Use `repo_context_summary` or `repo://overview` for general repo orientation and current implementation status.
+- Use `docs_digest` or `repo://prd-status` for PRD status, current product slice, architecture, style, deploy, notes, or changelog summaries.
+- Use `task_brief` for task-specific orientation before planning or implementing non-trivial work.
+- Use `code_area_map` before exploring a broad code area such as `ui`, `simulation`, `api`, `terraform`, `deploy`, `tests`, or `docs`.
+- Use `compact_files` when summarizing specific files or directories without needing exact full contents.
+- If the MCP server is unavailable, fails, lacks the needed detail, or exact file contents are required for editing/debugging/line references, agents may use normal reads/searches after briefly stating the fallback reason.
