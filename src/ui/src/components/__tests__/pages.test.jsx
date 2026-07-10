@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import PlayGamePage from '../pages/PlayGamePage'
 import WelcomeToLifePage from '../pages/WelcomeToLifePage'
+import { getLifeLessonSpotlight } from '../../data/lifeLessonSpotlights'
 import { createGame } from '../../test/testUtils'
 
 describe('Page components', () => {
@@ -68,7 +69,12 @@ describe('Page components', () => {
     expect(screen.getByText('Ari')).toBeInTheDocument()
     expect(screen.getByText('Jo')).toBeInTheDocument()
     expect(screen.getByText('Software Engineer')).toBeInTheDocument()
+    const spotlight = getLifeLessonSpotlight({ player: game.players[1], turnNumber: 3 })
+
     expect(screen.getByText('Physical Health (69)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Life lesson spotlight')).toBeInTheDocument()
+    expect(screen.getByText(spotlight.title)).toBeInTheDocument()
+    expect(screen.getByText(spotlight.prompt)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Plan This Month' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'See History' })).toBeInTheDocument()
 

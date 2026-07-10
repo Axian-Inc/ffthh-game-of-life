@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 import PrimaryButton from '../ui/PrimaryButton'
 import SecondaryButton from '../ui/SecondaryButton'
 import PlayerAvatar from '../ui/PlayerAvatar'
 import ActionPlannerModal from '../modals/ActionPlannerModal'
 import { PLAY_TURN_STAT_ICONS } from '../../data/playTurnPlaceholder'
+import { getLifeLessonSpotlight } from '../../data/lifeLessonSpotlights'
 import { getCareerLabel, getCityLabel } from '../../simulation/definitions'
 import './play-game-page.css'
 
@@ -114,6 +115,7 @@ const PlayGamePage = ({
   const stage = turnPlan?.stage || 'brief'
   const reveal = turnPlan?.reveal || {}
   const highlightedDeltaMap = new Map((reveal.topDeltaCards || []).map((item) => [item.key, item]))
+  const lifeLessonSpotlight = getLifeLessonSpotlight({ player: activePlayer, turnNumber })
 
   const financialStats = [
     {
@@ -374,6 +376,20 @@ const PlayGamePage = ({
                 Spend points on a few strong moves instead of one flat action.
               </div>
             </div>
+
+            <article className={'play-turn-life-lesson is-' + lifeLessonSpotlight.tone} aria-label="Life lesson spotlight">
+              <div className="play-turn-life-lesson-topline">
+                <span className="play-turn-life-lesson-icon" aria-hidden="true">
+                  <Sparkles />
+                </span>
+                <div>
+                  <p className="play-turn-life-lesson-eyebrow">Life Lesson Spotlight</p>
+                  <h4>{lifeLessonSpotlight.title}</h4>
+                </div>
+              </div>
+              <p>{lifeLessonSpotlight.prompt}</p>
+              <strong>{lifeLessonSpotlight.takeaway}</strong>
+            </article>
 
             <div className="play-turn-status-columns">
               <section className="play-turn-status-column" aria-label="Financial overview">
