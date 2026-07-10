@@ -35,6 +35,9 @@ const normalizeMoveHistory = (moveHistory) => {
       typeof entry?.actionType === 'string' && entry.actionType.trim() ? entry.actionType : 'choose_action',
     actionLabel:
       typeof entry?.actionLabel === 'string' && entry.actionLabel.trim() ? entry.actionLabel : 'Choose Action',
+    statDelta: entry?.statDelta && typeof entry.statDelta === 'object' ? entry.statDelta : {},
+    turnLog: entry?.turnLog && typeof entry.turnLog === 'object' ? entry.turnLog : null,
+    actionsTaken: Array.isArray(entry?.actionsTaken) ? entry.actionsTaken : [],
     createdAt: Number.isFinite(entry?.createdAt) ? entry.createdAt : 0,
   }))
 }

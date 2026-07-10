@@ -34,6 +34,20 @@ export const createDefaultPlayerTraits = (traits = {}) => ({
   ...traits,
 })
 
+const createDefaultProgressionArcs = (arcs = []) => {
+  const byId = new Map(Array.isArray(arcs) ? arcs.map((arc) => [arc?.id, arc]) : [])
+  const defaults = [
+    { id: 'burnout', label: 'Burnout', value: 0, band: 'calm', headline: 'You are keeping up with life.' },
+    { id: 'recovery', label: 'Recovery', value: 0, band: 'steady', headline: 'You are holding your ground.' },
+    { id: 'careerMomentum', label: 'Career Momentum', value: 0, band: 'steady', headline: 'Your career is moving at a steady pace.' },
+  ]
+
+  return defaults.map((arc) => ({
+    ...arc,
+    ...(byId.get(arc.id) || {}),
+  }))
+}
+
 export const initializePlayerState = (player, modifierContext = createDefaultModifierContext()) => {
   const careerRule = getCareerRule(player.jobId)
   const cityRule = getCityRule(player.cityId)
@@ -65,6 +79,8 @@ export const initializePlayerState = (player, modifierContext = createDefaultMod
     statusEffects: Array.isArray(player.statusEffects) ? player.statusEffects : [],
     actionHistory: Array.isArray(player.actionHistory) ? player.actionHistory : [],
     activeIssues: Array.isArray(player.activeIssues) ? player.activeIssues : [],
+    pendingConsequences: Array.isArray(player.pendingConsequences) ? player.pendingConsequences : [],
+    progressionArcs: createDefaultProgressionArcs(player.progressionArcs),
     playerTraits: createDefaultPlayerTraits(player.playerTraits),
     profileId: typeof player.profileId === 'string' && player.profileId ? player.profileId : 'none',
   }
@@ -96,5 +112,7 @@ export const normalizePlayerState = (player, modifierContext = createDefaultModi
     statusEffects: Array.isArray(player.statusEffects) ? player.statusEffects : [],
     actionHistory: Array.isArray(player.actionHistory) ? player.actionHistory : [],
     activeIssues: Array.isArray(player.activeIssues) ? player.activeIssues : [],
+    pendingConsequences: Array.isArray(player.pendingConsequences) ? player.pendingConsequences : [],
+    progressionArcs: createDefaultProgressionArcs(player.progressionArcs),
   }
 }

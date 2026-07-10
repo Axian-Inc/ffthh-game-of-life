@@ -18,6 +18,14 @@ export const createPlayer = (overrides = {}) => ({
   playerTraits: overrides.playerTraits ?? { grit: 0, focus: 0, resilience: 0, riskTolerance: 0 },
   statusEffects: overrides.statusEffects ?? [],
   actionHistory: overrides.actionHistory ?? [],
+  activeIssues: overrides.activeIssues ?? [],
+  pendingConsequences: overrides.pendingConsequences ?? [],
+  progressionArcs:
+    overrides.progressionArcs ?? [
+      { id: 'burnout', label: 'Burnout', value: 0, band: 'calm', headline: 'You are keeping up with life.' },
+      { id: 'recovery', label: 'Recovery', value: 0, band: 'steady', headline: 'You are holding your ground.' },
+      { id: 'careerMomentum', label: 'Career Momentum', value: 0, band: 'steady', headline: 'Your career is moving at a steady pace.' },
+    ],
   ...overrides,
 })
 

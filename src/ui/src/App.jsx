@@ -13,22 +13,19 @@ import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
 import { createDefaultModifierContext, initializePlayerState } from './simulation/playerState'
 import { getAvailableTurnActions } from './simulation/actionCatalog'
+import { buildTurnBrief, buildTurnReveal } from './simulation/turnPresentation'
 import { resolvePlayerTurn } from './simulation/turnResolver'
 
-const MOVE_LABELS = {
-  choose_action: 'Choose Action',
-  pass: 'Pass',
-  study: 'Study',
-  workout: 'Workout',
-  side_gig: 'Side Gig',
-  debt_paydown: 'Debt Paydown',
-  social_time: 'Social Time',
-  vacation_escape: 'Vacation Escape',
-  startup_bet: 'Startup Bet',
-  festival_weekend: 'Festival Weekend',
-  car_breakdown: 'Address Car Breakdown',
-  plumbing_leak: 'Address Plumbing Leak',
-  burnout_warning: 'Address Burnout Warning',
+const EMPTY_TURN_PLAN = {
+  stage: 'brief',
+  actionPoints: 0,
+  remainingActionPoints: 0,
+  selectedActions: [],
+  curatedActions: [],
+  issueActions: [],
+  explanation: '',
+  brief: null,
+  reveal: null,
 }
 
 const parseAppRoute = (pathname) => {
@@ -100,8 +97,7 @@ function App() {
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false)
-  const [isActionPickerOpen, setIsActionPickerOpen] = useState(false)
-  const [actionMenu, setActionMenu] = useState({ regularActions: [], advancedActions: [], unexpectedActions: [] })
+  const [turnPlan, setTurnPlan] = useState(EMPTY_TURN_PLAN)
   const [entrySource, setEntrySource] = useState('none')
   const [playScreen, setPlayScreen] = useState('welcome')
   const [wizardDraft, setWizardDraft] = useState(null)
@@ -127,6 +123,46 @@ function App() {
         .filter((entry) => entry.playerId === historyPlayer.playerId)
         .sort((left, right) => right.createdAt - left.createdAt)
     : []
+
+  const buildTurnPlanForGame = useCallback((gameOverride = currentActiveGame) => {
+    const game = gameOverride
+    const players = Array.isArray(game?.players) ? game.players : []
+    if (!game || players.length === 0) {
+      return EMPTY_TURN_PLAN
+    }
+
+    const activePlayerIndex = normalizeActivePlayerIndex(game.activePlayerIndex, players.length)
+    const activePlayer = players[activePlayerIndex] || null
+    if (!activePlayer) {
+      return EMPTY_TURN_PLAN
+    }
+
+    const nextActionMenu = getAvailableTurnActions({
+      game,
+      player: activePlayer,
+      turnNumber: normalizeTurnNumber(game.turnNumber),
+    })
+
+    return {
+      stage: 'brief',
+      actionPoints: nextActionMenu.actionPoints,
+      remainingActionPoints: nextActionMenu.actionPoints,
+      selectedActions: [],
+      curatedActions: nextActionMenu.curatedActions,
+      issueActions: nextActionMenu.issueActions,
+      explanation: nextActionMenu.explanation,
+      brief: buildTurnBrief({
+        game,
+        player: activePlayer,
+        turnNumber: normalizeTurnNumber(game.turnNumber),
+      }),
+      reveal: buildTurnReveal({
+        game,
+        player: activePlayer,
+        turnNumber: normalizeTurnNumber(game.turnNumber),
+      }),
+    }
+  }, [currentActiveGame])
 
   const clearDebugState = useCallback(() => {
     setEntrySource('none')
@@ -264,7 +300,7 @@ function App() {
   const handlePlayPlaceholderAction = useCallback(() => {}, [])
 
   const handleRecordMoveAndAdvanceTurn = useCallback(
-    async (actionType) => {
+    async (selectedActions = []) => {
       if (isAdvancingTurn || !currentActiveGame) {
         return
       }
@@ -287,14 +323,10 @@ function App() {
       const resolvedTurn = resolvePlayerTurn({
         game: currentActiveGame,
         player: activePlayer,
-        actionType,
+        selectedActions,
         turnNumber: currentTurnNumber,
         playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
       })
-      const recordedActionType = resolvedTurn.turnLog.actionType
-      const actionLabelKey = recordedActionType.startsWith('address_issue:')
-        ? recordedActionType.slice('address_issue:'.length)
-        : recordedActionType
       const nextPlayers = players.map((player, index) =>
         index === activePlayerIndex ? resolvedTurn.player : player,
       )
@@ -305,10 +337,11 @@ function App() {
           playerId: getPlayerKey(activePlayer, activePlayerIndex),
           playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
           turnNumber: currentTurnNumber,
-          actionType: recordedActionType,
-          actionLabel: MOVE_LABELS[actionLabelKey] || 'Move',
+          actionType: resolvedTurn.actionType,
+          actionLabel: resolvedTurn.actionLabel,
           statDelta: resolvedTurn.totalDelta,
           turnLog: resolvedTurn.turnLog,
+          actionsTaken: resolvedTurn.turnLog.actionsTaken,
           createdAt: timestamp,
         },
       ]
@@ -325,51 +358,84 @@ function App() {
           lastUpdated: timestamp,
         })
         openPlay(updatedGame)
-        setActionMenu({ regularActions: [], advancedActions: [], unexpectedActions: [] })
-        setIsActionPickerOpen(false)
+        const nextTurnPlan = buildTurnPlanForGame(updatedGame)
+        setTurnPlan({
+          ...nextTurnPlan,
+          stage: 'handoff',
+        })
       } finally {
         setIsAdvancingTurn(false)
       }
     },
-    [isAdvancingTurn, currentActiveGame, updateGame, openPlay],
+    [isAdvancingTurn, currentActiveGame, updateGame, openPlay, buildTurnPlanForGame],
   )
 
-  const handleAdvanceTurn = useCallback(() => {
+  const handleBeginTurn = useCallback(() => {
     if (isAdvancingTurn) {
       return
     }
-    if (currentActiveGame && currentActivePlayer) {
-      const availableActions = getAvailableTurnActions({
-        game: currentActiveGame,
-        player: currentActivePlayer,
-        turnNumber: normalizeTurnNumber(currentActiveGame.turnNumber),
-      })
-      setActionMenu(availableActions)
-    }
-    setIsActionPickerOpen(true)
-  }, [isAdvancingTurn, currentActiveGame, currentActivePlayer])
-
-  const handleSelectAction = useCallback(
-    (actionType) => {
-      return handleRecordMoveAndAdvanceTurn(actionType)
-    },
-    [handleRecordMoveAndAdvanceTurn],
-  )
-
-  const handleCancelActionPicker = useCallback(() => {
-    if (isAdvancingTurn) {
-      return
-    }
-    setActionMenu({ regularActions: [], advancedActions: [], unexpectedActions: [] })
-    setIsActionPickerOpen(false)
+    setTurnPlan((current) => ({
+      ...current,
+      stage: 'action',
+    }))
   }, [isAdvancingTurn])
 
-  const handlePassTurn = useCallback(() => {
-    return handleRecordMoveAndAdvanceTurn('pass')
-  }, [handleRecordMoveAndAdvanceTurn])
+  const handleRevealNextTurn = useCallback(() => {
+    setTurnPlan((current) => ({
+      ...current,
+      stage: 'turn_reveal',
+    }))
+  }, [])
+
+  const handleContinueToBrief = useCallback(() => {
+    setTurnPlan((current) => ({
+      ...current,
+      stage: 'brief',
+    }))
+  }, [])
+
+  const handleToggleAction = useCallback((actionId) => {
+    setTurnPlan((current) => {
+      const selectedActions = Array.isArray(current.selectedActions) ? current.selectedActions : []
+      const curatedActions = [...(current.curatedActions || []), ...(current.issueActions || [])]
+      const action = curatedActions.find((entry) => entry.id === actionId)
+      if (!action) {
+        return current
+      }
+
+      if (selectedActions.includes(actionId)) {
+        return {
+          ...current,
+          selectedActions: selectedActions.filter((entry) => entry !== actionId),
+          remainingActionPoints: Math.min(current.actionPoints, current.remainingActionPoints + action.apCost),
+        }
+      }
+
+      if (action.apCost > current.remainingActionPoints) {
+        return current
+      }
+
+      return {
+        ...current,
+        selectedActions: [...selectedActions, actionId],
+        remainingActionPoints: current.remainingActionPoints - action.apCost,
+      }
+    })
+  }, [])
+
+  const handleResetTurnPlan = useCallback(() => {
+    setTurnPlan(buildTurnPlanForGame())
+  }, [buildTurnPlanForGame])
+
+  const handleEndTurn = useCallback(() => {
+    return handleRecordMoveAndAdvanceTurn(turnPlan.selectedActions)
+  }, [handleRecordMoveAndAdvanceTurn, turnPlan.selectedActions])
 
   const handleOpenHistory = useCallback(() => {
     if (isAdvancingTurn || !currentActiveGame) {
+      return
+    }
+    if (turnPlan.stage === 'handoff' || turnPlan.stage === 'turn_reveal') {
       return
     }
     if (!currentActivePlayerKey) {
@@ -379,11 +445,35 @@ function App() {
       playerId: currentActivePlayerKey,
       playerName: currentActivePlayer?.name?.trim() || `Player ${currentActivePlayerIndex + 1}`,
     })
-  }, [isAdvancingTurn, currentActiveGame, currentActivePlayer, currentActivePlayerIndex, currentActivePlayerKey, openHistory])
+  }, [isAdvancingTurn, currentActiveGame, turnPlan.stage, currentActivePlayer, currentActivePlayerIndex, currentActivePlayerKey, openHistory])
 
   const handleViewResults = (game) => {
     openSession(game, 'results')
   }
+
+  useEffect(() => {
+    if (view !== 'play' || playScreen !== 'turn') {
+      return
+    }
+    const currentTurn = normalizeTurnNumber(currentActiveGame?.turnNumber)
+    const currentPlayerName = currentActivePlayer?.name?.trim() || 'Player'
+    const planMatchesCurrentTurn =
+      turnPlan.reveal?.turnNumber === currentTurn && turnPlan.reveal?.playerName === currentPlayerName
+
+    if (planMatchesCurrentTurn) {
+      return
+    }
+    setTurnPlan(buildTurnPlanForGame())
+  }, [
+    view,
+    playScreen,
+    turnPlan.reveal,
+    buildTurnPlanForGame,
+    currentActiveGame?.id,
+    currentActivePlayer,
+    currentActivePlayerKey,
+    currentActiveGame?.turnNumber,
+  ])
 
   useEffect(() => {
     const handlePopState = () => {
@@ -485,6 +575,7 @@ function App() {
   useEffect(() => {
     if (view !== 'play') {
       setPlayScreen('welcome')
+      setTurnPlan(EMPTY_TURN_PLAN)
     }
   }, [view])
 
@@ -499,6 +590,7 @@ function App() {
       activeGameMode,
       entrySource,
       playScreen,
+      playStage: turnPlan.stage,
       activeGameId,
       activeGame: currentActiveGame,
       turnNumber: normalizeTurnNumber(currentActiveGame?.turnNumber),
@@ -510,8 +602,9 @@ function App() {
       storageKey,
       allGames,
       wizardDraft,
+      turnPlan,
     }, {})
-  }, [view, activeGameMode, entrySource, playScreen, currentActiveGame, games, wizardDraft, historyPlayer])
+  }, [view, activeGameMode, entrySource, playScreen, turnPlan, currentActiveGame, games, wizardDraft, historyPlayer])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -565,8 +658,10 @@ function App() {
 
   const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete) || Boolean(historyPlayer)
 
+  const pageShellClassName = view === 'play' && playScreen === 'turn' ? 'page-play' : ''
+
   return (
-    <PageShell isBlurred={isModalOpen} modals={modals}>
+    <PageShell isBlurred={isModalOpen} modals={modals} className={pageShellClassName}>
       {view === 'home' ? (
         <>
           <Hero onCreate={handleCreateClick} buttonRef={newGameButtonRef} />
@@ -597,13 +692,14 @@ function App() {
           <PlayGamePage
             game={currentActiveGame}
             isAdvancingTurn={isAdvancingTurn}
-            onChooseAction={handleAdvanceTurn}
-            actionOptions={actionMenu}
-            isActionPickerOpen={isActionPickerOpen}
-            onActionPick={handleSelectAction}
-            onCancelActionPicker={handleCancelActionPicker}
+            turnPlan={turnPlan}
+            onContinueToBrief={handleContinueToBrief}
+            onBeginTurn={handleBeginTurn}
+            onRevealNextTurn={handleRevealNextTurn}
+            onToggleAction={handleToggleAction}
+            onEndTurn={handleEndTurn}
+            onResetTurnPlan={handleResetTurnPlan}
             onNextPlayer={handlePlayPlaceholderAction}
-            onPass={handlePassTurn}
             onPreviousPlayer={handlePlayPlaceholderAction}
             onSeeHistory={handleOpenHistory}
           />

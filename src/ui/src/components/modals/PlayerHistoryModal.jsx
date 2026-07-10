@@ -13,6 +13,19 @@ const formatTimestamp = (createdAt) => {
   return timestampFormatter.format(new Date(createdAt))
 }
 
+const formatSignedValue = (value, formatter = (innerValue) => innerValue) => {
+  const safeValue = Number(value) || 0
+  const prefix = safeValue > 0 ? '+' : ''
+  return `${prefix}${formatter(safeValue)}`
+}
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0)
+
 const PlayerHistoryModal = ({ isOpen, playerName, entries = [], onBackdropClick, onClose }) => {
   if (!isOpen) {
     return null
@@ -33,6 +46,21 @@ const PlayerHistoryModal = ({ isOpen, playerName, entries = [], onBackdropClick,
                   <div className="history-item-copy">
                     <p className="history-item-title">{entry.actionLabel}</p>
                     <p className="history-item-meta">{`Turn ${entry.turnNumber}`}</p>
+                    {entry.actionsTaken?.length ? (
+                      <p className="history-item-submeta">{entry.actionsTaken.map((action) => action.actionLabel).join(' + ')}</p>
+                    ) : null}
+                    {entry.turnLog?.topCallouts?.length ? (
+                      <ul className="history-item-callouts">
+                        {entry.turnLog.topCallouts.map((callout) => (
+                          <li key={callout}>{callout}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    <div className="history-item-deltas">
+                      <span>{`Net ${formatSignedValue(entry.statDelta?.netWorth || 0, formatCurrency)}`}</span>
+                      <span>{`Stress ${formatSignedValue(entry.statDelta?.stress || 0)}`}</span>
+                      <span>{`Mental ${formatSignedValue(entry.statDelta?.mentalHealth || 0)}`}</span>
+                    </div>
                   </div>
                   <time className="history-item-time" dateTime={new Date(entry.createdAt || 0).toISOString()}>
                     {formatTimestamp(entry.createdAt)}

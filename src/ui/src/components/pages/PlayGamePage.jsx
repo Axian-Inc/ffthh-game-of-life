@@ -2,10 +2,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import PrimaryButton from '../ui/PrimaryButton'
 import SecondaryButton from '../ui/SecondaryButton'
 import PlayerAvatar from '../ui/PlayerAvatar'
-import {
-  PLAY_TURN_MODIFIER_GROUPS,
-  PLAY_TURN_STAT_ICONS,
-} from '../../data/playTurnPlaceholder'
+import ActionPlannerModal from '../modals/ActionPlannerModal'
+import { PLAY_TURN_STAT_ICONS } from '../../data/playTurnPlaceholder'
 import { getCareerLabel, getCityLabel } from '../../simulation/definitions'
 import './play-game-page.css'
 
@@ -30,6 +28,12 @@ const formatCurrency = (value) =>
     maximumFractionDigits: 0,
   }).format(Number.isFinite(value) ? value : 0)
 
+const formatDelta = (value, formatter = (innerValue) => innerValue) => {
+  const safeValue = Number(value) || 0
+  const prefix = safeValue > 0 ? '+' : ''
+  return `${prefix}${formatter(safeValue)}`
+}
+
 const getMeterToneClass = (value) => {
   if (value >= 70) {
     return 'is-good'
@@ -40,18 +44,49 @@ const getMeterToneClass = (value) => {
   return 'is-danger'
 }
 
+const renderDeltaPill = (label, value, type = 'number') => {
+  const formatter = type === 'currency' ? formatCurrency : (innerValue) => innerValue
+  const tone = value > 0 ? 'is-positive' : value < 0 ? 'is-negative' : 'is-neutral'
+
+  return (
+    <span className={`play-turn-delta-pill ${tone}`.trim()} key={label}>
+      <strong>{label}</strong>
+      <span>{formatDelta(value, formatter)}</span>
+    </span>
+  )
+}
+
+const formatCurrentWithDelta = (currentValue, deltaValue, type = 'number') => {
+  const baseFormatter = type === 'currency' ? formatCurrency : (innerValue) => innerValue
+  if (!deltaValue) {
+    return baseFormatter(currentValue)
+  }
+  return `${baseFormatter(currentValue)} (${formatDelta(deltaValue, baseFormatter)})`
+}
+
 const PlayGamePage = ({
   game,
   isAdvancingTurn = false,
   onPreviousPlayer = noop,
   onNextPlayer = noop,
   onSeeHistory = noop,
-  onChooseAction = noop,
-  actionOptions = { regularActions: [], advancedActions: [], unexpectedActions: [] },
-  isActionPickerOpen = false,
-  onActionPick = noop,
-  onCancelActionPicker = noop,
-  onPass = noop,
+  onBeginTurn = noop,
+  onContinueToBrief = noop,
+  onRevealNextTurn = noop,
+  onToggleAction = noop,
+  onEndTurn = noop,
+  onResetTurnPlan = noop,
+  turnPlan = {
+    stage: 'brief',
+    actionPoints: 0,
+    remainingActionPoints: 0,
+    selectedActions: [],
+    curatedActions: [],
+    issueActions: [],
+    explanation: '',
+    brief: null,
+    reveal: null,
+  },
 }) => {
   const players = getPlayers(game)
   const activePlayerIndex = getActivePlayerIndex(game, players)
@@ -68,36 +103,47 @@ const PlayGamePage = ({
   const activePlayerPhysicalHealth = Math.max(0, Math.min(100, Number(activePlayer?.physicalHealth) || 0))
   const activePlayerMentalHealth = Math.max(0, Math.min(100, Number(activePlayer?.mentalHealth) || 0))
   const activePlayerStress = Math.max(0, Math.min(100, Number(activePlayer?.stress) || 0))
-  const regularActions = Array.isArray(actionOptions?.regularActions) ? actionOptions.regularActions : []
-  const advancedActions = Array.isArray(actionOptions?.advancedActions) ? actionOptions.advancedActions : []
-  const unexpectedActions = Array.isArray(actionOptions?.unexpectedActions) ? actionOptions.unexpectedActions : []
+  const brief = turnPlan?.brief || {}
+  const previousTurnSummary = brief.previousTurnSummary || null
+  const progressionArcs = Array.isArray(brief.progressionArcs) ? brief.progressionArcs : []
+  const revealedConsequences = Array.isArray(brief.revealedConsequences) ? brief.revealedConsequences : []
+  const activeIssues = Array.isArray(brief.activeIssues) ? brief.activeIssues : []
+  const selectedActionIds = Array.isArray(turnPlan?.selectedActions) ? turnPlan.selectedActions : []
+  const curatedActions = Array.isArray(turnPlan?.curatedActions) ? turnPlan.curatedActions : []
+  const issueActions = Array.isArray(turnPlan?.issueActions) ? turnPlan.issueActions : []
+  const stage = turnPlan?.stage || 'brief'
+  const reveal = turnPlan?.reveal || {}
+  const highlightedDeltaMap = new Map((reveal.topDeltaCards || []).map((item) => [item.key, item]))
 
   const financialStats = [
     {
       id: 'net-worth',
       label: 'Net Worth',
-      value: formatCurrency(activePlayerNetWorth),
+      value: formatCurrentWithDelta(activePlayerNetWorth, highlightedDeltaMap.get('netWorth')?.value || 0, 'currency'),
       iconSrc: PLAY_TURN_STAT_ICONS.moneyBagIcon,
       tone: activePlayerNetWorth < 0 ? 'negative' : 'neutral',
+      isChanged: highlightedDeltaMap.has('netWorth'),
     },
     {
       id: 'cash',
-      label: 'Cash (Spendable)',
-      value: formatCurrency(activePlayerCash),
+      label: 'Cash',
+      value: formatCurrentWithDelta(activePlayerCash, highlightedDeltaMap.get('cash')?.value || 0, 'currency'),
       iconSrc: PLAY_TURN_STAT_ICONS.cashIcon,
+      isChanged: highlightedDeltaMap.has('cash'),
     },
     {
       id: 'assets',
-      label: 'Assets & Investments',
+      label: 'Assets',
       value: formatCurrency(activePlayerAssets),
       iconSrc: PLAY_TURN_STAT_ICONS.assetsIcon,
     },
     {
       id: 'debt',
       label: 'Debt',
-      value: formatCurrency(activePlayerDebt),
+      value: formatCurrentWithDelta(activePlayerDebt, highlightedDeltaMap.get('debt')?.value || 0, 'currency'),
       iconSrc: PLAY_TURN_STAT_ICONS.debtIcon,
       tone: activePlayerDebt > 0 ? 'negative' : 'neutral',
+      isChanged: highlightedDeltaMap.has('debt'),
     },
   ]
 
@@ -117,211 +163,278 @@ const PlayGamePage = ({
     },
     {
       id: 'physical-health',
-      label: `Physical Health (${activePlayerPhysicalHealth})`,
+      label: `Physical Health (${formatCurrentWithDelta(activePlayerPhysicalHealth, highlightedDeltaMap.get('physicalHealth')?.value || 0)})`,
       value: activePlayerPhysicalHealth,
       iconSrc: PLAY_TURN_STAT_ICONS.heartIcon,
       kind: 'meter',
       tone: getMeterToneClass(activePlayerPhysicalHealth),
+      isChanged: highlightedDeltaMap.has('physicalHealth'),
     },
     {
       id: 'mental-health',
-      label: `Mental Health (${activePlayerMentalHealth})`,
+      label: `Mental Health (${formatCurrentWithDelta(activePlayerMentalHealth, highlightedDeltaMap.get('mentalHealth')?.value || 0)})`,
       value: activePlayerMentalHealth,
       iconSrc: PLAY_TURN_STAT_ICONS.brainIcon,
       kind: 'meter',
       tone: getMeterToneClass(activePlayerMentalHealth),
+      isChanged: highlightedDeltaMap.has('mentalHealth'),
     },
     {
       id: 'stress',
-      label: `Stress (${activePlayerStress})`,
+      label: `Stress (${formatCurrentWithDelta(activePlayerStress, highlightedDeltaMap.get('stress')?.value || 0)})`,
       value: activePlayerStress,
       iconSrc: PLAY_TURN_STAT_ICONS.brainIcon,
       kind: 'meter',
       tone: getMeterToneClass(100 - activePlayerStress),
+      isChanged: highlightedDeltaMap.has('stress'),
     },
   ]
 
-  return (
-    <section aria-label="Player turn placeholder" className="play-turn-page">
-      <header className="play-turn-header">
-        <h2 className="play-turn-title">{`Modern Game of Life - Turn ${turnNumber}`}</h2>
-        <p className="play-turn-subtitle">{`${activePlayerName}'s Turn`}</p>
-      </header>
+  if (stage === 'handoff') {
+    return (
+      <section aria-label="Player turn handoff" className="play-turn-page play-turn-stage">
+        <div className="play-turn-stage-card">
+          <p className="play-turn-stage-eyebrow">Pass-and-play handoff</p>
+          <h2 className="play-turn-stage-title">{`Pass to ${activePlayerName}`}</h2>
+          <p className="play-turn-stage-copy">{`Turn ${turnNumber} is ready. Hand the screen to ${activePlayerName}, then reveal the new month.`}</p>
+          <PrimaryButton className="play-turn-action-primary" onClick={onRevealNextTurn}>
+            Reveal Next Month
+          </PrimaryButton>
+        </div>
+      </section>
+    )
+  }
 
-      <div className="play-turn-rail" role="group" aria-label="Turn order">
-        <button
-          aria-label="Previous player"
-          className="play-turn-chevron"
-          onClick={onPreviousPlayer}
-          type="button"
-        >
-          <ChevronLeft aria-hidden="true" />
-        </button>
+  if (stage === 'turn_reveal') {
+    return (
+      <section aria-label="Turn reveal" className="play-turn-page play-turn-stage">
+        <div className="play-turn-stage-card play-turn-stage-card-reveal">
+          <p className="play-turn-stage-eyebrow">{`Turn ${reveal.turnNumber || turnNumber}`}</p>
+          <h2 className="play-turn-stage-title">{`${reveal.playerName || activePlayerName}'s Month Begins`}</h2>
+          <p className="play-turn-stage-copy">{reveal.monthHeadline || 'A new month has arrived, and life did not stand still.'}</p>
 
-        <ul className="play-turn-player-list" style={{ '--rail-player-count': players.length || 1 }}>
-          {players.map((player, index) => (
-            <li className="play-turn-player" key={player.id || `player-${index}`}>
-              <div className={`play-turn-player-card ${index === activePlayerIndex ? 'is-active' : ''}`.trim()}>
-                <PlayerAvatar avatar={player.avatar} className="play-turn-player-avatar" decorative />
-              </div>
-              <span className="play-turn-player-name">{player.name || `Player ${index + 1}`}</span>
-            </li>
-          ))}
-        </ul>
-
-        <button aria-label="Next player" className="play-turn-chevron" onClick={onNextPlayer} type="button">
-          <ChevronRight aria-hidden="true" />
-        </button>
-      </div>
-
-      <div className="play-turn-status-card">
-        <section className="play-turn-status-column" aria-label="Financial overview">
-          {financialStats.map((item) => (
-            <div className="play-turn-stat-row" key={item.id}>
-              <span className="play-turn-stat-icon" aria-hidden="true">
-                <img alt="" src={item.iconSrc} />
-              </span>
-              <div className="play-turn-stat-copy">
-                <p className="play-turn-stat-label">{item.label}:</p>
-                <p className={`play-turn-stat-value ${item.tone === 'negative' ? 'is-negative' : ''}`.trim()}>
-                  {item.value}
-                </p>
-              </div>
+          {(reveal.topDeltaCards || []).length ? (
+            <div className="play-turn-stage-delta-grid">
+              {reveal.topDeltaCards.map((item) => renderDeltaPill(item.label, item.value, item.type))}
             </div>
-          ))}
-        </section>
+          ) : null}
 
-        <section className="play-turn-status-column" aria-label="Player status">
-          {statusStats.map((item) =>
-            item.kind === 'meter' ? (
-              <div className="play-turn-stat-row play-turn-stat-row-meter" key={item.id}>
-                <span className="play-turn-stat-icon" aria-hidden="true">
-                  <img alt="" src={item.iconSrc} />
-                </span>
-                <div className="play-turn-stat-copy">
-                  <p className="play-turn-stat-label play-turn-stat-label-inline">{item.label}</p>
-                  <div className="play-turn-meter">
-                    <span
-                      className={`play-turn-meter-fill ${item.tone ? ` ${item.tone}` : ''}`.trim()}
-                      style={{ width: `${item.value}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="play-turn-stat-row" key={item.id}>
-                <span className="play-turn-stat-icon" aria-hidden="true">
-                  <img alt="" src={item.iconSrc} />
-                </span>
-                <div className="play-turn-stat-copy">
-                  <p className="play-turn-stat-label">{item.label}:</p>
-                  <p className="play-turn-stat-value">{item.value}</p>
-                </div>
-              </div>
-            ),
-          )}
-        </section>
+          {reveal.callouts?.length ? (
+            <ul className="play-turn-callout-list play-turn-callout-list-reveal">
+              {reveal.callouts.map((callout) => (
+                <li key={callout}>{callout}</li>
+              ))}
+            </ul>
+          ) : null}
 
-        <section className="play-turn-status-column play-turn-status-column-modifiers" aria-label="Modifiers">
-          <h3 className="play-turn-modifiers-title">Modifier Icons</h3>
-          {PLAY_TURN_MODIFIER_GROUPS.map((group) => (
-            <div className="play-turn-modifier-group" key={group.id}>
-              <p className="play-turn-modifier-group-title">{group.title}</p>
-              <div className="play-turn-modifier-grid">
-                {group.items.map((item) => (
-                  <div className="play-turn-modifier-item" key={item.id}>
-                    <span className="play-turn-modifier-icon" aria-hidden="true">
-                      <img alt="" src={item.iconSrc} />
-                    </span>
-                    <span className="play-turn-modifier-label">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </section>
-      </div>
-
-      <div className="play-turn-actions">
-        <SecondaryButton className="play-turn-action-muted" onClick={onSeeHistory}>
-          See History
-        </SecondaryButton>
-        <PrimaryButton className="play-turn-action-primary" disabled={isAdvancingTurn} onClick={onChooseAction}>
-          {isAdvancingTurn ? 'Advancing...' : 'Choose Action'}
-        </PrimaryButton>
-        <SecondaryButton className="play-turn-action-muted" disabled={isAdvancingTurn} onClick={onPass}>
-          Pass
-        </SecondaryButton>
-      </div>
-
-      {isActionPickerOpen ? (
-        <section className="play-turn-action-picker" aria-label="Choose a turn action">
-          <div className="play-turn-action-picker-header">
-            <h3>Choose Your Action</h3>
-            <button type="button" className="play-turn-action-picker-close" onClick={onCancelActionPicker}>
-              Cancel
-            </button>
-          </div>
-          <div className="play-turn-action-picker-group">
-            <p className="play-turn-action-picker-group-title">Regular Actions</p>
-            <div className="play-turn-action-picker-grid">
-              {regularActions.map((action) => (
-                <button
-                  key={action.id}
-                  type="button"
-                  className="play-turn-action-option"
-                  onClick={() => onActionPick(action.id)}
-                  disabled={isAdvancingTurn}
-                >
-                  <strong>{action.label}</strong>
-                  <span>{action.description}</span>
-                </button>
+          {reveal.revealedConsequences?.length ? (
+            <div className="play-turn-story-grid">
+              {reveal.revealedConsequences.map((consequence) => (
+                <article className={`play-turn-story-card ${consequence.tone ? `is-${consequence.tone}` : ''}`.trim()} key={consequence.id}>
+                  <strong>{consequence.label}</strong>
+                  <p>{consequence.headline}</p>
+                </article>
               ))}
             </div>
+          ) : null}
+
+          <PrimaryButton className="play-turn-action-primary" onClick={onContinueToBrief}>
+            Continue to Brief
+          </PrimaryButton>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <>
+      <section aria-label="Player turn" className="play-turn-page">
+        <header className="play-turn-topbar">
+          <div className="play-turn-header">
+            <h2 className="play-turn-sr-only">{`Modern Game of Life - Turn ${turnNumber}`}</h2>
+            <p className="play-turn-sr-only">{`${activePlayerName}'s Turn`}</p>
+            <p className="play-turn-header-eyebrow">{`Turn ${turnNumber}`}</p>
+            <h2 className="play-turn-title">{`${activePlayerName}'s Month`}</h2>
           </div>
 
-          {advancedActions.length > 0 ? (
-            <div className="play-turn-action-picker-group">
-              <p className="play-turn-action-picker-group-title">Advanced Action</p>
-              <div className="play-turn-action-picker-grid">
-                {advancedActions.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className="play-turn-action-option is-advanced"
-                    onClick={() => onActionPick(action.id)}
-                    disabled={isAdvancingTurn}
-                  >
-                    <strong>{action.label}</strong>
-                    <span>{action.description}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
+          <div className="play-turn-rail" role="group" aria-label="Turn order">
+            <button aria-label="Previous player" className="play-turn-chevron" onClick={onPreviousPlayer} type="button">
+              <ChevronLeft aria-hidden="true" />
+            </button>
 
-          {unexpectedActions.length > 0 ? (
-            <div className="play-turn-action-picker-group">
-              <p className="play-turn-action-picker-group-title">Unexpected Issues</p>
-              <div className="play-turn-action-picker-grid">
-                {unexpectedActions.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className="play-turn-action-option is-unexpected"
-                    onClick={() => onActionPick(action.id)}
-                    disabled={isAdvancingTurn}
-                  >
-                    <strong>{action.label}</strong>
-                    <span>{action.description}</span>
-                  </button>
-                ))}
+            <ul className="play-turn-player-list" style={{ '--rail-player-count': players.length || 1 }}>
+              {players.map((player, index) => (
+                <li className="play-turn-player" key={player.id || `player-${index}`}>
+                  <div className={`play-turn-player-card ${index === activePlayerIndex ? 'is-active' : ''}`.trim()}>
+                    <PlayerAvatar avatar={player.avatar} className="play-turn-player-avatar" decorative />
+                  </div>
+                  <span className="play-turn-player-name">{player.name || `Player ${index + 1}`}</span>
+                </li>
+              ))}
+            </ul>
+
+            <button aria-label="Next player" className="play-turn-chevron" onClick={onNextPlayer} type="button">
+              <ChevronRight aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+
+        <div className="play-turn-dashboard">
+          <section className="play-turn-brief-card" aria-label="Monthly brief">
+            <div className="play-turn-brief-eyebrow">Start-of-turn brief</div>
+            <h3 className="play-turn-brief-title">{brief.monthHeadline || 'Life keeps moving. Decide how to answer it.'}</h3>
+            <p className="play-turn-brief-copy">
+              {turnPlan?.explanation || 'Review the month, then decide how to spend your time and energy.'}
+            </p>
+
+            {previousTurnSummary ? (
+              <div className="play-turn-brief-section">
+                <p className="play-turn-brief-label">{`Since your last turn (${previousTurnSummary.actionLabel})`}</p>
+                <div className="play-turn-delta-grid">
+                  {renderDeltaPill('Net', previousTurnSummary.statDelta?.netWorth || 0, 'currency')}
+                  {renderDeltaPill('Stress', previousTurnSummary.statDelta?.stress || 0)}
+                  {renderDeltaPill('Mental', previousTurnSummary.statDelta?.mentalHealth || 0)}
+                  {renderDeltaPill('Physical', previousTurnSummary.statDelta?.physicalHealth || 0)}
+                </div>
+                {previousTurnSummary.topCallouts?.length ? (
+                  <ul className="play-turn-callout-list">
+                    {previousTurnSummary.topCallouts.map((callout) => (
+                      <li key={callout}>{callout}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
+
+            {revealedConsequences.length ? (
+              <div className="play-turn-brief-section">
+                <p className="play-turn-brief-label">This month catches up with you</p>
+                <div className="play-turn-story-grid">
+                  {revealedConsequences.map((consequence) => (
+                    <article className={`play-turn-story-card ${consequence.tone ? `is-${consequence.tone}` : ''}`.trim()} key={consequence.id}>
+                      <strong>{consequence.label}</strong>
+                      <p>{consequence.headline}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {activeIssues.length ? (
+              <div className="play-turn-brief-section">
+                <p className="play-turn-brief-label">Pressure building</p>
+                <div className="play-turn-story-grid">
+                  {activeIssues.map((issue) => (
+                    <article className="play-turn-story-card is-bad" key={issue.id}>
+                      <strong>{issue.label}</strong>
+                      <p>{issue.headline || 'This problem will keep getting worse if you ignore it.'}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {progressionArcs.length ? (
+              <div className="play-turn-brief-section">
+                <p className="play-turn-brief-label">Longer-term arcs</p>
+                <div className="play-turn-arc-grid">
+                  {progressionArcs.map((arc) => (
+                    <article className="play-turn-arc-card" key={arc.id}>
+                      <strong>{arc.label}</strong>
+                      <span>{arc.headline}</span>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="play-turn-brief-actions">
+              <SecondaryButton className="play-turn-action-muted" onClick={onSeeHistory}>
+                See History
+              </SecondaryButton>
+              {stage === 'brief' ? (
+                <PrimaryButton className="play-turn-action-primary" onClick={onBeginTurn}>
+                  Plan This Month
+                </PrimaryButton>
+              ) : (
+                <SecondaryButton className="play-turn-action-muted" onClick={onResetTurnPlan}>
+                  Re-read Brief
+                </SecondaryButton>
+              )}
+            </div>
+          </section>
+
+          <section className="play-turn-status-card" aria-label="Player status">
+            <div className="play-turn-status-topline">
+              <div>
+                <p className="play-turn-status-eyebrow">Action Points</p>
+                <h3>{`${turnPlan?.remainingActionPoints || 0} / ${turnPlan?.actionPoints || 0}`}</h3>
+              </div>
+              <div className="play-turn-status-caption">
+                Spend points on a few strong moves instead of one flat action.
               </div>
             </div>
-          ) : null}
-        </section>
-      ) : null}
-    </section>
+
+            <div className="play-turn-status-columns">
+              <section className="play-turn-status-column" aria-label="Financial overview">
+                {financialStats.map((item) => (
+                  <div className={`play-turn-stat-row ${item.isChanged ? 'is-changed' : ''}`.trim()} key={item.id}>
+                    <span className="play-turn-stat-icon" aria-hidden="true">
+                      <img alt="" src={item.iconSrc} />
+                    </span>
+                    <div className="play-turn-stat-copy">
+                      <p className="play-turn-stat-label">{item.label}</p>
+                      <p className={`play-turn-stat-value ${item.tone === 'negative' ? 'is-negative' : ''}`.trim()}>{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </section>
+
+              <section className="play-turn-status-column" aria-label="Player meters">
+                {statusStats.map((item) =>
+                  item.kind === 'meter' ? (
+                    <div className={`play-turn-stat-row play-turn-stat-row-meter ${item.isChanged ? 'is-changed' : ''}`.trim()} key={item.id}>
+                      <span className="play-turn-stat-icon" aria-hidden="true">
+                        <img alt="" src={item.iconSrc} />
+                      </span>
+                      <div className="play-turn-stat-copy">
+                        <p className="play-turn-stat-label play-turn-stat-label-inline">{item.label}</p>
+                        <div className="play-turn-meter">
+                          <span className={`play-turn-meter-fill ${item.tone ? ` ${item.tone}` : ''}`.trim()} style={{ width: `${item.value}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="play-turn-stat-row" key={item.id}>
+                      <span className="play-turn-stat-icon" aria-hidden="true">
+                        <img alt="" src={item.iconSrc} />
+                      </span>
+                      <div className="play-turn-stat-copy">
+                        <p className="play-turn-stat-label">{item.label}</p>
+                        <p className="play-turn-stat-value">{item.value}</p>
+                      </div>
+                    </div>
+                  ),
+                )}
+              </section>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <ActionPlannerModal
+        actionPoints={turnPlan?.actionPoints || 0}
+        curatedActions={curatedActions}
+        isAdvancingTurn={isAdvancingTurn}
+        isOpen={stage === 'action'}
+        issueActions={issueActions}
+        onClose={onResetTurnPlan}
+        onEndTurn={onEndTurn}
+        onToggleAction={onToggleAction}
+        remainingActionPoints={turnPlan?.remainingActionPoints || 0}
+        selectedActionIds={selectedActionIds}
+      />
+    </>
   )
 }
 

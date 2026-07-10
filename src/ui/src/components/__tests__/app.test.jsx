@@ -164,12 +164,14 @@ describe('App create flow', () => {
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    await user.click(screen.getByRole('button', { name: 'Plan This Month' }))
     await user.click(screen.getByRole('button', { name: /Study/i }))
+    await user.click(screen.getByRole('button', { name: /End Turn/i }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
         playScreen: 'turn',
+        playStage: 'handoff',
         turnNumber: 1,
         activePlayerIndex: 1,
         isHistoryOpen: false,
@@ -189,9 +191,14 @@ describe('App create flow', () => {
       }),
     )
 
-    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
-    expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
+    expect(screen.getByText('Pass to Mia')).toBeInTheDocument()
     expect(window.life.status().persistedGame.moveHistory).toHaveLength(1)
+
+    expect(screen.queryByRole('button', { name: 'See History' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Reveal Next Month' }))
+    expect(screen.getByRole('button', { name: 'Continue to Brief' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Continue to Brief' }))
+    expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'See History' }))
 
@@ -205,11 +212,13 @@ describe('App create flow', () => {
     await user.click(screen.getByRole('button', { name: 'Close' }))
     expect(screen.queryByText("Mia's Actions")).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    await user.click(screen.getByRole('button', { name: 'Plan This Month' }))
+    await user.click(screen.getByRole('button', { name: 'End Turn' }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
         playScreen: 'turn',
+        playStage: 'handoff',
         turnNumber: 2,
         activePlayerIndex: 0,
         persistedGame: expect.objectContaining({
@@ -221,25 +230,29 @@ describe('App create flow', () => {
               playerId: 'player-1',
             }),
             expect.objectContaining({
-              actionType: 'pass',
+              actionType: 'end_turn',
               playerId: 'player-2',
               playerName: 'Mia',
               turnNumber: 1,
-              actionLabel: 'Pass',
+              actionLabel: 'End Turn',
             }),
           ],
         }),
       }),
     )
 
+    expect(screen.getByText('Pass to Ted')).toBeInTheDocument()
+    expect(window.life.status().persistedGame.moveHistory).toHaveLength(2)
+
+    await user.click(screen.getByRole('button', { name: 'Reveal Next Month' }))
+    await user.click(screen.getByRole('button', { name: 'Continue to Brief' }))
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 2' })).toBeInTheDocument()
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
-    expect(window.life.status().persistedGame.moveHistory).toHaveLength(2)
 
     await user.click(screen.getByRole('button', { name: 'See History' }))
     const historyDialog = screen.getByRole('dialog')
     expect(within(historyDialog).getByText("Ted's Actions")).toBeInTheDocument()
-    expect(within(historyDialog).getByText('Study')).toBeInTheDocument()
+    expect(within(historyDialog).getAllByText('Study').length).toBeGreaterThan(0)
     expect(within(historyDialog).queryByText('Pass')).not.toBeInTheDocument()
   })
 
@@ -295,14 +308,16 @@ describe('App create flow', () => {
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 3' })).toBeInTheDocument()
     expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+    await user.click(screen.getByRole('button', { name: 'Plan This Month' }))
     await user.click(screen.getByRole('button', { name: /Study/i }))
+    await user.click(screen.getByRole('button', { name: /End Turn/i }))
 
     await waitFor(() =>
       expect(window.life.status()).toMatchObject({
         view: 'play',
         entrySource: 'resume',
         playScreen: 'turn',
+        playStage: 'handoff',
         activeGameId: 'resume-route',
         turnNumber: 4,
         activePlayerIndex: 0,
@@ -322,8 +337,7 @@ describe('App create flow', () => {
     )
 
     expect(JSON.stringify(window.life.status().persistedGame)).not.toBe(persistedBefore)
-    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeInTheDocument()
-    expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
+    expect(screen.getByText('Pass to Ari')).toBeInTheDocument()
   })
 
   it('normalizes missing move history for older saved games', async () => {
@@ -362,14 +376,15 @@ describe('App create flow', () => {
 
     expect(window.life.status().persistedGame.moveHistory).toEqual([])
 
-    await user.click(screen.getByRole('button', { name: 'Pass' }))
+    await user.click(screen.getByRole('button', { name: 'Plan This Month' }))
+    await user.click(screen.getByRole('button', { name: 'End Turn' }))
 
     await waitFor(() =>
       expect(window.life.status().persistedGame.moveHistory).toEqual([
         expect.objectContaining({
           playerId: 'player-1',
-          actionType: 'pass',
-          actionLabel: 'Pass',
+          actionType: 'end_turn',
+          actionLabel: 'End Turn',
           turnNumber: 2,
         }),
       ]),

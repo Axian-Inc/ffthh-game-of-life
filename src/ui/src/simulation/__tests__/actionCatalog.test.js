@@ -26,4 +26,16 @@ describe('action catalog', () => {
       expect(options.advancedActions.length).toBeLessThanOrEqual(1)
     }
   })
+
+  it('varies curated action sets across turns for the same player', () => {
+    const game = { id: 'g1', seed: 'seed-a' }
+    const seen = new Set()
+
+    for (let turn = 1; turn <= 12; turn += 1) {
+      const options = getAvailableTurnActions({ game, player, turnNumber: turn })
+      seen.add(options.curatedActions.map((action) => action.id).join(','))
+    }
+
+    expect(seen.size).toBeGreaterThan(1)
+  })
 })

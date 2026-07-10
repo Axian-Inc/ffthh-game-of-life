@@ -8,6 +8,23 @@
   margin: 0 auto;
 }
 
+.page.page-play {
+  max-width: 1520px;
+  min-height: 100vh;
+  height: 100vh;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: clamp(20px, 3vw, 44px);
+  padding-right: clamp(20px, 3vw, 44px);
+  overflow: hidden;
+}
+
+.page.page-play .layout {
+  height: 100%;
+  min-height: 0;
+  gap: 0;
+}
+
 .layout {
   display: flex;
   flex-direction: column;
@@ -853,11 +870,31 @@ h1 {
 }
 
 .history-item-meta,
+.history-item-submeta,
 .history-item-time {
   margin: 0;
   color: var(--text-2);
   font-size: 0.92rem;
   font-weight: 600;
+}
+
+.history-item-callouts {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: var(--text-1);
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.history-item-deltas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 0.86rem;
+  font-weight: 700;
 }
 
 .history-item-time {
