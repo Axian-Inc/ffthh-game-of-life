@@ -34,13 +34,28 @@ const permissions =
   config.permission && typeof config.permission === "object" && !Array.isArray(config.permission)
     ? config.permission
     : {};
+const mcp =
+  config.mcp && typeof config.mcp === "object" && !Array.isArray(config.mcp)
+    ? config.mcp
+    : {};
 
 config.$schema ??= "https://opencode.ai/config.json";
 config.permission = {
   ...permissions,
   websearch: "allow",
 };
+config.mcp = {
+  ...mcp,
+  "ffthh-project-expert": {
+    type: "local",
+    command: [
+      "node",
+      "/workspaces/ffthh-game-of-life/tools/project-expert-mcp/bin/project-expert-mcp.js",
+    ],
+    enabled: true,
+  },
+};
 
 fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
-console.log(`OpenCode websearch permission enabled in ${configPath}.`);
+console.log(`OpenCode websearch and project expert MCP configured in ${configPath}.`);
 NODE

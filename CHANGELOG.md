@@ -1,5 +1,7 @@
 # Changelog
 
+- Configured the dev container to register the local project expert MCP server automatically for Codex and OpenCode, so it starts with each client session.
+
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased

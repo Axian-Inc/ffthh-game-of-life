@@ -1,5 +1,10 @@
 # Notes
 
+- Task: Start the project expert MCP server automatically in the dev container.
+- What changed: Post-create setup now registers the stdio server with Codex and OpenCode after installing the clients; both clients launch it automatically for their sessions.
+- Paths: `.devcontainer/post-create.sh`, `.devcontainer/configure-codex.sh`, `.devcontainer/configure-opencode.sh`, `tools/project-expert-mcp/README.md`, `CHANGELOG.md`
+- Commands/runbooks: `bash -n .devcontainer/post-create.sh .devcontainer/configure-codex.sh .devcontainer/configure-opencode.sh`; test the configuration scripts with temporary Codex and OpenCode config directories.
+
 Lightweight, task-focused log for what changed, why, and where.
 
 ## Template

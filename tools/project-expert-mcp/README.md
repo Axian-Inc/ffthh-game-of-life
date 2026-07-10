@@ -28,6 +28,10 @@ Most MCP clients start stdio servers themselves. Configure the client with:
 }
 ```
 
+The dev container registers this server automatically for both Codex and
+OpenCode during `postCreateCommand`. Each client starts the stdio process when
+it opens a session; no separate background service is required.
+
 If your agent accepts a package-style command, this also works from the repo root:
 
 ```bash
