@@ -10,7 +10,29 @@ Modern Game of Life is a web implementation of a Game of Life-inspired education
 
 ## Optional dev container
 
-The repository includes a VS Code dev container with Terraform, AWS CLI, Node.js, Chromium, Codex CLI, and OpenCode preinstalled for a consistent local environment. Codex CLI and OpenCode are installed from npm during container creation and reuse a persistent npm cache across rebuilds. OpenCode websearch is enabled by default inside the container.
+The repository includes a VS Code dev container with Terraform, AWS CLI, Node.js, Chromium, Codex CLI, and OpenCode preinstalled for a consistent local environment. Codex CLI and a pinned OpenCode release are installed from npm during container creation and reuse a persistent npm cache across rebuilds.
+
+OpenCode is intentionally a chat-only harness in the container:
+
+- A root-owned `/etc/opencode/opencode.json` allows only the OpenAI provider.
+- Built-in tools, plugins, sharing, project config discovery, and OpenCode LSP support are disabled.
+- No MCP server is installed or configured by default.
+
+Rebuild the container after changing its configuration. In the rebuilt container, authenticate OpenAI with `/connect`, then verify the lockdown with:
+
+```bash
+.devcontainer/check-opencode-lockdown.sh
+opencode debug config
+opencode mcp list
+```
+
+If `opencode` is not found after pulling these files into an existing container, rebuild the dev container or install it into the current container with:
+
+```bash
+bash .devcontainer/install-ai-clis.sh
+```
+
+Keep API keys out of the repository. The [official OpenAI documentation](https://developers.openai.com/api/reference/overview#authentication) recommends loading API keys from an environment variable or a server-side secret manager. Deferred MCP lab activities are documented in `docs/opencode-mcp-lab.md`; they are guidance only and have not been enabled or tested in the baseline harness.
 
 ## First-time setup
 
@@ -42,4 +64,5 @@ Do not run Terraform in the `default` workspace.
 - Product requirements: `docs/modern-game-of-life-prd.md`
 - Architecture: `docs/ARCHITECTURE.md`
 - UI style guide: `docs/game-of-life-style-guide.md`
+- Deferred OpenCode MCP lab: `docs/opencode-mcp-lab.md`
 - Script usage: `scripts/README.md`

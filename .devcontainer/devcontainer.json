@@ -39,7 +39,9 @@
     "AWS_PROFILE": "default",
     "AWS_REGION": "us-west-2",
     "CHROME_BIN": "/usr/bin/chromium",
-    "OPENCODE_ENABLE_EXA": "1",
+    "OPENCODE_DISABLE_LSP_DOWNLOAD": "true",
+    "OPENCODE_DISABLE_PROJECT_CONFIG": "true",
+    "OPENCODE_PURE": "true",
   },
 
   // VS Code-specific customizations

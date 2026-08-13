@@ -33,6 +33,7 @@ try {
 }
 
 install_specs=()
+opencode_pinned_version="1.18.18"
 
 opencode_platform_package() {
   local platform
@@ -71,41 +72,6 @@ opencode_platform_package() {
   esac
 }
 
-latest_opencode_version() {
-  local latest_version
-  local platform_package
-  local candidate
-
-  latest_version="$(npm view opencode-ai version)"
-  platform_package="$(opencode_platform_package)"
-
-  if [[ -z "$platform_package" ]]; then
-    echo "$latest_version"
-    return
-  fi
-
-  if npm view "$platform_package@$latest_version" version >/dev/null 2>&1; then
-    echo "$latest_version"
-    return
-  fi
-
-  while IFS= read -r candidate; do
-    if npm view "$platform_package@$candidate" version >/dev/null 2>&1; then
-      echo "$candidate"
-      return
-    fi
-  done < <(npm view opencode-ai versions --json | node -e '
-const fs = require("fs");
-const versions = JSON.parse(fs.readFileSync(0, "utf8"));
-for (const version of versions.slice(-20).reverse()) {
-  console.log(version);
-}
-')
-
-  echo "No OpenCode version with $platform_package available." >&2
-  return 1
-}
-
 for package_name in "@openai/codex"; do
   latest_version="$(npm view "$package_name" version)"
   current_version="$(installed_version "$package_name")"
@@ -128,12 +94,16 @@ if (( ${#install_specs[@]} > 0 )); then
   npm install -g --no-audit --no-fund --prefer-offline "${install_specs[@]}"
 fi
 
-opencode_version="$(latest_opencode_version)"
+opencode_version="$opencode_pinned_version"
 opencode_current_version="$(installed_version opencode-ai)"
 opencode_platform="$(opencode_platform_package)"
 opencode_install_specs=("opencode-ai@$opencode_version")
 
 if [[ -n "$opencode_platform" ]]; then
+  if ! npm view "$opencode_platform@$opencode_version" version >/dev/null 2>&1; then
+    echo "OpenCode platform package is unavailable: $opencode_platform@$opencode_version" >&2
+    exit 1
+  fi
   opencode_install_specs+=("$opencode_platform@$opencode_version")
   echo "OpenCode platform package: $opencode_platform@$opencode_version."
 fi
