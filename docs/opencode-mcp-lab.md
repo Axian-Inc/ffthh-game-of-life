@@ -8,11 +8,11 @@ Before teaching this lab, recheck every package version, remote endpoint, OAuth 
 
 ## How the exercises modify OpenCode
 
-Add each MCP to the container user's global configuration at `~/.config/opencode/opencode.json`. Do not add it to the repository-level `opencode.json`; project config discovery is disabled in this lab.
+Each activity provides a prompt for Codex to make the container-local configuration changes. Students should not edit OpenCode configuration files manually. Codex must use the container user's global configuration under `~/.config/opencode/`; it must not add MCPs to the repository-level `opencode.json` or the root-managed `/etc/opencode/opencode.json`.
 
 Use these fixed server names because OpenCode prefixes MCP tools with the server name and the managed policy only recognizes `filesystem_*`, `github_*`, `slack_send_message`, and `playwright_*`.
 
-After each edit, restart OpenCode and check the connection:
+After Codex completes an activity, restart OpenCode and check the connection:
 
 ```bash
 opencode mcp list
@@ -33,39 +33,52 @@ Try equivalent prompts asking it to run `pwd`, search the web, edit a file, or l
 
 ## Activity 1: scoped filesystem access
 
-This activity uses the Model Context Protocol reference filesystem server. It deliberately exposes only `src/ui`; its server-side path restriction is the capability boundary.
+This activity uses the Model Context Protocol reference filesystem server. It deliberately exposes only `src/ui`; the MCP server, not a model instruction, must enforce that boundary.
 
-Add this entry under a top-level `mcp` object in `~/.config/opencode/opencode.json`:
+Do not configure the server with only a command-line directory argument. OpenCode 1.18.18 advertises its workspace through the MCP Roots protocol, and filesystem server 2026.7.10 replaces its command-line directories with roots supplied by the client. When OpenCode starts at the repository root, that naive configuration exposes the entire repository.
 
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "filesystem": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem@2026.7.10",
-        "/workspaces/ffthh-game-of-life/src/ui"
-      ],
-      "enabled": true
-    }
-  }
-}
+### Ask Codex to install the activity
+
+Open Codex in the dev container and give it this prompt verbatim:
+
+> Configure Activity 1 of the OpenCode MCP lab in this dev container. Perform the work yourself; do not ask me to edit files or paste JSON. Do not modify the Git repository, `/etc/opencode/opencode.json`, the managed OpenCode permission policy, providers, LSP settings, or built-in tool permissions.
+>
+> Install `@modelcontextprotocol/server-filesystem@2026.7.10` in a dedicated user-owned directory under `~/.local/share/opencode-mcp/filesystem/`. Do not use an unpinned package and do not depend on `npx` downloading it whenever OpenCode starts.
+>
+> Configure a user-level OpenCode MCP named exactly `filesystem`, preserving all unrelated existing user configuration. Its only filesystem scope must be the canonical path `/workspaces/ffthh-game-of-life/src/ui`.
+>
+> OpenCode 1.18.18 supplies its workspace directory through MCP Roots, and filesystem server 2026.7.10 replaces command-line allowed directories with those client roots. Prevent that behavior from widening the scope. Put a small user-owned Node stdio proxy outside the allowed directory, under `~/.local/lib/opencode-mcp/`. The proxy must start the pinned filesystem-server binary with `src/ui` as its command-line directory, intercept the server's JSON-RPC `roots/list` request, respond directly to the server with exactly one root whose canonical file URI is `/workspaces/ffthh-game-of-life/src/ui`, and not forward that request to OpenCode. It must transparently forward all other newline-delimited MCP messages and propagate stderr, termination, and exit failure. Do not solve this with a prompt instruction or by relying on where the student launches OpenCode.
+>
+> Point the user-level `filesystem` MCP command at that proxy. Keep the existing root-managed default-deny policy; do not add a broader permission. Validate the resulting JSON and proxy syntax before starting OpenCode.
+>
+> Do not declare success merely because the MCP connects. Test through OpenCode and require all of these results: `opencode mcp list` reports `filesystem` connected; `filesystem_list_allowed_directories` reports only `/workspaces/ffthh-game-of-life/src/ui`; reading `/workspaces/ffthh-game-of-life/src/ui/package.json` succeeds; and reading `/workspaces/ffthh-game-of-life/terraform/main.tf` fails with an outside-allowed-directories error. If the reported root is the repository root, or the Terraform read succeeds, stop and correct the boundary. Finally report the installed package/version, every container-local file changed, the four test results, and whether any Git-tracked file changed.
+
+Codex has broader administrative capabilities than the OpenCode harness in this lab. Watch its summary carefully: the evidence that matters is what OpenCode can do after installation, not what Codex can read while setting it up.
+
+### Observe the new capability in OpenCode
+
+Start a fresh OpenCode session and confirm that it lists one connected server:
+
+```bash
+opencode mcp list
+opencode
 ```
 
-Success prompt:
+Give OpenCode this observation prompt:
 
-> Use the filesystem MCP to read `src/ui/src/App.jsx` and summarize the component's responsibilities.
+> Use only the filesystem MCP. First report the output of `list_allowed_directories`. Then read `/workspaces/ffthh-game-of-life/src/ui/package.json` and summarize its scripts. Finally attempt to read `/workspaces/ffthh-game-of-life/terraform/main.tf` and quote the access error. Do not guess about either file if a tool call fails.
 
-Boundary prompt:
+Expected result: OpenCode reports only `/workspaces/ffthh-game-of-life/src/ui`; the UI read succeeds; and the Terraform read is rejected because it is outside the allowed directory. A connected status alone is not a passing result.
 
-> Use the filesystem MCP to read `/workspaces/ffthh-game-of-life/terraform/main.tf`.
+The reference server includes write-capable tools. For this observation-only activity, do not ask OpenCode to create, edit, move, or delete files.
 
-Expected result: the first request succeeds and the second is rejected because `terraform` is outside the allowed directory. Before using writes, work on a disposable branch and ask the MCP to make a small change under `src/ui`, then inspect the Git diff yourself.
+### Ask Codex to remove the activity
 
-Cleanup: remove the `filesystem` entry and restart OpenCode. The local server exits with its OpenCode session.
+When the activity is finished, exit OpenCode and give Codex this prompt:
+
+> Remove only Activity 1's `filesystem` MCP from my user-level OpenCode configuration. Preserve every unrelated setting and MCP. Remove the dedicated user-owned filesystem-server installation and its scope proxy, but do not modify the repository or `/etc/opencode/opencode.json`. Validate the remaining configuration, run `opencode mcp list`, and report every path removed and whether any Git-tracked file changed.
+
+The local MCP process exits with its OpenCode session. Removing its configuration and user-owned installation restores the bare harness; rebuilding the dev container also discards these container-local changes.
 
 Upstream reference: [Model Context Protocol filesystem server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
 
