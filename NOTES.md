@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-08-12
+- Task: Remove noisy VS Code extensions from the dev container.
+- Why: Terraform, AWS Toolkit, GitLens, and Docker UI integrations add clutter, login prompts, and update noise when their command-line tools are sufficient.
+- What changed: Removed those four extension recommendations and the Terraform extension-specific setting; retained only the Python and Pylance extensions. GitHub Copilot was not configured by this repository, so no repository entry existed to remove.
+- Paths: .devcontainer/devcontainer.json, CHANGELOG.md, NOTES.md
+- Commands/runbooks: Rebuild the dev container to apply the reduced extension set.
+- Follow-ups: If GitHub Copilot still appears, remove or disable it in the Dev Container window and check VS Code Settings Sync or `dev.containers.defaultExtensions`.
+
 ## 2026-08-13
 - Task: Lock down the dev-container OpenCode harness before the MCP capability lab.
 - Why: The lab needs a demonstrably chat-only baseline so later MCP additions visibly introduce bounded capabilities.

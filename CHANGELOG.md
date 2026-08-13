@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Reduced dev-container VS Code extensions to the Python tooling by removing the Terraform, AWS Toolkit, GitLens, and Docker extension recommendations.
 - Locked the dev-container OpenCode harness to OpenAI-backed chat, denied built-in tools, plugins, sharing, and OpenCode LSPs through managed configuration, and documented deferred MCP exercises without enabling them.
 - Removed the current tree's Git LFS dependency and retired the original sample screens after adding Playwright baselines for every New Game wizard step.
 - Documented the current gameplay implementation status and next PRD-aligned simulation slice for future agents.
