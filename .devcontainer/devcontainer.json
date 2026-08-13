@@ -44,39 +44,6 @@
     "OPENCODE_PURE": "true",
   },
 
-  // VS Code-specific customizations
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        // Python
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-
-        // Terraform
-        "hashicorp.terraform",
-
-        // AWS
-        "AmazonWebServices.aws-toolkit-vscode",
-
-        // Git quality-of-life
-        "eamodio.gitlens",
-
-        // Docker (often handy with devcontainers & infra)
-        "ms-azuretools.vscode-docker"
-      ],
-      "settings": {
-        // Python settings
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.analysis.typeCheckingMode": "basic",
-        "python.testing.pytestEnabled": true,
-        "python.testing.unittestEnabled": false,
-
-        // Terraform
-        "terraform.languageServer.enabled": true
-      }
-    }
-  },
-
   // Use the non-root user the base image defines
   "remoteUser": "vscode"
 }
