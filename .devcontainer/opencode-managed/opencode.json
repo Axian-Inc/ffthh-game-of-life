@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "enabled_providers": ["openai"],
+  "provider": {
+    "openai": {
+      "options": {
+        "baseURL": "https://api.openai.com/v1"
+      }
+    }
+  },
+  "lsp": false,
+  "permission": {
+    "*": "deny",
+    "lsp": "deny",
+    "filesystem_*": "allow",
+    "github_*": "allow",
+    "slack_send_message": "allow",
+    "playwright_*": "allow"
+  },
+  "plugin": [],
+  "share": "disabled",
+  "autoupdate": false
+}

@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-08-13
+- Task: Lock down the dev-container OpenCode harness before the MCP capability lab.
+- Why: The lab needs a demonstrably chat-only baseline so later MCP additions visibly introduce bounded capabilities.
+- What changed: Pinned OpenCode 1.18.18; installed a root-owned Linux managed config that allows only OpenAI, denies built-in tools, disables plugins/sharing/LSP/autoupdate, and reserves only reviewed future MCP namespaces; enabled OpenCode pure mode, disabled project config discovery and LSP downloads; removed the repository Ollama provider and default websearch; added static/resolved config checks and deferred MCP exercise guidance without installing or configuring an MCP.
+- Paths: .devcontainer/opencode-managed/opencode.json, .devcontainer/configure-opencode.sh, .devcontainer/install-ai-clis.sh, .devcontainer/check-opencode-lockdown.sh, .devcontainer/devcontainer.json, opencode.json, docs/opencode-mcp-lab.md, README.md, CHANGELOG.md
+- Commands/runbooks: bash -n .devcontainer/*.sh, .devcontainer/check-opencode-lockdown.sh, opencode debug config, opencode mcp list
+- Follow-ups: Revalidate and implement each exercise in docs/opencode-mcp-lab.md before teaching it; no MCP is part of the current baseline.
+
 ## 2026-08-12
 - Task: Remove sample screens and Git LFS from the current repository tree.
 - Why: All nine reference screens are implemented, and ordinary Git Playwright baselines now provide direct visual coverage for the remaining wizard steps.
