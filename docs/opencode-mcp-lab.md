@@ -84,45 +84,83 @@ Upstream reference: [Model Context Protocol filesystem server](https://github.co
 
 ## Activity 2: read-only GitHub context
 
-Create a fine-grained GitHub personal access token limited to this repository with read-only repository permissions. Export it only in the terminal that starts OpenCode:
+This activity uses a dedicated GitHub App as a separate, read-only lab identity. The instructor owns the App and provides each student with four setup values:
+
+- The GitHub App ID. This is not the OAuth client ID.
+- The App installation ID.
+- A cohort-specific private-key PEM file.
+- Whether the App was granted read access to organization Projects.
+
+The App must be installed only on `Axian-Inc/ffthh-game-of-life` with repository `Contents: read`, `Issues: read`, and `Metadata: read`. All repository write permissions must be disabled. Organization `Projects: read` is optional and should be granted only when the activity includes a GitHub Projects board.
+
+The PEM is a shared classroom secret, even though the App it represents is read-only and limited to the lab repository. Do not open it, paste its contents into Codex or OpenCode, commit it, or reuse it outside this activity. The official local GitHub MCP server uses it to mint and refresh short-lived installation tokens automatically, so no student or instructor has to refresh tokens during class.
+
+### Ask Codex to install the activity
+
+Download the instructor-provided PEM, note its path, and replace the four angle-bracket placeholders in this prompt. Give the completed prompt to Codex in the dev container. Do not paste the PEM contents.
+
+> Configure Activity 2 of the OpenCode MCP lab in this dev container. Perform the work yourself; do not ask me to edit files or paste JSON. Do not modify the Git repository, `/etc/opencode/opencode.json`, the managed OpenCode permission policy, providers, LSP settings, or built-in tool permissions. Preserve every unrelated user setting and existing MCP.
+>
+> Use these instructor-provided values:
+>
+> - GitHub App ID: `<APP_ID>`
+> - GitHub App installation ID: `<INSTALLATION_ID>`
+> - Downloaded private-key path: `<DOWNLOADED_PEM_PATH>`
+> - Organization Projects read access was granted: `<YES_OR_NO>`
+>
+> Treat the PEM as a secret. Confirm that the supplied path is a regular PEM file without printing or reading its contents into the conversation. Move it outside the Git repository to `~/.config/opencode/secrets/github-app.pem`; create the secrets directory with mode `700` and set the PEM to mode `600`. Ensure the original supplied path no longer contains a copy. If the supplied file is Git-tracked, staged, or cannot be moved safely, stop and report the problem without exposing its contents.
+>
+> Install the official `github/github-mcp-server` release `v1.9.0` in a dedicated user-owned directory under `~/.local/share/opencode-mcp/github/`. Download the release archive matching this container's operating system and CPU architecture from the official GitHub release. Download the release's official checksum file and verify the archive before extracting it. Do not use an unpinned image, branch, or binary.
+>
+> Configure a user-level OpenCode MCP named exactly `github`. Run the installed binary in local `stdio` mode with the supplied App ID, installation ID, and private-key path. Use absolute paths in the OpenCode command array because JSON does not expand `~`. Pass only the key path, never the PEM contents. Enable only the `repos` and `issues` toolsets and enable the GitHub MCP server's `--read-only` mode. If and only if the instructor value above is `YES`, also enable the `projects` toolset. Do not enable `context`, `pull_requests`, `git`, `actions`, or any other toolset.
+>
+> Keep the existing root-managed default-deny policy and its narrow `github_*` allowance; do not add or broaden a permission. Validate the resulting user configuration before starting OpenCode. Do not run a diagnostic that prints secret contents.
+>
+> Do not declare success merely because the MCP connects. Require all of these results through OpenCode: `opencode mcp list` reports `github` connected; repository metadata for `Axian-Inc/ffthh-game-of-life` is readable; issues are readable; branches are readable; and the five latest commits are readable. If Projects was enabled, also list the lab's project titles without changing them.
+>
+> Inspect the tools exposed by the `github` MCP. Fail the setup if any tool capable of creating or changing an issue, branch, commit, file, pull request, project item, or repository is exposed. Do not test the boundary by attempting a write. Finally report the installed server version, enabled toolsets, non-secret container-local paths changed, read-test results, the write-tool inspection result, and whether any Git-tracked file changed. Never report the key contents or a generated installation token.
+
+The installed command will conceptually resemble this; Codex supplies the real user-local paths and identifiers:
 
 ```bash
-export GITHUB_PERSONAL_ACCESS_TOKEN="..."
+github-mcp-server stdio \
+  --app-id APP_ID \
+  --app-installation-id INSTALLATION_ID \
+  --app-private-key-path ~/.config/opencode/secrets/github-app.pem \
+  --toolsets repos,issues \
+  --read-only
+```
+
+This activity has three independent boundaries: the App has only GitHub read permissions, its installation includes only the lab repository, and the MCP server's read-only mode removes write tools. A model instruction not to write is not one of the security boundaries.
+
+### Observe the new capability in OpenCode
+
+Start a fresh OpenCode session and confirm both cumulative MCPs are connected:
+
+```bash
+opencode mcp list
 opencode
 ```
 
-Add the remote server alongside any existing MCP entries:
+Give OpenCode this observation prompt:
 
-```json
-{
-  "mcp": {
-    "github": {
-      "type": "remote",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}",
-        "X-MCP-Toolsets": "context,repos,issues,pull_requests",
-        "X-MCP-Readonly": "true"
-      },
-      "enabled": true
-    }
-  }
-}
-```
+> Use only the GitHub MCP with `Axian-Inc/ffthh-game-of-life`. Report the repository description and default branch, list open issues, list all branches, and summarize the five latest commits. If GitHub Projects read tools are available, list the project titles and their fields. Do not use the local filesystem and do not perform any write operation. Do not guess when a tool call fails.
 
-Success prompt:
+Then inspect the boundary without asking OpenCode to attempt a write:
 
-> Use the GitHub MCP to summarize the open pull requests and issues for this repository.
+> Inspect the GitHub MCP tools available to you without taking any GitHub action. Report whether any tool can create or modify an issue, branch, commit, file, pull request, project item, or repository. Name any such tool if one exists.
 
-Boundary prompt:
+Expected result: the requested repository information is readable and no GitHub write tool is exposed. A connected status or a promise not to write is not a passing result.
 
-> Use the GitHub MCP to create an issue titled "MCP write test".
+### Ask Codex to remove the activity
 
-Expected result: repository reads succeed, while write tools are absent because GitHub's server-side read-only mode takes precedence over its toolsets. Also verify that the fine-grained token cannot read an unrelated private repository.
+When the activity is finished, exit OpenCode and give Codex this prompt:
 
-Cleanup: remove the `github` entry, unset the environment variable, and revoke the temporary token after the lab.
+> Remove only Activity 2's `github` MCP from my user-level OpenCode configuration. Preserve the `filesystem` MCP and every unrelated setting. Remove the dedicated user-owned GitHub MCP installation and `~/.config/opencode/secrets/github-app.pem`; remove the secrets directory only if it is empty. If another process is using the PEM, stop it first. Do not display the PEM, modify the Git repository, or modify `/etc/opencode/opencode.json`. Validate the remaining configuration, run `opencode mcp list`, and report every non-secret path removed and whether any Git-tracked file changed.
 
-Upstream reference: [GitHub's official MCP server](https://github.com/github/github-mcp-server)
+The instructor revokes the cohort private key after the class. Until then, anyone retaining a copy can continue reading the lab repository with the App's permissions. Rebuilding the dev container also discards these container-local changes, provided the PEM was stored only inside the container.
+
+Upstream references: [GitHub's official MCP server](https://github.com/github/github-mcp-server), [GitHub MCP App authentication](https://github.com/github/github-mcp-server/blob/main/docs/github-app-auth.md)
 
 ## Activity 3: send-only Slack progress updates
 
