@@ -2,12 +2,10 @@
 set -euo pipefail
 
 sudo apt-get update
-sudo apt-get install -y chromium chromium-driver xvfb git-lfs
+sudo apt-get install -y chromium chromium-driver xvfb
 
 sudo mkdir -p /home/vscode/.npm
 sudo chown -R vscode:vscode /home/vscode/.npm
-
-git lfs install --skip-repo
 
 exec_dir="$(dirname "${BASH_SOURCE[0]}")"
 

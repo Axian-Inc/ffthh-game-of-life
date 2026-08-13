@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-08-12
+- Task: Remove sample screens and Git LFS from the current repository tree.
+- Why: All nine reference screens are implemented, and ordinary Git Playwright baselines now provide direct visual coverage for the remaining wizard steps.
+- What changed: Added deterministic baselines for Player Identity, City, Education, and Career; removed the nine LFS-backed sample pointers and their tracking rule; removed Git LFS from dev-container setup; and made the written guide, implemented UI, and Playwright snapshots the normative visual sources.
+- Paths: src/ui/e2e/wizard-visual.spec.js, src/ui/e2e/__snapshots__/, docs/game-of-life-style-guide.md, docs/sample-images/, .gitattributes, .devcontainer/post-create.sh, README.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run test:e2e:ci, npm --prefix src/ui run build, bash -n .devcontainer/post-create.sh
+- Follow-ups: Historical sample pointers and remote LFS objects remain in older commits; no history rewrite is planned.
+
 ## 2026-05-07
 - Task: Document current gameplay status and next PRD implementation slice.
 - Why: Future agents need a clear handoff for what is done and what to build next from the PRD.
