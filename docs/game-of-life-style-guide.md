@@ -1,18 +1,12 @@
 # Game of Life UI Style Guide
 
-Audience: contributors implementing the current desktop UI with high fidelity to the approved sample screens.
+Audience: contributors implementing the current desktop UI with high fidelity to the documented visual system.
 
 Normative references:
 
-- `docs/sample-images/1.WelcomeResume.png`
-- `docs/sample-images/2.GameName.png`
-- `docs/sample-images/3.PlayerPickAvatar.png`
-- `docs/sample-images/4.PickCity.png`
-- `docs/sample-images/5.PickEdcuation.png`
-- `docs/sample-images/6.PickCareer.png`
-- `docs/sample-images/7.GameSummary.png`
-- `docs/sample-images/8.Life.Start.png`
-- `docs/sample-images/9.PlayerTurn.png`
+- The written anatomy, behavior, and visual rules in this guide.
+- The implemented UI in `src/ui/src/`.
+- The desktop Playwright visual baselines in `src/ui/e2e/__snapshots__/`.
 
 ## 1. Global rules
 1. The supported UI target is desktop browser at `1280x720`.
@@ -48,7 +42,7 @@ Normative references:
 - Inputs use cream-tinted fills with teal focus rings and full pill radii.
 - Selected option cards and selected avatar chips use a teal outline, not a filled state.
 
-## 3. Screen 1: Home (`1.WelcomeResume.png`)
+## 3. Screen 1: Home
 Required anatomy:
 1. Centered logo tile, `GAME HUB` eyebrow, `Game of LIFE` headline, supporting copy, and a wide centered `New Game` CTA.
 2. A large white `Your Games` panel sits beneath the hero with a soft drop shadow.
@@ -67,14 +61,14 @@ Shared shell rules:
 5. The modal owns all setup state locally until `Start Game`.
 6. Closing the modal abandons the in-progress setup without persisting a draft game.
 
-### 4.1 Step 1: Game name (`2.GameName.png`)
+### 4.1 Step 1: Game name
 1. Title: `Name Your Game`
 2. Show only the close button in the header row.
 3. Progress rail shows segment 1 active.
 4. Input placeholder: `e.g. Family Game Night`
 5. `Next` remains disabled until the trimmed game name is non-empty.
 
-### 4.2 Step 2: Player identity (`3.PlayerPickAvatar.png`)
+### 4.2 Step 2: Player identity
 1. Header title: `Player N`
 2. Header includes back arrow on the left and close button on the right.
 3. Progress rail shows segments 1-2 active.
@@ -82,35 +76,35 @@ Shared shell rules:
 5. Avatar grid is `8 x 2` circular chips with no default selection.
 6. `Next` remains disabled until nickname is valid and an avatar is explicitly selected.
 
-### 4.3 Step 3: City (`4.PickCity.png`)
+### 4.3 Step 3: City
 1. Header title: `Choose a City`
 2. Progress rail shows segments 1-3 active.
 3. Render three vertically stacked rounded cards: `Metro`, `Suburbia`, and `Small Town`.
 4. Each city card includes icon, short subtitle, and three PRD-aligned modifier callouts.
 5. `Next` remains disabled until a city is selected.
 
-### 4.4 Step 4: Education (`5.PickEdcuation.png`)
+### 4.4 Step 4: Education
 1. Header title: `Education Track`
 2. Progress rail shows segments 1-4 active.
 3. Render three stacked cards: `Degree`, `Trades`, and `Self-Taught`.
 4. Each card includes an icon, short subtitle, and three explanatory modifier callouts.
 5. `Next` remains disabled until a track is selected.
 
-### 4.5 Step 5: Career (`6.PickCareer.png`)
+### 4.5 Step 5: Career
 1. Header title: `Pick a Career`
 2. Progress rail shows all five segments active.
 3. Show only the three career cards for the currently selected education track.
 4. Each career card includes icon, title, and compact stat rows for weekly income, debt, activities per turn, and shorthand attributes.
 5. `Next` remains disabled until a career is selected.
 
-### 4.6 Step 6: Summary (`7.GameSummary.png`)
+### 4.6 Step 6: Summary
 1. Header title: `Ready to Play`
 2. Summary shows game name, player count, and one compact row per committed player.
 3. Each player row includes avatar, nickname, city, and career.
 4. Center `Add Player` and `Start Game` buttons beneath the summary card.
 5. `Start Game` remains disabled unless the game name is valid and at least two players are committed.
 
-## 5. Welcome page (`8.Life.Start.png`)
+## 5. Welcome page
 Required anatomy:
 1. Bright off-white canvas with a narrow centered reading column.
 2. Gradient logo tile above the `Welcome to Life!` heading.
@@ -119,7 +113,7 @@ Required anatomy:
 5. A wide centered `Let's Begin!` CTA at the bottom.
 6. `Start Game` and `Resume` both land here first.
 
-## 6. Player Turn (`9.PlayerTurn.png`)
+## 6. Player Turn
 Implementation status: the turn number, active player subtitle, seat-order rail, turn actions, and active-player history modal are wired to persisted game state. The financial, job, health, location, and modifier values remain placeholder UI data until the simulation state described in PRD section 11.3 is implemented.
 
 Required anatomy:
