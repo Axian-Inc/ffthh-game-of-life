@@ -33,7 +33,11 @@ try {
 }
 
 install_specs=()
-opencode_pinned_version="1.18.18"
+# OpenCode 1.17.6+ advertises the project directory through MCP Roots. The
+# filesystem MCP treats those client roots as authoritative and replaces its
+# command-line allowlist, exposing the whole repository. Keep 1.17.5 until the
+# client can disable MCP Roots per server or the server can prefer static roots.
+opencode_pinned_version="1.17.5"
 
 opencode_platform_package() {
   local platform

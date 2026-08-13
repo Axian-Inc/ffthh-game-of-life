@@ -5,6 +5,21 @@ OpenCode starts with chat only. In this lab, you will add four narrowly scoped M
 ## Before you start
 
 Rebuild the dev container, open the repository root, and connect OpenCode to OpenAI with `/connect`.
+Then verify the pinned OpenCode version and managed configuration:
+
+```bash
+opencode --version
+bash .devcontainer/check-opencode-lockdown.sh
+```
+
+The version must be `1.17.5`. Do not continue with the filesystem activity if the
+check reports another version; rebuilding is what replaces an OpenCode version already
+installed in an existing container.
+
+The checked-in `opencode.json` intentionally contains no `mcp` entry, and the dev
+container does not install any MCP server. `opencode mcp list` should show no connected
+servers before the first activity. Students enable capabilities by asking Codex to
+edit `opencode.json`; they use OpenCode only for the before, after, and boundary tests.
 
 Use the two agents for different jobs:
 
@@ -22,7 +37,28 @@ The activities are cumulative. Do not remove an MCP entry after completing an ac
 
 ## Activity 1: give OpenCode scoped filesystem access
 
-You will expose only `src/ui` so OpenCode can work on the UI without reading the rest of the repository.
+You will expose exactly two directory trees to OpenCode:
+
+- `/workspaces/ffthh-game-of-life/src` for all application source code
+- `/workspaces/ffthh-game-of-life/docs` for the PRD, architecture, and other project documentation
+
+The filesystem MCP treats each command argument after the package name as an allowed
+root. A local protocol guard prevents client-advertised MCP Roots from replacing that
+allowlist. Files elsewhere in the repository—including root files such as
+`opencode.json` and everything under `terraform`—remain outside the server's allowed
+roots. The managed OpenCode configuration separately denies native filesystem tools,
+so students must use this scoped MCP for file access.
+
+The dev container intentionally pins OpenCode 1.17.5. OpenCode 1.17.6 and later
+advertise the repository root through dynamic MCP Roots; without the protocol guard,
+the filesystem server replaces its command-line allowlist with that root and exposes
+the entire repository. The guard makes the static roots authoritative even if a client
+advertises broader roots. Do not update OpenCode without first verifying both boundary
+tests below. Rebuild the dev container after changing the OpenCode pin.
+
+This server exposes both read and write tools inside the two allowed roots. That is
+intentional for the implementation activity later in this lab; the directory boundary,
+not a read-only policy, prevents access to the rest of the repository.
 
 ### Before
 
@@ -36,23 +72,61 @@ The request should fail because OpenCode has no file tool.
 
 Paste into Codex:
 
-> Update the root `opencode.json` to add a local MCP server named `filesystem`. Run `npx -y @modelcontextprotocol/server-filesystem@2026.7.10` and allow only `/workspaces/ffthh-game-of-life/src/ui`. Enable the server and preserve every existing setting. Show me the diff when done.
+> Update the root `opencode.json` to add a local MCP server named `filesystem`. Run `npx -y @modelcontextprotocol/server-filesystem@2026.7.10` through `/workspaces/ffthh-game-of-life/.devcontainer/run-scoped-filesystem-mcp.js`, and allow only `/workspaces/ffthh-game-of-life/src` and `/workspaces/ffthh-game-of-life/docs`. Enable the server and preserve every existing setting. Show me the diff when done.
 
-Restart OpenCode.
+The prompt must include `.devcontainer/run-scoped-filesystem-mcp.js`. It prevents
+client-advertised roots from widening the two directories selected by the student.
+
+This is a single prompt: Codex should make the configuration change without students
+manually editing JSON. Before restarting OpenCode, confirm the resulting command has
+exactly these two allowed-root arguments and no repository-root argument:
+
+```json
+  "command": [
+  "node",
+  "/workspaces/ffthh-game-of-life/.devcontainer/run-scoped-filesystem-mcp.js",
+  "npx",
+  "-y",
+  "@modelcontextprotocol/server-filesystem@2026.7.10",
+  "/workspaces/ffthh-game-of-life/src",
+  "/workspaces/ffthh-game-of-life/docs"
+]
+```
+
+Restart OpenCode so it loads the new MCP server, then confirm that it is connected:
+
+```bash
+opencode mcp list
+```
 
 ### After
 
 > Use the filesystem MCP to read `src/ui/src/App.jsx` and summarize its responsibilities.
 
+Then verify the second allowed root:
+
+> Use the filesystem MCP to read `docs/modern-game-of-life-prd.md` and summarize the current implementation status. Do not guess.
+
 ### Boundary
+
+Run both boundary checks:
+
+> Use the filesystem MCP to read `/workspaces/ffthh-game-of-life/opencode.json`.
 
 > Use the filesystem MCP to read `/workspaces/ffthh-game-of-life/terraform/main.tf`.
 
-Reading `App.jsx` should succeed. Reading `terraform/main.tf` should be rejected because it is outside the allowed directory.
+Reading `App.jsx` and the PRD should succeed. Reading both `opencode.json` and
+`terraform/main.tf` should be rejected because neither file is beneath an allowed
+root. Do not test the boundary with another shell, native file, or GitHub tool: those
+are separate capabilities and do not demonstrate the filesystem MCP's boundary.
 
 ## Activity 2: read GitHub through a read-only app
 
 You will connect an instructor-provided GitHub App. Its installation and the MCP server are both read-only, so OpenCode can inspect repository work without changing it.
+
+This server is not installed by the dev-container baseline. Before this activity, the
+instructor must explicitly run `.devcontainer/install-github-mcp-server.sh`; this is
+separate from the limited-filesystem activity above.
 
 Copy the supplied `ffthh-open-code-read-only.pem` into the repository root. This PEM is the GitHub App's private key; it is ignored by Git. Restrict its permissions and export the IDs supplied by the instructor in the terminal that will start OpenCode:
 
@@ -70,7 +144,7 @@ The request should fail because no GitHub MCP is connected.
 
 ### Configure with Codex
 
-> Update the root `opencode.json` and preserve the filesystem MCP. Add an enabled local MCP server named `github` using the preinstalled `/usr/local/bin/github-mcp-server`. Run it with `stdio`, `--read-only`, and `--toolsets repos,issues,pull_requests`. Pass `GITHUB_APP_ID` and `GITHUB_APP_INSTALLATION_ID` from the current environment, and set `GITHUB_APP_PRIVATE_KEY_PATH` to `/workspaces/ffthh-game-of-life/ffthh-open-code-read-only.pem`. Do not read or print the PEM. Show me the diff when done.
+> Update the root `opencode.json` and preserve the filesystem MCP. Add an enabled local MCP server named `github` using `/usr/local/bin/github-mcp-server`. Run it with `stdio`, `--read-only`, and `--toolsets repos,issues,pull_requests`. Pass `GITHUB_APP_ID` and `GITHUB_APP_INSTALLATION_ID` from the current environment, and set `GITHUB_APP_PRIVATE_KEY_PATH` to `/workspaces/ffthh-game-of-life/ffthh-open-code-read-only.pem`. Do not read or print the PEM. Show me the diff when done.
 
 Restart OpenCode from the terminal where the two ID variables are exported.
 

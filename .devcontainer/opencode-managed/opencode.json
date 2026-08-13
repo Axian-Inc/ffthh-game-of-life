@@ -17,6 +17,28 @@
     "slack_send_message": "allow",
     "playwright_*": "allow"
   },
+  "agent": {
+    "build": {
+      "permission": {
+        "*": "deny",
+        "lsp": "deny",
+        "filesystem_*": "allow",
+        "github_*": "allow",
+        "slack_send_message": "allow",
+        "playwright_*": "allow"
+      }
+    },
+    "plan": {
+      "permission": {
+        "*": "deny",
+        "lsp": "deny",
+        "filesystem_*": "allow",
+        "github_*": "allow",
+        "slack_send_message": "allow",
+        "playwright_*": "allow"
+      }
+    }
+  },
   "plugin": [],
   "share": "disabled",
   "autoupdate": false

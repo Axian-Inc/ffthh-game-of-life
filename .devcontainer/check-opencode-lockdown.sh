@@ -37,6 +37,8 @@ assert(JSON.stringify(config.enabled_providers) === JSON.stringify(["openai"]), 
 assert(config.provider?.openai?.options?.baseURL === "https://api.openai.com/v1", "OpenAI must use the canonical API endpoint");
 assert(config.lsp === false, "OpenCode LSP must be disabled");
 assert(JSON.stringify(config.permission) === JSON.stringify(expectedPermissions), "Managed permissions do not match the lockdown policy");
+assert(JSON.stringify(config.agent?.build?.permission) === JSON.stringify(expectedPermissions), "Build-agent permissions do not match the lockdown policy");
+assert(JSON.stringify(config.agent?.plan?.permission) === JSON.stringify(expectedPermissions), "Plan-agent permissions do not match the lockdown policy");
 assert(Array.isArray(config.plugin) && config.plugin.length === 0, "Plugins must be disabled");
 assert(config.share === "disabled", "Session sharing must be disabled");
 assert(config.autoupdate === false, "OpenCode autoupdate must be disabled");
@@ -50,16 +52,28 @@ if ! command -v opencode >/dev/null 2>&1; then
   exit 0
 fi
 
+expected_opencode_version="1.17.5"
+installed_opencode_version="$(opencode --version)"
+if [[ "$installed_opencode_version" != "$expected_opencode_version" ]]; then
+  echo "Unsafe OpenCode version for the scoped filesystem lab: expected $expected_opencode_version, found $installed_opencode_version. Rebuild the dev container." >&2
+  exit 1
+fi
+
+echo "OK: OpenCode $installed_opencode_version does not advertise the repository through MCP Roots."
+
 test_config_home="$(mktemp -d)"
 test_project="$(mktemp -d)"
 trap 'rm -rf "$test_config_home" "$test_project"' EXIT
 
-OPENCODE_TEST_MANAGED_CONFIG_DIR="$managed_dir" \
-OPENCODE_DISABLE_PROJECT_CONFIG="false" \
-OPENCODE_PURE="true" \
-OPENCODE_CONFIG_CONTENT='{"enabled_providers":["anthropic"],"provider":{"openai":{"options":{"baseURL":"https://example.invalid/v1"}}},"lsp":true,"permission":"allow","plugin":["example-plugin"],"share":"auto","autoupdate":true}' \
-XDG_CONFIG_HOME="$test_config_home" \
-opencode debug config | node "$script_dir/check-opencode-resolved.js"
+(
+  cd "$test_project"
+  OPENCODE_TEST_MANAGED_CONFIG_DIR="$managed_dir" \
+  OPENCODE_DISABLE_PROJECT_CONFIG="false" \
+  OPENCODE_PURE="true" \
+  OPENCODE_CONFIG_CONTENT='{"enabled_providers":["anthropic"],"provider":{"openai":{"options":{"baseURL":"https://example.invalid/v1"}}},"lsp":true,"permission":"allow","plugin":["example-plugin"],"share":"auto","autoupdate":true}' \
+  XDG_CONFIG_HOME="$test_config_home" \
+  opencode debug config
+) | node "$script_dir/check-opencode-resolved.js"
 
 echo "OK: managed OpenCode settings override conflicting inline configuration."
 
@@ -78,7 +92,7 @@ fs.writeFileSync(
     plugin: ["example-plugin"],
     share: "auto",
     autoupdate: true,
-    agent: { build: { permission: "allow" } },
+    agent: { build: { permission: { "*": "allow" } } },
     mcp: {
       unexpected: {
         type: "local",

@@ -18,6 +18,8 @@ assert(JSON.stringify(config.enabled_providers) === JSON.stringify(["openai"]), 
 assert(config.provider?.openai?.options?.baseURL === "https://api.openai.com/v1", "Managed OpenAI endpoint was overridden");
 assert(config.lsp === false, "Managed LSP setting was overridden");
 assert(JSON.stringify(config.permission) === JSON.stringify(expectedPermissions), "Managed permissions were overridden");
+assert(JSON.stringify(config.agent?.build?.permission) === JSON.stringify(expectedPermissions), "Managed build-agent permissions were overridden");
+assert(JSON.stringify(config.agent?.plan?.permission) === JSON.stringify(expectedPermissions), "Managed plan-agent permissions were overridden");
 assert(Array.isArray(config.plugin) && config.plugin.length === 0, "Managed plugin lockdown was overridden");
 assert(config.share === "disabled", "Managed sharing lockdown was overridden");
 assert(config.autoupdate === false, "Managed autoupdate setting was overridden");

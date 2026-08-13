@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-08-13
+- Task: Close the OpenCode filesystem boundary bypass and test it end to end.
+- Why: The filesystem server can replace command-line roots with client-advertised MCP Roots, and built-in agent permissions could override the managed global deny policy.
+- What changed: Kept the checked-in OpenCode configuration MCP-free; stopped installing the GitHub MCP server during container creation; added an MCP protocol guard that makes the optional `src` and `docs` roots authoritative; locked `build` and `plan` agent permissions; corrected the override fixture; and added an adversarial protocol test that verifies `terraform/main.tf` remains denied after students configure filesystem access.
+- Paths: .devcontainer/post-create.sh, .devcontainer/run-scoped-filesystem-mcp.js, .devcontainer/check-scoped-filesystem-mcp.js, .devcontainer/opencode-managed/opencode.json, .devcontainer/check-opencode-lockdown.sh, .devcontainer/check-opencode-resolved.js, README.md, opencode.json, docs/opencode-mcp-lab.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: bash .devcontainer/configure-opencode.sh, bash .devcontainer/check-opencode-lockdown.sh; after the student configuration, node .devcontainer/check-scoped-filesystem-mcp.js and OpenCode before/after/boundary prompts
+- Follow-ups: Restart any already-running OpenCode process after pulling the updated configuration.
+
 ## 2026-08-12
 - Task: Remove VS Code extension recommendations from the dev container.
 - Why: Terraform, AWS Toolkit, GitLens, Docker, Python, and Pylance UI integrations add clutter, login prompts, or update noise when their command-line tools are sufficient.
@@ -22,7 +30,7 @@ Lightweight, task-focused log for what changed, why, and where.
 ## 2026-08-13
 - Task: Turn the deferred OpenCode MCP notes into a hands-on student lab.
 - Why: Students need short capability-focused activities, visible root-level configuration changes, GitHub App authentication, and an end-to-end MCP exercise.
-- What changed: Enabled project config discovery under the managed namespace policy; added a pinned, checksum-verified GitHub MCP Server installer; ignored the instructor PEM filename; and rewrote the lab as filesystem, GitHub, Playwright, Slack, and combined delivery activities with before/after tests and Codex configuration prompts.
+- What changed: Enabled project config discovery under the managed namespace policy; added an optional pinned, checksum-verified GitHub MCP Server installer; ignored the instructor PEM filename; and rewrote the lab as filesystem, GitHub, Playwright, Slack, and combined delivery activities with before/after tests and Codex configuration prompts. The installer is not run by the baseline container setup.
 - Paths: docs/opencode-mcp-lab.md, .gitignore, .devcontainer/devcontainer.json, .devcontainer/install-github-mcp-server.sh, .devcontainer/post-create.sh, .devcontainer/check-opencode-lockdown.sh, .devcontainer/check-opencode-resolved.js, README.md, CHANGELOG.md
 - Commands/runbooks: bash -n .devcontainer/*.sh, .devcontainer/install-github-mcp-server.sh <temporary-path>, .devcontainer/check-opencode-lockdown.sh, opencode debug config, opencode mcp list
 - Follow-ups: Before class, supply the GitHub App IDs and PEM, Slack credentials and channel, and a self-contained UI issue for Activity 5; run every live MCP prompt with those credentials.
