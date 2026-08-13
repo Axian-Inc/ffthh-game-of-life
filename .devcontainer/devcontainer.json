@@ -44,24 +44,6 @@
     "OPENCODE_PURE": "true",
   },
 
-  // VS Code-specific customizations
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        // Python
-        "ms-python.python",
-        "ms-python.vscode-pylance"
-      ],
-      "settings": {
-        // Python settings
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.analysis.typeCheckingMode": "basic",
-        "python.testing.pytestEnabled": true,
-        "python.testing.unittestEnabled": false
-      }
-    }
-  },
-
   // Use the non-root user the base image defines
   "remoteUser": "vscode"
 }
