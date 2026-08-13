@@ -20,6 +20,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Follow-ups: If GitHub Copilot still appears, remove or disable it in the Dev Container window and check VS Code Settings Sync or `dev.containers.defaultExtensions`.
 
 ## 2026-08-13
+- Task: Turn the deferred OpenCode MCP notes into a hands-on student lab.
+- Why: Students need short capability-focused activities, visible root-level configuration changes, GitHub App authentication, and an end-to-end MCP exercise.
+- What changed: Enabled project config discovery under the managed namespace policy; added a pinned, checksum-verified GitHub MCP Server installer; ignored the instructor PEM filename; and rewrote the lab as filesystem, GitHub, Playwright, Slack, and combined delivery activities with before/after tests and Codex configuration prompts.
+- Paths: docs/opencode-mcp-lab.md, .gitignore, .devcontainer/devcontainer.json, .devcontainer/install-github-mcp-server.sh, .devcontainer/post-create.sh, .devcontainer/check-opencode-lockdown.sh, .devcontainer/check-opencode-resolved.js, README.md, CHANGELOG.md
+- Commands/runbooks: bash -n .devcontainer/*.sh, .devcontainer/install-github-mcp-server.sh <temporary-path>, .devcontainer/check-opencode-lockdown.sh, opencode debug config, opencode mcp list
+- Follow-ups: Before class, supply the GitHub App IDs and PEM, Slack credentials and channel, and a self-contained UI issue for Activity 5; run every live MCP prompt with those credentials.
+
+## 2026-08-13
 - Task: Lock down the dev-container OpenCode harness before the MCP capability lab.
 - Why: The lab needs a demonstrably chat-only baseline so later MCP additions visibly introduce bounded capabilities.
 - What changed: Pinned OpenCode 1.18.18; installed a root-owned Linux managed config that allows only OpenAI, denies built-in tools, disables plugins/sharing/LSP/autoupdate, and reserves only reviewed future MCP namespaces; enabled OpenCode pure mode, disabled project config discovery and LSP downloads; removed the repository Ollama provider and default websearch; added static/resolved config checks and deferred MCP exercise guidance without installing or configuring an MCP.

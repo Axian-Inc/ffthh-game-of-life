@@ -21,4 +21,9 @@ assert(JSON.stringify(config.permission) === JSON.stringify(expectedPermissions)
 assert(Array.isArray(config.plugin) && config.plugin.length === 0, "Managed plugin lockdown was overridden");
 assert(config.share === "disabled", "Managed sharing lockdown was overridden");
 assert(config.autoupdate === false, "Managed autoupdate setting was overridden");
-assert(config.mcp === undefined || Object.keys(config.mcp).length === 0, "Baseline unexpectedly resolved an MCP server");
+const expectedMcpName = process.env.EXPECTED_MCP_NAME;
+if (expectedMcpName) {
+  assert(config.mcp?.[expectedMcpName], `Expected project MCP server was not resolved: ${expectedMcpName}`);
+} else {
+  assert(config.mcp === undefined || Object.keys(config.mcp).length === 0, "Baseline unexpectedly resolved an MCP server");
+}

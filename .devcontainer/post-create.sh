@@ -11,3 +11,4 @@ exec_dir="$(dirname "${BASH_SOURCE[0]}")"
 
 bash "$exec_dir/configure-opencode.sh"
 bash "$exec_dir/install-ai-clis.sh"
+bash "$exec_dir/install-github-mcp-server.sh"

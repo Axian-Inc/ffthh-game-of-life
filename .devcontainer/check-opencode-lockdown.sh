@@ -5,12 +5,17 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 managed_dir="$script_dir/opencode-managed"
 managed_config="$managed_dir/opencode.json"
 
-for setting in OPENCODE_DISABLE_LSP_DOWNLOAD OPENCODE_DISABLE_PROJECT_CONFIG OPENCODE_PURE; do
+for setting in OPENCODE_DISABLE_LSP_DOWNLOAD OPENCODE_PURE; do
   if ! grep -Eq "\"$setting\"[[:space:]]*:[[:space:]]*\"true\"" "$script_dir/devcontainer.json"; then
     echo "Missing required dev-container setting: $setting=true" >&2
     exit 1
   fi
 done
+
+if ! grep -Eq '"OPENCODE_DISABLE_PROJECT_CONFIG"[[:space:]]*:[[:space:]]*"false"' "$script_dir/devcontainer.json"; then
+  echo "Project-level OpenCode configuration must be enabled for the MCP lab." >&2
+  exit 1
+fi
 
 MANAGED_CONFIG="$managed_config" node <<'NODE'
 const fs = require("fs");
@@ -50,7 +55,7 @@ test_project="$(mktemp -d)"
 trap 'rm -rf "$test_config_home" "$test_project"' EXIT
 
 OPENCODE_TEST_MANAGED_CONFIG_DIR="$managed_dir" \
-OPENCODE_DISABLE_PROJECT_CONFIG="true" \
+OPENCODE_DISABLE_PROJECT_CONFIG="false" \
 OPENCODE_PURE="true" \
 OPENCODE_CONFIG_CONTENT='{"enabled_providers":["anthropic"],"provider":{"openai":{"options":{"baseURL":"https://example.invalid/v1"}}},"lsp":true,"permission":"allow","plugin":["example-plugin"],"share":"auto","autoupdate":true}' \
 XDG_CONFIG_HOME="$test_config_home" \
@@ -87,10 +92,10 @@ NODE
 (
   cd "$test_project"
   OPENCODE_TEST_MANAGED_CONFIG_DIR="$managed_dir" \
-  OPENCODE_DISABLE_PROJECT_CONFIG="true" \
+  OPENCODE_DISABLE_PROJECT_CONFIG="false" \
   OPENCODE_PURE="true" \
   XDG_CONFIG_HOME="$test_config_home" \
   opencode debug config
-) | node "$script_dir/check-opencode-resolved.js"
+) | EXPECTED_MCP_NAME="unexpected" node "$script_dir/check-opencode-resolved.js"
 
-echo "OK: project configuration discovery is disabled for the locked harness."
+echo "OK: project MCP configuration is discovered while managed restrictions remain enforced."

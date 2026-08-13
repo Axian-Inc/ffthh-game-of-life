@@ -1,258 +1,201 @@
-# Deferred OpenCode MCP Lab
+# OpenCode MCP Lab
 
-> Status: future lab material. None of the MCP servers below are installed, configured, authenticated, or tested by the current repository setup.
+OpenCode starts with chat only. In this lab, you will add four narrowly scoped Model Context Protocol (MCP) servers, test each new capability, and then combine them in one workflow.
 
-The dev container starts OpenCode as a deliberately limited AI chat harness. Its built-in tools are denied, project-level OpenCode configuration is ignored, and only OpenAI is enabled as a model provider. The managed policy reserves four MCP tool namespaces, but those rules grant no capability until you explicitly configure the corresponding MCP servers.
+## Before you start
 
-Before teaching this lab, recheck every package version, remote endpoint, OAuth field, and resulting tool name against current upstream documentation. The examples below were prepared on 2026-08-13 for OpenCode 1.18.18.
+Rebuild the dev container, open the repository root, and connect OpenCode to OpenAI with `/connect`.
 
-## How the exercises modify OpenCode
+Use the two agents for different jobs:
 
-Add each MCP to the container user's global configuration at `~/.config/opencode/opencode.json`. Do not add it to the repository-level `opencode.json`; project config discovery is disabled in this lab.
+- Run each **Before**, **After**, and **Boundary** prompt manually in OpenCode.
+- Paste each **Codex prompt** into Codex. Codex will update the root `opencode.json` while preserving earlier activities.
 
-Use these fixed server names because OpenCode prefixes MCP tools with the server name and the managed policy only recognizes `filesystem_*`, `github_*`, `slack_send_message`, and `playwright_*`.
-
-After each edit, restart OpenCode and check the connection:
+After Codex changes the configuration, inspect it and restart OpenCode:
 
 ```bash
+git diff -- opencode.json
 opencode mcp list
-opencode debug config
 ```
 
-Preserve previously added `mcp` entries when moving through the cumulative exercises. Never commit API keys, access tokens, OAuth client secrets, or generated MCP authentication files.
+The activities are cumulative. Do not remove an MCP entry after completing an activity. Never paste credentials or PEM contents into either agent or `opencode.json`.
 
-## Activity 0: establish the baseline
+## Activity 1: give OpenCode scoped filesystem access
 
-Prompt OpenCode:
+You will expose only `src/ui` so OpenCode can work on the UI without reading the rest of the repository.
 
-> Without guessing, read `src/ui/src/App.jsx` with a tool and summarize it.
+### Before
 
-Expected result: OpenCode cannot call a file, shell, search, or web tool. It may explain that no applicable tool is available, but it must not claim to have inspected the file.
+Ask OpenCode:
 
-Try equivalent prompts asking it to run `pwd`, search the web, edit a file, or launch a subagent. All should remain unavailable.
+> Read `src/ui/src/App.jsx` with a tool and summarize its responsibilities. Do not guess.
 
-## Activity 1: scoped filesystem access
+The request should fail because OpenCode has no file tool.
 
-This activity uses the Model Context Protocol reference filesystem server. It deliberately exposes only `src/ui`; its server-side path restriction is the capability boundary.
+### Configure with Codex
 
-Add this entry under a top-level `mcp` object in `~/.config/opencode/opencode.json`:
+Paste into Codex:
 
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "filesystem": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem@2026.7.10",
-        "/workspaces/ffthh-game-of-life/src/ui"
-      ],
-      "enabled": true
-    }
-  }
-}
-```
+> Update the root `opencode.json` to add a local MCP server named `filesystem`. Run `npx -y @modelcontextprotocol/server-filesystem@2026.7.10` and allow only `/workspaces/ffthh-game-of-life/src/ui`. Enable the server and preserve every existing setting. Show me the diff when done.
 
-Success prompt:
+Restart OpenCode.
 
-> Use the filesystem MCP to read `src/ui/src/App.jsx` and summarize the component's responsibilities.
+### After
 
-Boundary prompt:
+> Use the filesystem MCP to read `src/ui/src/App.jsx` and summarize its responsibilities.
+
+### Boundary
 
 > Use the filesystem MCP to read `/workspaces/ffthh-game-of-life/terraform/main.tf`.
 
-Expected result: the first request succeeds and the second is rejected because `terraform` is outside the allowed directory. Before using writes, work on a disposable branch and ask the MCP to make a small change under `src/ui`, then inspect the Git diff yourself.
+Reading `App.jsx` should succeed. Reading `terraform/main.tf` should be rejected because it is outside the allowed directory.
 
-Cleanup: remove the `filesystem` entry and restart OpenCode. The local server exits with its OpenCode session.
+## Activity 2: read GitHub through a read-only app
 
-Upstream reference: [Model Context Protocol filesystem server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
+You will connect an instructor-provided GitHub App. Its installation and the MCP server are both read-only, so OpenCode can inspect repository work without changing it.
 
-## Activity 2: read-only GitHub context
-
-Create a fine-grained GitHub personal access token limited to this repository with read-only repository permissions. Export it only in the terminal that starts OpenCode:
+Copy the supplied `ffthh-open-code-read-only.pem` into the repository root. This PEM is the GitHub App's private key; it is ignored by Git. Restrict its permissions and export the IDs supplied by the instructor in the terminal that will start OpenCode:
 
 ```bash
-export GITHUB_PERSONAL_ACCESS_TOKEN="..."
-opencode
+chmod 600 ffthh-open-code-read-only.pem
+export GITHUB_APP_ID="<APP_ID>"
+export GITHUB_APP_INSTALLATION_ID="<INSTALLATION_ID>"
 ```
 
-Add the remote server alongside any existing MCP entries:
+### Before
 
-```json
-{
-  "mcp": {
-    "github": {
-      "type": "remote",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}",
-        "X-MCP-Toolsets": "context,repos,issues,pull_requests",
-        "X-MCP-Readonly": "true"
-      },
-      "enabled": true
-    }
-  }
-}
-```
+> Use a GitHub tool to list the open issues in `Axian-Inc/ffthh-game-of-life`. Do not use the public web.
 
-Success prompt:
+The request should fail because no GitHub MCP is connected.
 
-> Use the GitHub MCP to summarize the open pull requests and issues for this repository.
+### Configure with Codex
 
-Boundary prompt:
+> Update the root `opencode.json` and preserve the filesystem MCP. Add an enabled local MCP server named `github` using the preinstalled `/usr/local/bin/github-mcp-server`. Run it with `stdio`, `--read-only`, and `--toolsets repos,issues,pull_requests`. Pass `GITHUB_APP_ID` and `GITHUB_APP_INSTALLATION_ID` from the current environment, and set `GITHUB_APP_PRIVATE_KEY_PATH` to `/workspaces/ffthh-game-of-life/ffthh-open-code-read-only.pem`. Do not read or print the PEM. Show me the diff when done.
 
-> Use the GitHub MCP to create an issue titled "MCP write test".
+Restart OpenCode from the terminal where the two ID variables are exported.
 
-Expected result: repository reads succeed, while write tools are absent because GitHub's server-side read-only mode takes precedence over its toolsets. Also verify that the fine-grained token cannot read an unrelated private repository.
+### After
 
-Cleanup: remove the `github` entry, unset the environment variable, and revoke the temporary token after the lab.
+> Use the GitHub MCP to list the open issues and pull requests in `Axian-Inc/ffthh-game-of-life`.
 
-Upstream reference: [GitHub's official MCP server](https://github.com/github/github-mcp-server)
+### Boundary
 
-## Activity 3: send-only Slack progress updates
+> Use the GitHub MCP to create an issue titled `MCP write test` in `Axian-Inc/ffthh-game-of-life`.
 
-This activity needs one admin-prepared internal Slack app. Create it from a manifest similar to the following, substituting the final app name if necessary:
+Reads should succeed. Issue creation should be unavailable because the server runs in read-only mode.
 
-```json
-{
-  "display_information": {
-    "name": "OpenCode MCP Lab"
-  },
-  "oauth_config": {
-    "pkce_enabled": true,
-    "redirect_urls": [
-      "http://127.0.0.1:19876/mcp/oauth/callback"
-    ],
-    "scopes": {
-      "user": ["chat:write"]
-    }
-  },
-  "settings": {
-    "org_deploy_enabled": false,
-    "socket_mode_enabled": false,
-    "token_rotation_enabled": false
-  }
-}
-```
+Reference: [GitHub MCP Server—GitHub App authentication](https://github.com/github/github-mcp-server/blob/main/docs/github-app-auth.md)
 
-Enable the Slack MCP Server feature for the internal app. Record its client ID and client secret, approve it for the training workspace, and forward container port `19876` to the host before testing the loopback OAuth callback.
+## Activity 3: inspect the UI with Playwright
 
-Export the credentials in the terminal that starts OpenCode:
+You will give OpenCode a browser limited to the local Vite application. Leave Vite running so Activity 5 can use hot reload.
 
-```bash
-export SLACK_MCP_CLIENT_ID="..."
-export SLACK_MCP_CLIENT_SECRET="..."
-opencode
-```
-
-Add the server:
-
-```json
-{
-  "mcp": {
-    "slack": {
-      "type": "remote",
-      "url": "https://mcp.slack.com/mcp",
-      "oauth": {
-        "clientId": "{env:SLACK_MCP_CLIENT_ID}",
-        "clientSecret": "{env:SLACK_MCP_CLIENT_SECRET}",
-        "scope": "chat:write",
-        "callbackPort": 19876
-      },
-      "enabled": true
-    }
-  }
-}
-```
-
-Authenticate and inspect the discovered tools:
-
-```bash
-opencode mcp auth slack
-opencode mcp list
-```
-
-Confirm that OpenCode 1.18.18 exposes Slack's send operation as `slack_send_message`. If the discovered name differs, stop the exercise: the root-managed allow rule must be reviewed and changed by the instructor rather than broadening permissions in user config.
-
-Success prompt:
-
-> Post "OpenCode MCP lab: filesystem and GitHub stages complete" to the designated training channel.
-
-Boundary prompt:
-
-> Read the latest messages from the designated training channel.
-
-Expected result: posting succeeds, while Slack read, search, reaction, canvas, and channel-management tools remain denied. Use a dedicated training channel and tell participants that messages are sent on their behalf.
-
-Cleanup:
-
-```bash
-opencode mcp logout slack
-unset SLACK_MCP_CLIENT_ID SLACK_MCP_CLIENT_SECRET
-```
-
-Then remove the `slack` entry. The workspace admin should revoke the app grant after a temporary class if it will not be reused.
-
-Upstream reference: [Slack's official hosted MCP server](https://docs.slack.dev/ai/slack-mcp-server/)
-
-## Activity 4: inspect the local UI with Playwright
-
-Start the application yourself in a separate terminal; the container does not auto-start it:
+Start the UI in a separate terminal:
 
 ```bash
 npm --prefix src/ui ci
 npm --prefix src/ui run dev
 ```
 
-Add Playwright alongside the existing MCP entries:
+### Before
 
-```json
-{
-  "mcp": {
-    "playwright": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@playwright/mcp@0.0.79",
-        "--headless",
-        "--isolated",
-        "--browser",
-        "chromium",
-        "--executable-path",
-        "/usr/bin/chromium",
-        "--block-service-workers",
-        "--allowed-origins",
-        "http://127.0.0.1:5173;http://localhost:5173"
-      ],
-      "enabled": true
-    }
-  }
-}
+> Open `http://127.0.0.1:5173` with a browser tool and describe the visible game screen.
+
+The request should fail because OpenCode has no browser tool.
+
+### Configure with Codex
+
+> Update the root `opencode.json` and preserve the filesystem and GitHub MCPs. Add an enabled local MCP server named `playwright` running `npx -y @playwright/mcp@0.0.79`. Use headless and isolated Chromium at `/usr/bin/chromium`, block service workers, and allow only `http://127.0.0.1:5173;http://localhost:5173`. Show me the diff when done.
+
+Restart OpenCode, but leave Vite running.
+
+### After
+
+> Use Playwright to open `http://127.0.0.1:5173`, inspect the accessibility snapshot, and describe the visible game screen.
+
+### Boundary
+
+> Use Playwright to navigate to `https://example.com` and summarize the page.
+
+The local inspection should succeed. The external request should be blocked by the configured origin allowlist. The allowlist is a teaching guardrail, not an operating-system security boundary.
+
+## Activity 4: send a Slack update
+
+You will connect an instructor-prepared Slack app with only `chat:write`, allowing OpenCode to post progress without reading workspace conversations.
+
+Export the client ID and secret supplied by the instructor in the terminal that will start OpenCode:
+
+```bash
+export SLACK_MCP_CLIENT_ID="<CLIENT_ID>"
+export SLACK_MCP_CLIENT_SECRET="<CLIENT_SECRET>"
 ```
 
-Success prompt:
+### Before
 
-> Open `http://127.0.0.1:5173`, inspect the accessibility snapshot, and describe the visible game screen.
+> Post `OpenCode MCP lab connection test` to `<TRAINING_CHANNEL>` in Slack.
 
-Boundary prompt:
+The request should fail because no Slack MCP is connected.
 
-> Navigate to `https://example.com` and summarize the page.
+### Configure with Codex
 
-Expected result: local inspection succeeds and the non-local request is blocked by the configured origin allowlist. Treat this as a teaching guardrail, not an operating-system security boundary; redirects and the browser process require separate threat analysis for adversarial use.
+> Update the root `opencode.json` and preserve all existing MCPs. Add an enabled remote MCP server named `slack` at `https://mcp.slack.com/mcp`. Configure OAuth with `SLACK_MCP_CLIENT_ID` and `SLACK_MCP_CLIENT_SECRET` from the environment, scope `chat:write`, and callback port `19876`. Show me the diff when done.
 
-Cleanup: remove the `playwright` entry, stop the Vite process, and restart OpenCode.
+Authenticate, check the connection, and restart OpenCode from the terminal containing the Slack variables:
 
-Upstream reference: [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp)
+```bash
+opencode mcp auth slack
+opencode mcp list
+```
 
-## Instructor acceptance checklist for the future implementation
+### After
 
-- Rebuild a clean dev container before the class.
-- Run `.devcontainer/check-opencode-lockdown.sh` and confirm the baseline has no MCPs.
-- Validate every package and tool name against the managed namespace rules.
-- Use disposable GitHub and Slack credentials with the minimum scopes described above.
-- Run every success and boundary prompt yourself.
-- Inspect logs and Git diffs rather than trusting model summaries.
-- Remove credentials and OAuth grants after the exercise.
+> Post `OpenCode MCP lab: Slack connected` to `<TRAINING_CHANNEL>`.
+
+### Boundary
+
+> Read the latest messages from `<TRAINING_CHANNEL>`.
+
+Posting should succeed. Reading messages should be unavailable because the app has only `chat:write` and managed policy permits only `slack_send_message`.
+
+## Activity 5: deliver a feature across all four MCPs
+
+You will now combine GitHub context, scoped file changes, browser verification, and a Slack notification. Vite should still be running from Activity 3 so saved UI changes appear through hot reload.
+
+### Before
+
+Confirm that all four servers report connected:
+
+```bash
+opencode mcp list
+```
+
+Then capture the starting point in OpenCode:
+
+> Use Playwright to inspect `http://127.0.0.1:5173` and summarize the current UI. Do not change any files.
+
+### Run the workflow in OpenCode
+
+Replace `<ISSUE_NUMBER>` and `<TRAINING_CHANNEL>`, then paste this single prompt into OpenCode:
+
+> Complete issue `<ISSUE_NUMBER>` from `Axian-Inc/ffthh-game-of-life` using the MCP tools available to you.
+>
+> 1. Read the issue with the GitHub MCP and restate its requirements and acceptance criteria.
+> 2. Inspect the current UI and implement the requested feature using only the filesystem MCP. Keep every change under `src/ui` and do not change dependencies.
+> 3. The Vite server is already running at `http://127.0.0.1:5173`. Use Playwright to verify every acceptance criterion in the rendered UI. If verification fails, fix the UI and test again.
+> 4. Only after every criterion passes, use Slack to post to `<TRAINING_CHANNEL>`: `Completed issue #<ISSUE_NUMBER>: <one-sentence feature summary>. Verified locally at http://127.0.0.1:5173.`
+>
+> Stop without posting a success message if you cannot read the issue, implement it entirely under `src/ui`, or verify every acceptance criterion. Finish with a concise list of changed files and Playwright checks performed.
+
+### After
+
+In OpenCode, run one final independent check:
+
+> Use Playwright to inspect `http://127.0.0.1:5173` and verify the acceptance criteria from issue `<ISSUE_NUMBER>`. Report pass or fail for each criterion without changing files or posting to Slack.
+
+In the terminal, inspect the actual source changes:
+
+```bash
+git diff -- src/ui
+```
+
+Confirm the feature is visible locally and that the completion message appears in the training channel. A success message must not be posted when implementation or verification fails.

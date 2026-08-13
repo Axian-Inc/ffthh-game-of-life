@@ -40,7 +40,7 @@
     "AWS_REGION": "us-west-2",
     "CHROME_BIN": "/usr/bin/chromium",
     "OPENCODE_DISABLE_LSP_DOWNLOAD": "true",
-    "OPENCODE_DISABLE_PROJECT_CONFIG": "true",
+    "OPENCODE_DISABLE_PROJECT_CONFIG": "false",
     "OPENCODE_PURE": "true",
   },
 
