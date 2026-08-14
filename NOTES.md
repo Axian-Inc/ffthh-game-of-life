@@ -30,10 +30,10 @@ Lightweight, task-focused log for what changed, why, and where.
 ## 2026-08-13
 - Task: Turn the deferred OpenCode MCP notes into a hands-on student lab.
 - Why: Students need short capability-focused activities, visible root-level configuration changes, GitHub App authentication, and an end-to-end MCP exercise.
-- What changed: Enabled project config discovery under the managed namespace policy; added an optional pinned, checksum-verified GitHub MCP Server installer; ignored the instructor PEM filename; and rewrote the lab as filesystem, GitHub, Playwright, Slack, and combined delivery activities with before/after tests and Codex configuration prompts. The installer is not run by the baseline container setup.
+- What changed: Enabled project config discovery under the managed namespace policy; added an optional pinned, checksum-verified GitHub MCP Server installer; ignored the instructor PEM filename; and rewrote the lab as filesystem, native planning tools, GitHub, Playwright, and a combined delivery activity with before/after tests and Codex configuration prompts. The installer is not run by the baseline container setup.
 - Paths: docs/opencode-mcp-lab.md, .gitignore, .devcontainer/devcontainer.json, .devcontainer/install-github-mcp-server.sh, .devcontainer/post-create.sh, .devcontainer/check-opencode-lockdown.sh, .devcontainer/check-opencode-resolved.js, README.md, CHANGELOG.md
 - Commands/runbooks: bash -n .devcontainer/*.sh, .devcontainer/install-github-mcp-server.sh <temporary-path>, .devcontainer/check-opencode-lockdown.sh, opencode debug config, opencode mcp list
-- Follow-ups: Before class, supply the GitHub App IDs and PEM, Slack credentials and channel, and a self-contained UI issue for Activity 5; run every live MCP prompt with those credentials.
+- Follow-ups: Before class, supply the GitHub App IDs and PEM plus a self-contained UI issue for Activity 5; run every live MCP prompt with those credentials.
 
 ## 2026-08-13
 - Task: Lock down the dev-container OpenCode harness before the MCP capability lab.

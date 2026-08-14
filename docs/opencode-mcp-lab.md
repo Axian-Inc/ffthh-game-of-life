@@ -130,7 +130,7 @@ The read should succeed. Creating or editing an issue must remain unavailable.
 **Why:** Playwright lets the model see and test the application it is building instead
 of reasoning only from source code.
 
-Start the UI in a separate terminal and leave it running through Activity 6:
+Start the UI in a separate terminal and leave it running through Activity 5:
 
 ```bash
 npm --prefix src/ui ci
@@ -156,49 +156,14 @@ Restart OpenCode, but leave Vite running.
 The local page should be visible. Navigation to `https://example.com` should be
 blocked by the origin allowlist.
 
-## Activity 5: notify a Slack channel
-
-**Why:** The official remote Slack MCP lets the agent report completion to one training
-channel without reading workspace conversations.
-
-Export the instructor-provided OAuth values in the terminal that will start OpenCode:
-
-```bash
-export SLACK_MCP_CLIENT_ID="<CLIENT_ID>"
-export SLACK_MCP_CLIENT_SECRET="<CLIENT_SECRET>"
-```
-
-### Before
-
-> Post `OpenCode MCP lab connection test` to `<TRAINING_CHANNEL>` in Slack.
-
-This should fail because Slack is not connected.
-
-### Codex prompt
-
-> Update the root `opencode.json` and preserve every existing setting. Add an enabled remote MCP server named `slack` at `https://mcp.slack.com/mcp`. Configure OAuth from `SLACK_MCP_CLIENT_ID` and `SLACK_MCP_CLIENT_SECRET`, request only `chat:write`, and use callback port `19876`. Show me the diff.
-
-Authenticate and restart OpenCode from the same terminal:
-
-```bash
-opencode mcp auth slack
-opencode mcp list
-```
-
-### After
-
-> Post `OpenCode MCP lab: Slack connected` to `<TRAINING_CHANNEL>`.
-
-Posting should succeed. Reading channel history must remain unavailable.
-
-## Activity 6: deliver one issue end to end
+## Activity 5: deliver one issue end to end
 
 **Why:** This combines bounded context, planning, implementation, visual verification,
 and communication into one agent workflow.
 
 ### Before
 
-Confirm that all four MCP servers are connected and Vite is still running:
+Confirm that all three MCP servers are connected and Vite is still running:
 
 ```bash
 opencode mcp list
@@ -213,15 +178,15 @@ opencode mcp list
 > 3. Use todowrite to track planning, implementation, and verification.
 > 4. Implement the issue using only the filesystem MCP. Keep all changes under `src/ui` and do not change dependencies.
 > 5. Use Playwright at `http://127.0.0.1:5173` to verify every acceptance criterion. Fix failures and test again.
-> 6. Only after all criteria pass, post to `<TRAINING_CHANNEL>`: `Completed issue #<ISSUE_NUMBER>: <summary>. Verified locally at http://127.0.0.1:5173.`
+> 6. Finish with the changed files and a pass/fail result for every acceptance criterion.
 >
-> Do not post success if issue retrieval, implementation, or verification fails. Finish with changed files and verification results.
+> Stop if issue retrieval fails or if the work cannot be completed entirely under `src/ui`.
 
 ### After
 
-> Use Playwright to independently verify each acceptance criterion from issue `<ISSUE_NUMBER>`. Report pass or fail without changing files or posting to Slack.
+> Use Playwright to independently verify each acceptance criterion from issue `<ISSUE_NUMBER>`. Report pass or fail without changing files.
 
-Inspect the source diff and confirm the Slack message was posted only after success:
+Inspect the source diff and compare it with the verification results:
 
 ```bash
 git diff -- src/ui
@@ -229,11 +194,10 @@ git diff -- src/ui
 
 ## Clean up credentials
 
-After Activity 6, stop OpenCode, remove the instructor PEM, and clear credential
+After Activity 5, stop OpenCode, remove the instructor PEM, and clear credential
 variables from the shell:
 
 ```bash
 rm -f ffthh-open-code-read-only.pem
 unset GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID
-unset SLACK_MCP_CLIENT_ID SLACK_MCP_CLIENT_SECRET
 ```

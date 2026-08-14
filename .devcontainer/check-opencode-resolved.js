@@ -6,7 +6,6 @@ const expectedPermissions = {
   "lsp": "deny",
   "filesystem_*": "allow",
   "github_*": "allow",
-  "slack_send_message": "allow",
   "playwright_*": "allow",
 };
 
