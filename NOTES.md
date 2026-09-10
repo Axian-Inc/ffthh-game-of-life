@@ -11,6 +11,14 @@ Lightweight, task-focused log for what changed, why, and where.
 - Commands/runbooks:
 - Follow-ups:
 
+## 2026-09-10
+- Task: Make the scoped filesystem MCP security rationale easy for future maintainers to find.
+- Why: The wrapper's purpose and removal criteria were distributed across historical notes, the student lab, an installer comment, and a regression test; the wrapper itself did not explain the boundary it protects.
+- What changed: Added a canonical dev-container maintainer guide covering the threat model, control relationships, verification, and upgrade/removal checklist; added rationale beside the wrapper code; and linked existing documentation to the guide.
+- Paths: .devcontainer/README.md, .devcontainer/run-scoped-filesystem-mcp.js, .devcontainer/install-ai-clis.sh, README.md, docs/opencode-mcp-lab.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: node .devcontainer/check-scoped-filesystem-mcp.js
+- Follow-ups: Use the maintainer guide and rerun the adversarial boundary check before changing the OpenCode or filesystem-server version.
+
 ## 2026-08-13
 - Task: Close the OpenCode filesystem boundary bypass and test it end to end.
 - Why: The filesystem server can replace command-line roots with client-advertised MCP Roots, and built-in agent permissions could override the managed global deny policy.

@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 
+/**
+ * Preserve the command-line allowlist for the optional filesystem MCP.
+ *
+ * Client-advertised MCP Roots can replace that allowlist and expose the repository
+ * root. This protocol guard prevents both initial and later Roots negotiation; the
+ * child filesystem server still enforces the directories passed in serverArgs.
+ * See .devcontainer/README.md and check-scoped-filesystem-mcp.js.
+ */
+
 const { spawn } = require("child_process");
 const readline = require("readline");
 
@@ -29,10 +38,12 @@ clientLines.on("line", (line) => {
   }
 
   if (message.method === "initialize" && message.params?.capabilities?.roots) {
+    // Prevent the initial client Roots capability from replacing static roots.
     delete message.params.capabilities.roots;
   }
 
   if (message.method === "notifications/roots/list_changed") {
+    // Prevent later client root changes from widening the static allowlist.
     return;
   }
 

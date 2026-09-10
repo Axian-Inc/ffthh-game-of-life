@@ -38,7 +38,9 @@ This should fail because OpenCode has no file tool.
 > Update the root `opencode.json` to add an enabled local MCP server named `filesystem`. Run `npx -y @modelcontextprotocol/server-filesystem@2026.7.10` through `/workspaces/ffthh-game-of-life/.devcontainer/run-scoped-filesystem-mcp.js`. Allow only `/workspaces/ffthh-game-of-life/src` and `/workspaces/ffthh-game-of-life/docs`. Preserve every existing setting and show me the diff.
 
 The checked-in wrapper prevents client-advertised MCP Roots from widening this
-allowlist. Restart OpenCode and confirm `filesystem` is connected:
+allowlist. Its threat model, related controls, and upgrade checklist are in the
+[dev-container maintainer guide](../.devcontainer/README.md). Restart OpenCode and
+confirm `filesystem` is connected:
 
 ```bash
 opencode mcp list
