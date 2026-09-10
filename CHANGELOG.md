@@ -3,6 +3,7 @@
 Keep short entries that summarize user-visible or operational changes.
 
 ## Unreleased
+- Centralized the scoped filesystem MCP threat model, maintenance guidance, and upgrade checks in the dev-container documentation and beside the protocol guard.
 - Left the OpenCode baseline MCP-free, enforced the optional filesystem MCP boundary independently of client Roots, locked built-in agent permission overrides, and documented the Codex-configure/OpenCode-test student workflow.
 - Reworked the OpenCode MCP lab into five concise, test-driven activities; enabled visible project-root MCP configuration; and added an optional pinned, checksum-verified GitHub MCP Server installer for read-only GitHub App authentication.
 - Removed all dev-container VS Code extension recommendations to eliminate UI clutter, login prompts, and extension update noise.

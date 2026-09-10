@@ -35,6 +35,8 @@ bash .devcontainer/install-ai-clis.sh
 
 Keep API keys and private keys out of version control. The [official OpenAI documentation](https://developers.openai.com/api/reference/overview#authentication) recommends loading API keys from an environment variable or a server-side secret manager. The hands-on MCP activities are documented in `docs/opencode-mcp-lab.md`; the servers remain unconfigured until a student completes them.
 
+Maintainers should read [`.devcontainer/README.md`](.devcontainer/README.md) before changing OpenCode versions, MCP configuration, or the scoped filesystem wrapper.
+
 ## First-time setup
 
 1. Configure AWS credentials with `aws configure`.
@@ -66,4 +68,5 @@ Do not run Terraform in the `default` workspace.
 - Architecture: `docs/ARCHITECTURE.md`
 - UI style guide: `docs/game-of-life-style-guide.md`
 - OpenCode MCP lab: `docs/opencode-mcp-lab.md`
+- Dev-container AI harness: `.devcontainer/README.md`
 - Script usage: `scripts/README.md`
