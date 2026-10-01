@@ -3,7 +3,7 @@
 
   // Base image: Python, git, zsh, common build tools, non-root `vscode` user
   // https://mcr.microsoft.com/devcontainers/python
-  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
 
   // Add tools via Dev Container Features
   "features": {

@@ -1,4 +1,25 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [".opencode/instructions/open-model-tools.md"]
+  "instructions": [".opencode/instructions/open-model-tools.md"],
+  "mcp": {
+    "github": {
+      "type": "local",
+      "command": [
+        "/usr/local/bin/github-mcp-server",
+        "stdio",
+        "--read-only",
+        "--toolsets",
+        "repos,issues,pull_requests"
+      ],
+      "enabled": true,
+      "environment": {
+        "GITHUB_APP_ID": "{env:GITHUB_APP_ID}",
+        "GITHUB_APP_INSTALLATION_ID": "{env:GITHUB_APP_INSTALLATION_ID}",
+        "GITHUB_APP_PRIVATE_KEY_PATH": "/workspaces/ffthh-game-of-life/ffthh-open-code-read-only.pem"
+      }
+    }
+  },
+  "permission": {
+    "glob": "allow"
+  }
 }

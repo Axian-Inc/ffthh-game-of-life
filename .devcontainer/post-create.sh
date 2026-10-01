@@ -2,7 +2,8 @@
 set -euo pipefail
 
 sudo apt-get update
-sudo apt-get install -y chromium chromium-driver xvfb
+sudo apt-get install -y chromium chromium-driver xvfb git-lfs
+git lfs install --local
 
 sudo mkdir -p /home/vscode/.npm
 sudo chown -R vscode:vscode /home/vscode/.npm
