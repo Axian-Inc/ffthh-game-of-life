@@ -183,33 +183,33 @@ Implementation sequencing is managed through the normal product backlog and rele
 3. Starting a game persists an active game with `turnNumber`, `activePlayerIndex`, players, and an empty `moveHistory`.
 4. New and resumed games enter the welcome screen before the player-turn screen.
 5. The player-turn screen shows the persisted turn number and active player name, renders all players in seat order, and highlights the active player.
-6. `Choose Action` and `Pass` currently behave as light turn actions: they record a move-history entry, save the updated game, rotate to the next player, and increment the turn number after the last player acts.
-7. `See History` opens a modal scoped to the active player and lists only that player's saved moves.
+6. `Choose Action` and `Pass` use the storage adapter's turn-advance operation. AWS mode invokes guarded Bedrock generation and conditionally saves the event/effect; local mode saves a deterministic fallback event. Both record the move, rotate players, and increment the turn number after the last player acts.
+7. `See History` opens a modal scoped to the active player and lists that player's saved moves with their persisted event details.
+8. New games initialize canonical persisted player state from career and city definitions, including age, cash, debt, assets, net worth, physical health, mental health, status effects, and action history.
+9. Loaded legacy saves receive missing player-state defaults, bounded health values, recalculated net worth, and a game version when they are normalized; completed turn actions increment that version.
+10. A server-side content ingestion module deterministically retrieves and sanitizes current articles from an exact, reviewed NOAA RSS allowlist with HTTPS/redirect, timeout, payload-size, age, and typed-error controls. The event generator consumes it during AWS turn advancement; the previously reviewed JPL feed was removed after persistent HTTP 403 responses from AWS.
+11. A dedicated Node.js 24 Lambda sends sanitized source content and allowlisted anonymous player values to the Nova 2 Lite Bedrock Runtime profile at temperature zero. A versioned input/output guardrail, restricted IAM policy, and strict local `LifeEvent` validator enforce content and effect boundaries without agents or tools.
+12. `POST /games/{id}/turns/advance` uses optimistic versioning and a server-derived turn key to validate/apply one event, update the active player, save event and move history, and rotate play atomically. Exact retries are idempotent; stale different requests return `409`, and generic updates cannot change protected turn state.
+13. Turn requests disable every turn control and announce loading. Once resolved, a focus-trapped blocking modal shows the event outcome, metric delta/result, and source while retaining the acting player behind it; only `Continue` reveals the next turn, and Escape cannot bypass acknowledgment.
+14. External event-generation failures use a deterministic reviewed fallback within a 12-second total budget. Privacy-safe CloudWatch metrics and workspace-scoped alarms cover fallback rate, Lambda errors, Bedrock throttling, guardrail blocks, and p95 latency.
 
 ### 11.2 Current limitations
 1. The player-turn financial, career, health, location, and modifier values are placeholder display data, not derived from persisted player state.
-2. Setup selections store UI ids, but they do not yet initialize the full PRD `PlayerState` contract from section 9.2.
-3. Career and city options exist as UI catalog data, but not yet as canonical simulation definitions matching sections 7.2 and 7.4.
-4. The monthly turn sequence from section 4.3 is not implemented. No net-worth, recurring-cost, debt, asset, health, event, action-resolution, or end-of-turn summary logic runs yet.
-5. `Choose Action` does not yet open an action catalog or resolve intended/unintended outcomes.
+2. The complete monthly turn sequence from section 4.3 is not implemented. Event effects now run, but recurring-cost, debt, asset, baseline health, action-resolution, and end-of-turn summary phases do not.
+3. `Choose Action` does not yet open an action catalog or resolve intended/unintended outcomes.
 
 ### 11.3 Next implementation slice
-The next agent should implement the minimum real simulation foundation before building the full action picker.
-
-Goal: when a new game starts, initialize each player with canonical persisted financial and health state; when a player passes, resolve one no-action monthly turn using deterministic rules, save the phase deltas, and advance the turn.
+The next agent should replace the player-turn placeholder status values with canonical persisted player state.
 
 Recommended scope:
-1. Add canonical career and city definition data with ids, labels, starting cash/debt, income, cost/tax/opportunity/health modifiers, and switch/move metadata needed by sections 7.2-7.5.
-2. Expand created players into persisted `PlayerState` fields from section 9.2: `age`, `careerId`, `cityId`, `cash`, `debts`, `assets`, `netWorth`, `physicalHealth`, `mentalHealth`, `statusEffects`, and `actionHistory`.
-3. Add a small turn-resolution module that applies the no-action version of section 4.3 in order: income/recurring costs/debt interest/minimum payments, basic health drift/stress effects, no event yet or an explicit empty event phase, no player action for `Pass`, and an end-of-turn summary.
-4. Store a reviewable turn log entry with the pre-turn snapshot, phase deltas, explanation strings, post-turn snapshot, action type, player id, player name, and turn number.
-5. Update the player-turn screen to read financial, job, health, and location values from persisted player state instead of `PLAY_TURN_PLACEHOLDER` values.
-6. Keep `Choose Action` as the existing saved light action or temporarily disable it with clear copy until the action catalog is implemented; do not build a large action system before the turn-resolution foundation exists.
-7. Add tests for player-state initialization, no-action turn resolution, net-worth calculation, turn rotation, and save/resume continuity.
+1. Render cash, net worth, career, location, physical health, and mental health from the active player's persisted values.
+2. Derive meter values and modifier labels from canonical player state instead of `PLAY_TURN_PLACEHOLDER`.
+3. Preserve the current loading, event acknowledgment, history, and accessibility behavior.
+4. Add regression coverage for newly created and normalized legacy players.
 
-Suggested first files to inspect or modify: `src/ui/src/App.jsx`, `src/ui/src/services/gameStorage.js`, `src/ui/src/components/pages/PlayGamePage.jsx`, `src/ui/src/data/wizardVisualCatalog.js`, `src/ui/src/test/testUtils.js`, and the UI test suites under `src/ui/src/components/__tests__/` and `src/ui/src/services/__tests__/`.
+Suggested first files to inspect or modify: `src/ui/src/components/pages/PlayGamePage.jsx`, `src/ui/src/data/playTurnPlaceholder.js`, `src/ui/src/utils/playerState.js`, and the UI component tests.
 
-Verification commands: `npm --prefix src/ui run test:ci` and `npm --prefix src/ui run build`.
+Verification commands: `npm --prefix src/ui run test:ci`, `npm --prefix src/ui run lint`, and `npm --prefix src/ui run build`.
 
 ### 11.4 Later slices after the foundation
 1. Implement the action catalog and action preview UI from section 6.

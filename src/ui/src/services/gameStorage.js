@@ -1,4 +1,6 @@
 import { seedGames } from '../data/seedGames'
+import { normalizePlayers } from '../utils/playerState'
+import { advanceLocalGameTurn } from './turnEvents'
 
 const STORAGE_KEY = 'ffthh-game-of-life.games'
 export const GAME_STORAGE_KEY = STORAGE_KEY
@@ -34,19 +36,51 @@ const normalizeMoveHistory = (moveHistory) => {
       typeof entry?.actionType === 'string' && entry.actionType.trim() ? entry.actionType : 'choose_action',
     actionLabel:
       typeof entry?.actionLabel === 'string' && entry.actionLabel.trim() ? entry.actionLabel : 'Choose Action',
+    eventId: entry?.eventId != null ? String(entry.eventId) : null,
     createdAt: Number.isFinite(entry?.createdAt) ? entry.createdAt : 0,
   }))
 }
 
-const normalizeGame = (game) => ({
+const normalizeEvents = (events) => {
+  if (!Array.isArray(events)) {
+    return []
+  }
+  return events.map((event, index) => ({
+    id: event?.id != null ? String(event.id) : `event-${index}`,
+    turnKey: typeof event?.turnKey === 'string' ? event.turnKey : '',
+    playerId: event?.playerId != null ? String(event.playerId) : '',
+    turnNumber: normalizeTurnNumber(event?.turnNumber),
+    title: typeof event?.title === 'string' ? event.title : 'Life event',
+    narrative: typeof event?.narrative === 'string' ? event.narrative : '',
+    outcome: ['positive', 'negative', 'neutral'].includes(event?.outcome) ? event.outcome : 'neutral',
+    effect: {
+      metric: ['cash', 'physicalHealth', 'mentalHealth'].includes(event?.effect?.metric)
+        ? event.effect.metric
+        : 'mentalHealth',
+      amount: Number.isInteger(event?.effect?.amount) ? event.effect.amount : 0,
+    },
+    source: {
+      publisher: typeof event?.source?.publisher === 'string' ? event.source.publisher : 'Modern Game of Life',
+      headline: typeof event?.source?.headline === 'string' ? event.source.headline : 'Saved event',
+      publishedAt: typeof event?.source?.publishedAt === 'string' ? event.source.publishedAt : null,
+    },
+    generationMode: event?.generationMode === 'bedrock' ? 'bedrock' : 'fallback',
+    createdAt: Number.isFinite(event?.createdAt) ? event.createdAt : 0,
+  }))
+}
+
+export const normalizeGame = (game) => ({
   ...game,
   id: String(game.id),
+  version: Number.isInteger(game.version) && game.version >= 1 ? game.version : 1,
+  players: normalizePlayers(game.players),
   turnNumber: normalizeTurnNumber(game.turnNumber),
   activePlayerIndex: normalizeActivePlayerIndex(
     game.activePlayerIndex,
     Array.isArray(game.players) ? game.players.length : 0,
   ),
   moveHistory: normalizeMoveHistory(game.moveHistory),
+  events: normalizeEvents(game.events),
 })
 
 const normalizeGames = (games) => games.map(normalizeGame)
@@ -157,6 +191,7 @@ const createLocalStorage = () => ({
         ...existing,
         ...updates,
         id: normalizedId,
+        version: Math.max(existing.version, updates.version || 0),
       })
       const updated = games.map((game) => (game.id === normalizedId ? merged : game))
       saveLocalGames(updated)
@@ -164,7 +199,29 @@ const createLocalStorage = () => ({
     }
     throw new Error('Game not found')
   },
+  advanceTurn: async (gameId, request) => {
+    const normalizedId = String(gameId)
+    const games = loadLocalGames()
+    const existing = games.find((game) => game.id === normalizedId)
+    if (!existing) {
+      throw new Error('Game not found')
+    }
+    const result = advanceLocalGameTurn(existing, request)
+    if (!result.idempotent) {
+      saveLocalGames(games.map((game) => (game.id === normalizedId ? result.game : game)))
+    }
+    return result
+  },
 })
+
+export class ApiRequestError extends Error {
+  constructor(status, body) {
+    super(body?.message || 'Request failed')
+    this.name = 'ApiRequestError'
+    this.status = status
+    this.body = body
+  }
+}
 
 const fetchJson = async (url, options = {}) => {
   const response = await fetch(url, {
@@ -174,14 +231,15 @@ const fetchJson = async (url, options = {}) => {
       ...(options.headers || {}),
     },
   })
+  const text = response.status === 204 ? '' : await response.text()
+  const body = parseJson(text)
   if (!response.ok) {
-    const message = await response.text()
-    throw new Error(message || 'Request failed')
+    throw new ApiRequestError(response.status, body)
   }
   if (response.status === 204) {
     return null
   }
-  return response.json()
+  return body
 }
 
 const createApiStorage = (baseUrl) => ({
@@ -207,6 +265,17 @@ const createApiStorage = (baseUrl) => ({
       body: JSON.stringify({ game: updates }),
     })
     return data?.game ? normalizeGame(data.game) : normalizeGame({ ...updates, id: String(gameId) })
+  },
+  advanceTurn: async (gameId, request) => {
+    const data = await fetchJson(`${baseUrl}/games/${encodeURIComponent(gameId)}/turns/advance`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+    })
+    return {
+      game: normalizeGame(data.game),
+      event: normalizeEvents([data.event])[0],
+      idempotent: Boolean(data.idempotent),
+    }
   },
 })
 

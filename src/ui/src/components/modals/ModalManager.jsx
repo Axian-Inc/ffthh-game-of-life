@@ -2,6 +2,7 @@ import CreateGameModal from './CreateGameModal'
 import ResumeGameModal from './ResumeGameModal'
 import DeleteGameModal from './DeleteGameModal'
 import PlayerHistoryModal from './PlayerHistoryModal'
+import PlayerEventModal from './PlayerEventModal'
 
 const ModalManager = ({
   view,
@@ -10,9 +11,11 @@ const ModalManager = ({
   pendingDelete,
   historyPlayer,
   historyEntries,
+  pendingTurnEvent,
   onBackdropClick,
   onCloseAll,
   onHistoryClose,
+  onEventContinue,
   onDeleteCancel,
   onDeleteConfirm,
   createGameProps,
@@ -46,6 +49,11 @@ const ModalManager = ({
       entries={historyEntries}
       onBackdropClick={onBackdropClick}
       onClose={onHistoryClose}
+    />
+    <PlayerEventModal
+      event={pendingTurnEvent?.event}
+      resultingValue={pendingTurnEvent?.resultingValue}
+      onContinue={onEventContinue}
     />
   </>
 )

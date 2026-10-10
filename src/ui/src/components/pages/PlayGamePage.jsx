@@ -35,7 +35,7 @@ const PlayGamePage = ({
   const activePlayerName = activePlayer?.name?.trim() || 'Player'
 
   return (
-    <section aria-label="Player turn placeholder" className="play-turn-page">
+    <section aria-label="Player turn" aria-busy={isAdvancingTurn} className="play-turn-page">
       <header className="play-turn-header">
         <h2 className="play-turn-title">{`Modern Game of Life - Turn ${turnNumber}`}</h2>
         <p className="play-turn-subtitle">{`${activePlayerName}'s Turn`}</p>
@@ -45,6 +45,7 @@ const PlayGamePage = ({
         <button
           aria-label="Previous player"
           className="play-turn-chevron"
+          disabled={isAdvancingTurn}
           onClick={onPreviousPlayer}
           type="button"
         >
@@ -62,7 +63,7 @@ const PlayGamePage = ({
           ))}
         </ul>
 
-        <button aria-label="Next player" className="play-turn-chevron" onClick={onNextPlayer} type="button">
+        <button aria-label="Next player" className="play-turn-chevron" disabled={isAdvancingTurn} onClick={onNextPlayer} type="button">
           <ChevronRight aria-hidden="true" />
         </button>
       </div>
@@ -133,7 +134,7 @@ const PlayGamePage = ({
       </div>
 
       <div className="play-turn-actions">
-        <SecondaryButton className="play-turn-action-muted" onClick={onSeeHistory}>
+        <SecondaryButton className="play-turn-action-muted" disabled={isAdvancingTurn} onClick={onSeeHistory}>
           See History
         </SecondaryButton>
         <PrimaryButton className="play-turn-action-primary" disabled={isAdvancingTurn} onClick={onChooseAction}>
@@ -143,6 +144,9 @@ const PlayGamePage = ({
           Pass
         </SecondaryButton>
       </div>
+      {isAdvancingTurn ? (
+        <p className="play-turn-loading" role="status" aria-live="polite">Creating your life event…</p>
+      ) : null}
     </section>
   )
 }

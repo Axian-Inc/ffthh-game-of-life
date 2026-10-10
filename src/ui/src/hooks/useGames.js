@@ -46,6 +46,20 @@ const useGames = () => {
     return updatedGame
   }
 
+  const advanceTurn = async (gameId, request) => {
+    try {
+      const result = await storage.advanceTurn(gameId, request)
+      setGames((current) => current.map((game) => (game.id === result.game.id ? result.game : game)))
+      return result
+    } catch (error) {
+      if (error?.status === 409) {
+        const loadedGames = await storage.listGames()
+        setGames(loadedGames)
+      }
+      throw error
+    }
+  }
+
   return {
     games,
     isLoading,
@@ -54,6 +68,7 @@ const useGames = () => {
     createGame,
     deleteGame,
     updateGame,
+    advanceTurn,
     newGameId,
     setNewGameId,
   }

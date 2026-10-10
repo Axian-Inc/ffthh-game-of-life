@@ -55,6 +55,11 @@
   stroke-width: 2.4;
 }
 
+.play-turn-chevron:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .play-turn-player-list {
   list-style: none;
   margin: 0;
@@ -266,6 +271,12 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--turn-action-gap);
+}
+
+.play-turn-loading {
+  margin: -10px 0 0;
+  color: var(--turn-subtitle);
+  font-weight: 800;
 }
 
 .play-turn-action-muted,

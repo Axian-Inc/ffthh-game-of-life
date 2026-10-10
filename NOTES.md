@@ -1,5 +1,43 @@
 # Notes
 
+## 2026-10-09 — Expand external story variety
+- Task: Prevent player turns from repeatedly consuming only one or two NOAA stories.
+- Why: The 14-day freshness filter was too narrow for NOAA's current publishing cadence and left only one eligible feed entry.
+- What changed: Expanded the eligible article window to one year while preserving deterministic per-turn selection, and added a regression test proving ten recent stories are selected across turn keys.
+- Paths: src/api/contentSources.js, src/api/contentSources.test.js, docs/content-source-policy.md, docs/ARCHITECTURE.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/api test, scripts/deploy.sh
+
+## 2026-10-09 — Remove unavailable JPL source
+- Task: Remove the predictably unavailable JPL source from player-turn rotation.
+- Why: JPL consistently returned HTTP 403 from AWS, causing otherwise healthy turns to display `Live source content was unavailable`.
+- What changed: Restricted the active source registry to the verified NOAA National Ocean Service feed and updated source-policy and current-state documentation.
+- Paths: src/api/contentSources.js, src/api/contentSources.test.js, src/api/eventGenerator.test.js, docs/content-source-policy.md, docs/ARCHITECTURE.md, docs/modern-game-of-life-prd.md, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/api test, scripts/deploy.sh
+
+## 2026-10-09 — Restore source-driven event generation
+- Task: Restore external-source influence and make its provenance visible during player turns.
+- Why: The Bedrock guardrail was evaluating the trusted event-generation instructions together with fetched content and flagging the instructions as a prompt attack, so live requests silently used generic fallback events.
+- What changed: Sent trusted instructions and anonymous game state as normal Converse text while placing only the allowlisted, sanitized source payload in a `guardContent` block; strengthened the source-theme requirement; safely unwrapped Nova's single JSON code fence before strict schema validation; preserved checked-source attribution on fallback events; and labeled backup behavior in the event modal and history.
+- Paths: src/api/eventGenerator.js, src/api/eventGenerator.test.js, src/ui/src/components/modals/PlayerEventModal.jsx, src/ui/src/components/modals/PlayerHistoryModal.jsx, src/ui/src/components/__tests__/app.test.jsx, src/ui/src/App.css, CHANGELOG.md, NOTES.md
+- Commands/runbooks: npm --prefix src/api test, npm --prefix src/ui run test:ci, npm --prefix src/ui run build, scripts/deploy.sh
+
+## 2026-10-09 — MGOL-206 safe fallback and operations
+
+- Task: Keep event-backed turns running through external content and model failures while making failures observable.
+- Why: A family game should not stop when an approved feed or Bedrock is unavailable, slow, blocked, or returns invalid content.
+- What changed: Added a reviewed deterministic fallback catalog, strict contract revalidation, a 12-second end-to-end generation timeout with Bedrock cancellation, privacy-safe Embedded Metric Format records, and workspace-scoped alarms for errors, fallback rate, throttling, guardrail blocks, and p95 latency. Removed unused Bedrock read/control-plane IAM actions while retaining the required guardrail application permission, and scoped event-generator log writes to its managed log group.
+- Paths: src/api/eventFallbacks.js, src/api/eventGenerator.js, src/api/eventGenerator.test.js, terraform/main.tf, docs/event-operations.md, October-Stories.md, docs/ARCHITECTURE.md, docs/modern-game-of-life-prd.md, CHANGELOG.md
+- Commands/runbooks: npm --prefix src/api test, npm --prefix src/ui run test:ci, npm --prefix src/ui run lint, npm --prefix src/ui run build, terraform -chdir=terraform validate, terraform -chdir=terraform plan (workspace tg)
+- Follow-ups: Replace the player-turn placeholder status values with the canonical persisted player state before expanding the action catalog.
+
+## 2026-10-09 — MGOL-205 player event acknowledgment
+
+- Task: Implement the blocking player-event experience after turn advancement.
+- Why: Players need to understand the news-inspired outcome and its saved effect before the next turn is revealed.
+- Where: `src/ui/src/App.jsx`, `src/ui/src/components/modals/PlayerEventModal.jsx`, `src/ui/src/components/modals/PlayerHistoryModal.jsx`, `src/ui/src/components/pages/PlayGamePage.jsx`, and related styles/tests.
+- Details: Turn controls enter an announced disabled state, the completed player's turn remains visible behind a focus-trapped modal, and Continue is the only path to reveal the next player. Saved history now joins moves to their persisted events.
+- Follow-up: MGOL-206 should add deterministic AWS failure fallback, bounded latency, metrics, and alarms.
+
 Lightweight, task-focused log for what changed, why, and where.
 
 ## Template
@@ -10,6 +48,38 @@ Lightweight, task-focused log for what changed, why, and where.
 - Paths:
 - Commands/runbooks:
 - Follow-ups:
+
+## 2026-10-09
+- Task: Implement MGOL-204 event-backed turn advancement.
+- Why: Generated events and bounded effects must be saved atomically with the acting player's move and survive retries, refresh, and resume.
+- What changed: Added `POST /games/{id}/turns/advance`, synchronous invocation of the dedicated event generator, server-side effect validation/application, health clamping and net-worth recalculation, version-conditional DynamoDB persistence, server-derived turn keys, idempotent retry, stale conflict handling, and protected generic updates. Both UI actions now use the storage adapter's advance operation; local mode uses deterministic fallback events with the same persisted contract, and API conflicts reload current games.
+- Paths: src/api/index.js, src/api/turnResolution.js, src/api/index.test.js, src/api/turnResolution.test.js, src/ui/src/App.jsx, src/ui/src/hooks/useGames.js, src/ui/src/hooks/useGames.test.jsx, src/ui/src/services/gameStorage.js, src/ui/src/services/turnEvents.js, terraform/main.tf, October-Stories.md, docs/ARCHITECTURE.md, docs/modern-game-of-life-prd.md, CHANGELOG.md
+- Commands/runbooks: npm --prefix src/api test, npm --prefix src/ui run test:ci, npm --prefix src/ui run lint, npm --prefix src/ui run build, terraform -chdir=terraform validate, terraform -chdir=terraform plan (workspace tg)
+- Follow-ups: MGOL-205 should block on an event acknowledgement modal before revealing the persisted next player; MGOL-206 should add AWS failure fallback, bounded total latency, metrics, and alarms.
+
+## 2026-10-09
+- Task: Implement MGOL-203 guarded Bedrock event generation.
+- Why: Sanitized current content needs to become a bounded, classified player event without exposing entered identity data or granting the model browsing/tool capabilities.
+- What changed: Added a dedicated Node.js 24 Lambda handler that retrieves approved content, allowlists anonymous gameplay values, invokes the configurable Nova 2 Lite profile at temperature zero, rejects invalid `LifeEvent` output, and recognizes guardrail intervention. Added a versioned Bedrock Guardrail for input prompt attacks, bidirectional harmful content, self-harm, drugs, and gambling plus IAM that requires that guardrail and limits model access. Upgraded the Terraform AWS provider to a release supporting Node.js 24.
+- Paths: src/api/eventGenerator.js, src/api/eventGenerator.test.js, src/api/package.json, src/api/package-lock.json, terraform/main.tf, terraform/variables.tf, terraform/outputs.tf, terraform/.terraform.lock.hcl, October-Stories.md, docs/ARCHITECTURE.md, docs/modern-game-of-life-prd.md, CHANGELOG.md
+- Commands/runbooks: npm --prefix src/api test, terraform -chdir=terraform validate, terraform -chdir=terraform plan (workspace tg)
+- Follow-ups: MGOL-204 should invoke this Lambda from atomic turn advancement and persist the validated event/effect; MGOL-206 should add deterministic fallback and operational metrics.
+
+## 2026-10-09
+- Task: Implement MGOL-202 approved source retrieval.
+- Why: News-driven events need a constrained, testable content boundary before any article text is sent to Bedrock.
+- What changed: Added the exact JPL/NOAA source registry, deterministic per-turn selection, HTTPS and same-host redirect enforcement, a 2.5-second timeout, a 512 KiB response limit, RSS/Atom parsing, sanitization, 14-day preference, typed failures, source-policy documentation, and fixture/live-feed verification.
+- Paths: src/api/contentSources.js, src/api/contentSources.test.js, src/api/package.json, docs/content-source-policy.md, October-Stories.md, docs/ARCHITECTURE.md, docs/modern-game-of-life-prd.md
+- Commands/runbooks: npm --prefix src/api test, node --check src/api/contentSources.js, npm --prefix src/ui run test:ci, npm --prefix src/ui run lint, npm --prefix src/ui run build
+- Follow-ups: JPL returned HTTP 403 from the development environment on 2026-10-09 and correctly maps to a typed source error; MGOL-203 should consume the sanitized result and MGOL-206 should supply the player-facing fallback.
+
+## 2026-10-09
+- Task: Implement MGOL-201 event-ready player state.
+- Why: News-driven events need canonical, persisted financial and health values that can safely receive bounded effects.
+- What changed: Added canonical career/city mechanics, initialized complete player state for new games, normalized legacy saves without discarding valid state, recalculated net worth, bounded health, and added game versions that increment with completed turns.
+- Paths: src/ui/src/data/simulationDefinitions.js, src/ui/src/utils/playerState.js, src/ui/src/services/gameStorage.js, src/ui/src/App.jsx, src/api/index.js, October-Stories.md, docs/modern-game-of-life-prd.md, docs/ARCHITECTURE.md
+- Commands/runbooks: npm --prefix src/ui run test:ci, npm --prefix src/ui run lint, npm --prefix src/ui run build, node --check src/api/index.js
+- Follow-ups: Implement the no-action turn resolver and replace player-turn placeholder values with the persisted state before adding generated events.
 
 ## 2026-09-10
 - Task: Make the scoped filesystem MCP security rationale easy for future maintainers to find.

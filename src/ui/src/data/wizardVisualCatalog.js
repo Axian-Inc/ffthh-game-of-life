@@ -1,8 +1,11 @@
+import { CAREER_DEFINITION_BY_ID, CITY_DEFINITION_BY_ID } from './simulationDefinitions'
+
 export const WIZARD_TOTAL_STEPS = 6
 export const WIZARD_PROGRESS_SEGMENTS = 5
 
 export const WIZARD_CITY_OPTIONS = [
   {
+    ...CITY_DEFINITION_BY_ID.metro,
     id: 'metro',
     name: 'Metro City',
     shortName: 'Metro',
@@ -15,6 +18,7 @@ export const WIZARD_CITY_OPTIONS = [
     ],
   },
   {
+    ...CITY_DEFINITION_BY_ID.suburbia,
     id: 'suburbia',
     name: 'Suburbia',
     shortName: 'Suburbia',
@@ -27,6 +31,7 @@ export const WIZARD_CITY_OPTIONS = [
     ],
   },
   {
+    ...CITY_DEFINITION_BY_ID['small-town'],
     id: 'small-town',
     name: 'Small Town',
     shortName: 'Small Town',
@@ -78,6 +83,7 @@ export const WIZARD_EDUCATION_TRACKS = [
 
 export const WIZARD_CAREER_OPTIONS = [
   {
+    ...CAREER_DEFINITION_BY_ID['software-engineer'],
     id: 'software-engineer',
     trackId: 'degree',
     title: 'Software Engineer',
@@ -88,6 +94,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P5 M4 E7',
   },
   {
+    ...CAREER_DEFINITION_BY_ID['registered-nurse'],
     id: 'registered-nurse',
     trackId: 'degree',
     title: 'Registered Nurse',
@@ -98,6 +105,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P6 M5 E7',
   },
   {
+    ...CAREER_DEFINITION_BY_ID['financial-analyst'],
     id: 'financial-analyst',
     trackId: 'degree',
     title: 'Financial Analyst',
@@ -108,6 +116,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P4 M5 E8',
   },
   {
+    ...CAREER_DEFINITION_BY_ID.electrician,
     id: 'electrician',
     trackId: 'trades',
     title: 'Electrician',
@@ -118,6 +127,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P7 M5 E5',
   },
   {
+    ...CAREER_DEFINITION_BY_ID['hvac-technician'],
     id: 'hvac-technician',
     trackId: 'trades',
     title: 'HVAC Technician',
@@ -128,6 +138,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P7 M4 E5',
   },
   {
+    ...CAREER_DEFINITION_BY_ID.plumber,
     id: 'plumber',
     trackId: 'trades',
     title: 'Plumber',
@@ -138,6 +149,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P6 M5 E5',
   },
   {
+    ...CAREER_DEFINITION_BY_ID.entrepreneur,
     id: 'entrepreneur',
     trackId: 'self-taught',
     title: 'Entrepreneur',
@@ -148,6 +160,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P5 M4 E7',
   },
   {
+    ...CAREER_DEFINITION_BY_ID.musician,
     id: 'musician',
     trackId: 'self-taught',
     title: 'Musician',
@@ -158,6 +171,7 @@ export const WIZARD_CAREER_OPTIONS = [
     shorthand: 'P6 M7 E8',
   },
   {
+    ...CAREER_DEFINITION_BY_ID['content-creator'],
     id: 'content-creator',
     trackId: 'self-taught',
     title: 'Content Creator',

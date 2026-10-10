@@ -3,7 +3,12 @@
   "private": true,
   "version": "0.1.0",
   "type": "commonjs",
+  "scripts": {
+    "test": "node --test"
+  },
   "dependencies": {
-    "aws-sdk": "^2.1692.0"
+    "@aws-sdk/client-bedrock-runtime": "^3.1149.0",
+    "aws-sdk": "^2.1692.0",
+    "xml2js": "0.6.2"
   }
 }

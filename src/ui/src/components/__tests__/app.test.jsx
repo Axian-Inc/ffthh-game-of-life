@@ -2,7 +2,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import { beforeEach, afterEach, vi } from 'vitest'
 import App from '../../App'
-import { GAME_STORAGE_KEY } from '../../services/gameStorage'
+import { GAME_STORAGE_KEY, normalizeGame } from '../../services/gameStorage'
+import { advanceLocalGameTurn } from '../../services/turnEvents'
 
 const mockUseGamesState = {
   games: [],
@@ -12,6 +13,7 @@ const mockUseGamesState = {
   createGame: vi.fn(),
   deleteGame: vi.fn(),
   updateGame: vi.fn(),
+  advanceTurn: vi.fn(),
   newGameId: null,
   setNewGameId: vi.fn(),
 }
@@ -30,6 +32,15 @@ describe('App create flow', () => {
       createGame: vi.fn(),
       deleteGame: vi.fn(),
       updateGame: vi.fn(),
+      advanceTurn: vi.fn(async (gameId, request) => {
+        const existing = normalizeGame(mockUseGamesState.games.find((game) => game.id === String(gameId)))
+        const result = advanceLocalGameTurn(existing, request, 123456)
+        mockUseGamesState.games = mockUseGamesState.games.map((game) =>
+          game.id === result.game.id ? result.game : game,
+        )
+        window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(mockUseGamesState.games))
+        return result
+      }),
       newGameId: null,
       setNewGameId: vi.fn(),
     })
@@ -71,15 +82,6 @@ describe('App create flow', () => {
       mockUseGamesState.games = [createdGame]
       window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([createdGame]))
       return createdGame
-    })
-    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => {
-      const updatedGame = {
-        ...updates,
-        id: gameId,
-      }
-      mockUseGamesState.games = [updatedGame]
-      window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([updatedGame]))
-      return updatedGame
     })
 
     render(<App />)
@@ -147,6 +149,33 @@ describe('App create flow', () => {
     )
 
     expect(window.life.status().persistedGame.players).toHaveLength(2)
+    expect(window.life.status().persistedGame).toMatchObject({
+      version: 1,
+      players: [
+        expect.objectContaining({
+          name: 'Ted',
+          cityId: 'suburbia',
+          careerId: 'content-creator',
+          cash: 3000,
+          debts: [],
+          assets: [],
+          netWorth: 3000,
+          physicalHealth: 60,
+          mentalHealth: 50,
+          statusEffects: [],
+          actionHistory: [],
+        }),
+        expect.objectContaining({
+          name: 'Mia',
+          cityId: 'metro',
+          careerId: 'software-engineer',
+          cash: 4000,
+          netWorth: -26000,
+          physicalHealth: 50,
+          mentalHealth: 39,
+        }),
+      ],
+    })
     expect(screen.getByRole('heading', { name: 'Welcome to Life!' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
@@ -173,6 +202,7 @@ describe('App create flow', () => {
         activePlayerIndex: 1,
         isHistoryOpen: false,
         persistedGame: expect.objectContaining({
+          version: 2,
           turnNumber: 1,
           activePlayerIndex: 1,
           moveHistory: [
@@ -188,9 +218,21 @@ describe('App create flow', () => {
       }),
     )
 
-    expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 1' })).toBeInTheDocument()
-    expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
+    const firstEventDialog = screen.getByRole('dialog')
+    expect(within(firstEventDialog).getByText('Your Life Event')).toBeInTheDocument()
+    expect(within(firstEventDialog).getByRole('status')).toHaveTextContent(/outcome/i)
+    expect(within(firstEventDialog).getByText(/Source checked: Modern Game of Life/)).toBeInTheDocument()
+    expect(within(firstEventDialog).getByText('Offline family-safe event')).toBeInTheDocument()
+    expect(within(firstEventDialog).getByText(/reviewed backup event was used/i)).toBeInTheDocument()
+    expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
+    expect(screen.queryByText("Mia's Turn")).not.toBeInTheDocument()
+    expect(document.activeElement).toBe(within(firstEventDialog).getByRole('button', { name: 'Continue' }))
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(window.life.status().persistedGame.moveHistory).toHaveLength(1)
+
+    await user.click(within(firstEventDialog).getByRole('button', { name: 'Continue' }))
+    expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'See History' }))
 
@@ -212,6 +254,7 @@ describe('App create flow', () => {
         turnNumber: 2,
         activePlayerIndex: 0,
         persistedGame: expect.objectContaining({
+          version: 3,
           turnNumber: 2,
           activePlayerIndex: 0,
           moveHistory: [
@@ -231,6 +274,8 @@ describe('App create flow', () => {
       }),
     )
 
+    expect(screen.getByText("Mia's Turn")).toBeInTheDocument()
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Continue' }))
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 2' })).toBeInTheDocument()
     expect(screen.getByText("Ted's Turn")).toBeInTheDocument()
     expect(window.life.status().persistedGame.moveHistory).toHaveLength(2)
@@ -239,6 +284,7 @@ describe('App create flow', () => {
     const historyDialog = screen.getByRole('dialog')
     expect(within(historyDialog).getByText("Ted's Actions")).toBeInTheDocument()
     expect(within(historyDialog).getByText('Choose Action')).toBeInTheDocument()
+    expect(within(historyDialog).getByText(/Offline family-safe event/)).toBeInTheDocument()
     expect(within(historyDialog).queryByText('Pass')).not.toBeInTheDocument()
   })
 
@@ -261,15 +307,6 @@ describe('App create flow', () => {
     }
 
     mockUseGamesState.games = [resumedGame]
-    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => {
-      const updatedGame = {
-        ...updates,
-        id: gameId,
-      }
-      mockUseGamesState.games = [updatedGame]
-      window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([updatedGame]))
-      return updatedGame
-    })
     window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([resumedGame]))
 
     render(<App />)
@@ -320,6 +357,8 @@ describe('App create flow', () => {
     )
 
     expect(JSON.stringify(window.life.status().persistedGame)).not.toBe(persistedBefore)
+    expect(screen.getByText("Jo's Turn")).toBeInTheDocument()
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Continue' }))
     expect(screen.getByRole('heading', { name: 'Modern Game of Life - Turn 4' })).toBeInTheDocument()
     expect(screen.getByText("Ari's Turn")).toBeInTheDocument()
   })
@@ -342,15 +381,6 @@ describe('App create flow', () => {
     }
 
     mockUseGamesState.games = [olderGame]
-    mockUseGamesState.updateGame.mockImplementation(async (gameId, updates) => {
-      const updatedGame = {
-        ...updates,
-        id: gameId,
-      }
-      mockUseGamesState.games = [updatedGame]
-      window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([updatedGame]))
-      return updatedGame
-    })
     window.localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify([olderGame]))
 
     render(<App />)
@@ -372,5 +402,91 @@ describe('App create flow', () => {
         }),
       ]),
     )
+  })
+
+  it('disables every turn control and announces loading while an event resolves', async () => {
+    const user = userEvent.setup()
+    let resolveAdvance
+    mockUseGamesState.games = [normalizeGame({
+      id: 'loading-game',
+      name: 'Loading Game',
+      version: 1,
+      turnNumber: 1,
+      activePlayerIndex: 0,
+      moveHistory: [],
+      events: [],
+      players: [
+        { id: 'player-1', name: 'Ari', avatar: 'fox' },
+        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+      ],
+      resumable: true,
+    })]
+    mockUseGamesState.advanceTurn = vi.fn(() => new Promise((resolve) => { resolveAdvance = resolve }))
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Resume' }))
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+    await user.click(screen.getByRole('button', { name: 'Choose Action' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('Creating your life event')
+    for (const name of ['Previous player', 'Next player', 'See History', 'Advancing...', 'Pass']) {
+      expect(screen.getByRole('button', { name })).toBeDisabled()
+    }
+
+    const result = advanceLocalGameTurn(mockUseGamesState.games[0], {
+      actionType: 'choose_action',
+      expectedVersion: 1,
+    }, 123456)
+    resolveAdvance(result)
+    await screen.findByRole('dialog')
+  })
+
+  it('shows a persisted event in player history after resuming a game', async () => {
+    const user = userEvent.setup()
+    mockUseGamesState.games = [normalizeGame({
+      id: 'history-game',
+      name: 'History Game',
+      version: 2,
+      turnNumber: 2,
+      activePlayerIndex: 0,
+      players: [
+        { id: 'player-1', name: 'Ari', avatar: 'fox' },
+        { id: 'player-2', name: 'Jo', avatar: 'bear' },
+      ],
+      moveHistory: [{
+        id: 'move-1',
+        playerId: 'player-1',
+        playerName: 'Ari',
+        turnNumber: 1,
+        actionType: 'choose_action',
+        actionLabel: 'Choose Action',
+        eventId: 'event-1',
+        createdAt: 123456,
+      }],
+      events: [{
+        id: 'event-1',
+        turnKey: 'history-game:v1',
+        playerId: 'player-1',
+        turnNumber: 1,
+        title: 'A community garden grows',
+        narrative: 'Neighbors share fresh produce and helpful ideas.',
+        outcome: 'positive',
+        effect: { metric: 'mentalHealth', amount: 2 },
+        source: { publisher: 'NOAA', headline: 'Volunteers restore a local habitat', publishedAt: null },
+        generationMode: 'bedrock',
+        createdAt: 123456,
+      }],
+      resumable: true,
+    })]
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Resume' }))
+    await user.click(screen.getByRole('button', { name: "Let's Begin!" }))
+    await user.click(screen.getByRole('button', { name: 'See History' }))
+
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('A community garden grows')).toBeInTheDocument()
+    expect(within(dialog).getByText('Neighbors share fresh produce and helpful ideas.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Inspired by: NOAA: Volunteers restore a local habitat')).toBeInTheDocument()
   })
 })

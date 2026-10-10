@@ -33,6 +33,15 @@ const PlayerHistoryModal = ({ isOpen, playerName, entries = [], onBackdropClick,
                   <div className="history-item-copy">
                     <p className="history-item-title">{entry.actionLabel}</p>
                     <p className="history-item-meta">{`Turn ${entry.turnNumber}`}</p>
+                    {entry.event ? (
+                      <div className="history-event">
+                        <p className="history-event-title">{entry.event.title}</p>
+                        <p className="history-event-narrative">{entry.event.narrative}</p>
+                        <p className="history-item-meta">
+                          {`${entry.event.generationMode === 'fallback' ? 'Source checked' : 'Inspired by'}: ${entry.event.source.publisher}: ${entry.event.source.headline}`}
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
                   <time className="history-item-time" dateTime={new Date(entry.createdAt || 0).toISOString()}>
                     {formatTimestamp(entry.createdAt)}

@@ -17,3 +17,8 @@ output "api_base_url" {
   value       = aws_apigatewayv2_api.games_api.api_endpoint
   description = "Base URL for the games API."
 }
+
+output "event_generator_function_name" {
+  value       = aws_lambda_function.event_generator.function_name
+  description = "Name of the dedicated Bedrock player-event generator Lambda."
+}

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const ModalBackdrop = ({ onBackdropClick, children }) => {
+const ModalBackdrop = ({ onBackdropClick, ariaLabelledBy, children }) => {
   const overlayRef = useRef(null)
 
   useEffect(() => {
@@ -56,6 +56,7 @@ const ModalBackdrop = ({ onBackdropClick, children }) => {
       className="modal-overlay"
       role="dialog"
       aria-modal="true"
+      aria-labelledby={ariaLabelledBy}
       onClick={onBackdropClick}
     >
       {children}

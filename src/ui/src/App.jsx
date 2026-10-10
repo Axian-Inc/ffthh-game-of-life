@@ -11,11 +11,7 @@ import WelcomeToLifePage from './components/pages/WelcomeToLifePage'
 import useGames from './hooks/useGames'
 import useModalState from './hooks/useModalState'
 import { getGameStorageDebugSnapshot } from './services/gameStorage'
-
-const MOVE_LABELS = {
-  choose_action: 'Choose Action',
-  pass: 'Pass',
-}
+import { initializePlayerState } from './utils/playerState'
 
 const parseAppRoute = (pathname) => {
   if (!pathname || pathname === '/') {
@@ -73,19 +69,13 @@ const getPlayerKey = (player, index) => {
 
 const getMoveHistory = (game) => (Array.isArray(game?.moveHistory) ? game.moveHistory : [])
 
-const generateMoveId = () => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  return `move-${Date.now()}-${Math.floor(Math.random() * 100000)}`
-}
-
 function App() {
   const [resumeErrors, setResumeErrors] = useState({})
   const [deleteErrors, setDeleteErrors] = useState({})
   const [createError, setCreateError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [isAdvancingTurn, setIsAdvancingTurn] = useState(false)
+  const [pendingTurnEvent, setPendingTurnEvent] = useState(null)
   const [entrySource, setEntrySource] = useState('none')
   const [playScreen, setPlayScreen] = useState('welcome')
   const [wizardDraft, setWizardDraft] = useState(null)
@@ -96,19 +86,26 @@ function App() {
   const { state, openCreate, openSession, openPlay, openDelete, openHistory, closeHistory, closeAll } =
     useModalState()
   const { view, activeGame, activeGameMode, pendingDelete, historyPlayer } = state
-  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, updateGame, newGameId, setNewGameId } =
+  const { games, isLoading, fetchError, loadGames, createGame, deleteGame, advanceTurn, newGameId, setNewGameId } =
     useGames()
   const previousViewRef = useRef(view)
   const currentActiveGame =
     activeGame?.id != null ? games.find((game) => game.id === String(activeGame.id)) || activeGame : activeGame
-  const currentPlayers = Array.isArray(currentActiveGame?.players) ? currentActiveGame.players : []
+  const displayedGame = pendingTurnEvent?.previousGame || currentActiveGame
+  const currentPlayers = Array.isArray(displayedGame?.players) ? displayedGame.players : []
   const currentPlayerCount = currentPlayers.length
-  const currentActivePlayerIndex = normalizeActivePlayerIndex(currentActiveGame?.activePlayerIndex, currentPlayerCount)
+  const currentActivePlayerIndex = normalizeActivePlayerIndex(displayedGame?.activePlayerIndex, currentPlayerCount)
   const currentActivePlayer = currentPlayers[currentActivePlayerIndex] || null
   const currentActivePlayerKey = currentActivePlayer ? getPlayerKey(currentActivePlayer, currentActivePlayerIndex) : null
   const historyEntries = historyPlayer
     ? getMoveHistory(currentActiveGame)
         .filter((entry) => entry.playerId === historyPlayer.playerId)
+        .map((entry) => ({
+          ...entry,
+          event: (Array.isArray(currentActiveGame?.events) ? currentActiveGame.events : []).find(
+            (event) => event.id === entry.eventId,
+          ) || null,
+        }))
         .sort((left, right) => right.createdAt - left.createdAt)
     : []
 
@@ -152,13 +149,20 @@ function App() {
       const newGame = {
         name: payloadName,
         status: 'active',
-        players: payloadPlayers.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-        })),
+        players: payloadPlayers.map((player, index) =>
+          initializePlayerState(
+            {
+              ...player,
+              name: player.name.trim(),
+            },
+            index,
+          ),
+        ),
+        version: 1,
         turnNumber: 1,
         activePlayerIndex: 0,
         moveHistory: [],
+        events: [],
         lastUpdated: timestamp,
         createdAt: timestamp,
         resumable: true,
@@ -249,45 +253,28 @@ function App() {
         return
       }
 
-      const activePlayerIndex = normalizeActivePlayerIndex(currentActiveGame.activePlayerIndex, players.length)
-      const activePlayer = players[activePlayerIndex] || null
-      if (!activePlayer) {
-        return
-      }
-
-      const currentTurnNumber = normalizeTurnNumber(currentActiveGame.turnNumber)
-      const nextPlayerIndex = (activePlayerIndex + 1) % players.length
-      const nextTurnNumber = nextPlayerIndex === 0 ? currentTurnNumber + 1 : currentTurnNumber
-      const timestamp = Date.now()
-      const nextMoveHistory = [
-        ...getMoveHistory(currentActiveGame),
-        {
-          id: generateMoveId(),
-          playerId: getPlayerKey(activePlayer, activePlayerIndex),
-          playerName: activePlayer.name?.trim() || `Player ${activePlayerIndex + 1}`,
-          turnNumber: currentTurnNumber,
-          actionType,
-          actionLabel: MOVE_LABELS[actionType] || 'Move',
-          createdAt: timestamp,
-        },
-      ]
-
       setIsAdvancingTurn(true)
 
       try {
-        const updatedGame = await updateGame(currentActiveGame.id, {
-          ...currentActiveGame,
-          turnNumber: nextTurnNumber,
-          activePlayerIndex: nextPlayerIndex,
-          moveHistory: nextMoveHistory,
-          lastUpdated: timestamp,
+        const result = await advanceTurn(currentActiveGame.id, {
+          actionType,
+          expectedVersion:
+            Number.isInteger(currentActiveGame.version) && currentActiveGame.version >= 1 ? currentActiveGame.version : 1,
         })
-        openPlay(updatedGame)
+        openPlay(result.game)
+        const eventPlayer = result.game.players.find((player) => String(player.id) === String(result.event.playerId))
+        setPendingTurnEvent({
+          event: result.event,
+          previousGame: currentActiveGame,
+          resultingValue: eventPlayer?.[result.event.effect.metric],
+        })
+      } catch {
+        // A stale API request reloads the latest game in useGames.
       } finally {
         setIsAdvancingTurn(false)
       }
     },
-    [isAdvancingTurn, currentActiveGame, updateGame, openPlay],
+    [isAdvancingTurn, currentActiveGame, advanceTurn, openPlay],
   )
 
   const handleAdvanceTurn = useCallback(() => {
@@ -297,6 +284,10 @@ function App() {
   const handlePassTurn = useCallback(() => {
     return handleRecordMoveAndAdvanceTurn('pass')
   }, [handleRecordMoveAndAdvanceTurn])
+
+  const handleEventContinue = useCallback(() => {
+    setPendingTurnEvent(null)
+  }, [])
 
   const handleOpenHistory = useCallback(() => {
     if (isAdvancingTurn || !currentActiveGame) {
@@ -479,9 +470,11 @@ function App() {
       pendingDelete={pendingDelete}
       historyPlayer={historyPlayer}
       historyEntries={historyEntries}
+      pendingTurnEvent={pendingTurnEvent}
       onBackdropClick={handleBackdropClick}
       onCloseAll={handleBackClick}
       onHistoryClose={closeHistory}
+      onEventContinue={handleEventContinue}
       onDeleteCancel={handleDeleteCancel}
       onDeleteConfirm={handleDeleteConfirm}
       createGameProps={{
@@ -493,7 +486,7 @@ function App() {
     />
   )
 
-  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete) || Boolean(historyPlayer)
+  const isModalOpen = view === 'create' || view === 'session' || Boolean(pendingDelete) || Boolean(historyPlayer) || Boolean(pendingTurnEvent)
 
   return (
     <PageShell isBlurred={isModalOpen} modals={modals}>
@@ -525,7 +518,7 @@ function App() {
           <WelcomeToLifePage game={currentActiveGame} onBegin={handlePlayBegin} />
         ) : (
           <PlayGamePage
-            game={currentActiveGame}
+            game={displayedGame}
             isAdvancingTurn={isAdvancingTurn}
             onChooseAction={handleAdvanceTurn}
             onNextPlayer={handlePlayPlaceholderAction}
